@@ -9,3 +9,8 @@ Navigate to the cloned repo, and install the dependencies.
 And run the server.
 
 	node app
+
+Use Grunt to build the Javascript and Stylesheets.
+
+	npm install grunt -g
+	grunt
