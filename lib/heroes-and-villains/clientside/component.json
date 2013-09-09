@@ -1,0 +1,20 @@
+{
+  "name": "heroes-and-villains",
+  "description": "heroes and villains prod",
+  "dependencies": {
+  	"component/fullscreen" : "*",
+  	"bmcmahen/cast" : "*",
+  	"bmcmahen/modal" : "*",
+    "component/jquery": "*"
+  },
+  "development": {},
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ],
+  "styles": [ "styles/index.css" ],
+  "templates": [
+    "templates/modal-dialogue.jade",
+    "templates/card-view.jade"
+  ]
+}

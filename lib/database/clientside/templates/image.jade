@@ -1,0 +1,9 @@
+if object.loading
+	img(src='/img/loading.gif')
+if object.value
+	img.document-image(src=object.value.url + '/convert?w=250&h=250')
+input#filepicker(data-fp-maxSize='10485760', data-fp-button-class='btn btn-small btn-success filepicker', data-fp-button-text='Select an Image')
+if object.value
+	button#remove-image.btn.btn-small.btn-warning(href='#') Remove Image
+if object.helpText
+	span.help-block=object.helpText

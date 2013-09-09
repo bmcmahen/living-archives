@@ -1,0 +1,26 @@
+{
+  "name": "institutions",
+  "description": "institutions prod",
+  "dependencies": {
+  	"eugenicsarchivesca/horizontal-accordion" : "*",
+  	"eugenicsarchivesca/overlay" : "*",
+  	"component/bind" : "*",
+    "component/jquery": "*",
+    "component/events": "*",
+    "component/swipe": "*",
+    "component/underscore": "*"
+  },
+  "development": {},
+  "main": "index.js",
+  "scripts": [
+    "index.js",
+    "leaflet-label.js"
+  ],
+  "styles": [
+    "styles/institutions.styl"
+  ],
+  "templates": [
+    "templates/institution.jade",
+    "templates/button.jade"
+  ]
+}

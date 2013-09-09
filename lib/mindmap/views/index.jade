@@ -1,0 +1,25 @@
+extends ../../prods/layout
+
+block append styles
+  link(href='/styles/mindmap.css', rel='stylesheet')
+
+block append components
+  script(src="/javascripts/mindmap.js")
+  script
+    require('eugenics-mindmap');
+
+block subnav-mindmap
+  .prod.active
+    img(src='/img/frontend/mindmap.png', role='presentation')
+    span.label Mind Map
+
+block content
+  #app
+    .prod-heading
+      a#fullscreenmode(href='#')
+        i.icon-fullscreen.icon-large
+    #mindmap
+    #data
+      h2#map-heading
+      p#map-content
+      #map-links

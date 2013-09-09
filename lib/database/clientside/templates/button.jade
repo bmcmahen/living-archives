@@ -1,0 +1,10 @@
+label=object.label
+	if object.required
+		span *
+	span.target-link
+	div
+		button.btn.btn-success(name=object.name) Edit Connections
+if object.error
+	p.error-text=object.error
+if object.helpText
+	span.help-block=object.helpText

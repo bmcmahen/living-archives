@@ -1,0 +1,7 @@
+a.highslide(href='#', id=locals._id, title='Click to display additional information in a pop-up.')
+	img.timeline-image(src=locals.image.url + '/convert?w=150&h=150&fit=crop&align=faces', alt=title, style='height: 150px; width: 150px')
+	span.caption
+		if locals.startDate
+			#{startDate} : !{title}
+		else
+			#{date} : !{title}

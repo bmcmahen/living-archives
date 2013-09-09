@@ -1,0 +1,484 @@
+@import 'bootstrap.css'
+@import 'animate-custom.css'
+@import '../application/build/database.css'
+
+body
+  padding-top 60px
+
+h1
+  text-align center
+
+.myForm
+  width 100%
+  position relative
+
+  & textarea
+    height 200px
+
+#form-wrapper
+  width 100%
+  position relative
+
+form
+  position relative
+
+.remove-form
+  display inline-block
+  position absolute
+  top 0
+  right 0
+
+.formsetView
+  display: block
+  background: #ddd
+  width: 65%
+  padding: 10px
+  border-radius: 3px
+  box-sizing: border-box
+  margin-bottom: 20px
+
+.document-image
+  display block
+  margin-bottom 15px
+
+.document-name
+  width: 140px
+  white-space: nowrap
+  text-overflow: ellipsis
+  overflow: hidden
+  display: inline-block
+
+.delete
+  margin 0 10px
+
+.dashboard .well
+  text-align center
+  min-height 40px
+
+.formsetView .myForm
+  box-sizing border-box
+
+  & .form-field
+    width auto
+
+.formsetView .form-field
+  width 100%
+
+.form-field.prods
+  position absolute
+  top 0
+  right 0
+  width 32%
+
+.form-field.image
+  position absolute
+  top 280px
+  right 0
+  width 32%
+
+.myForm
+  textarea,
+  input[type='text'],
+  select
+    display block
+    margin-top 3px
+    margin-bottom 0
+
+.formsetView.well .myForm .form-field textarea#resource
+  width 95%
+
+.breadcrumb li, h3
+  text-transform capitalize
+
+h2
+  font-size 25px
+  line-height 25px
+  text-transform capitalize
+
+h4
+  text-transform capitalize
+
+h5
+  font-size 14px
+  font-weight normal !important
+  margin 0 0 5px 0 !important
+
+.well
+  margin-bottom 10px !important
+
+span.help-block
+  font-size 12px
+
+p.blurb
+  text-align center
+  margin-bottom 40px
+
+.navbar-inverse .navbar-inner
+  background-image linear-gradient(#535353, #171717)
+
+.wrapper
+  box-sizing border-box
+  height 140px
+  text-align center
+  background-color whitesmoke
+  transition background-color 0.3s
+  border-radius 3px
+  margin-bottom 20px
+  line-height 140px
+
+  & a
+    font-size 14px
+    color #333
+    font-weight 800
+
+  .header-image
+    width 100%
+
+  &:hover
+    background-color #ccc
+
+table td
+  background-color rgb(236, 236, 236)
+  padding 13px 8px !important
+
+  &.image
+    padding 0px !important
+    vertical-align middle
+    padding-left 4px !important
+    width 50px
+
+  &.title
+    width 180px
+
+span.prod
+  text-transform capitalize
+  margin-right 3px
+
+p.field-label
+  text-transform capitalize
+  font-weight bold
+
+dt
+  margin-top 10px
+  text-transform capitalize
+
+span.prod
+  text-transform capitalize
+
+.center
+  text-align center
+
+.margin-top
+  margin-top 35px
+
+h4
+  margin-bottom 30px
+  font-size 20px
+
+.dashboard
+  margin-bottom 10px
+
+  & a
+    display block
+
+.sort-by
+  padding-top 15px
+
+  & a
+    display inline-block
+    margin 0 10px
+
+.prod.timeline
+  margin-top 15px
+
+.prod.heroes
+  margin-bottom 15px
+
+input[type='checkbox']
+  margin 0 5px !important
+  vertical-align top
+
+.form-field.prods .prod
+  line-height 14px
+  margin 10px 0
+
+.navbar .navbar-inner
+  position relative
+
+#loading-wrapper
+  position absolute
+  width 50px
+  left 50%
+  padding 5px
+  margin-left -25px
+  height 50px
+
+label
+  font-weight bold
+  margin-bottom 0
+
+.form-field
+  margin-bottom 15px
+  width 70%
+  box-sizing border-box
+
+  input[type='text'],
+  textarea,
+  select
+    width 90%
+    display block
+
+span.help-block
+  margin-top 2px
+
+.well
+  border 1px solid rgb(214, 209, 209)
+  margin-bottom 5px
+
+.image-input
+  display none
+
+.error-text
+  margin-top 3px
+  color red
+
+#myForm .quote
+  height 100px
+
+td.image img
+  max-width 40px
+  max-height 40px
+
+.form-field a
+  display block
+
+#form-wrapper
+  float left
+
+#prod-wrapper
+  float left
+  width 440px
+  margin-left 50px
+
+h5
+  margin-top 0
+  margin-bottom 3px
+
+.navbar-inverse .nav > li > a .caret
+  margin-left 5px
+  border-top-color #aaa
+  border-bottom-color #aaa
+  color: #999999
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25)
+
+.nav .dropdown-toggle:hover .caret, .nav .dropdown-toggle:focus .caret
+  border-top-color #ddd !important
+  border-bottom-color #ddd !important
+
+.nav.pull-right li a i.icon-pencil
+  padding-right 4px
+
+.formsetView textarea
+  width 100%
+
+.image-controls
+  margin-top 10px
+
+.image-controls a
+  display inline-block
+
+#remove-image
+  margin-right 10px
+  margin-left 10px
+
+input#filepicker
+  display none
+
+.cast-item
+  position: absolute
+  opacity: 1
+  -webkit-transition: opacity 0.5s, -webkit-transform 0.5s
+  -moz-transition: opacity 0.5s, -moz-transform 0.5s
+  -ms-transition: opacity 0.5s, -ms-transform 0.5s
+  -o-transition: opacity 0.5s, -o-transform 0.5s
+  width 100%
+
+  & img
+    border-radius 3px
+
+.cast-item.hidden
+  opacity: 0
+
+#cast-wrapper
+  position relative
+  width 100%
+
+a.title
+  line-height 40px
+  margin-left 10px
+  vertical-align top !important
+  max-width 500px
+  display inline-block
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+
+span.date
+  float right
+  line-height 40px
+  margin-right 20px
+
+#sort
+  margin 0 10px
+
+#total
+  min-width 130px
+  text-align center
+
+.image-placeholder
+  width 39px
+  height 39px
+  display inline-block
+  border 1px solid #ccc
+  border-radius 3px
+
+.edit-btn
+  float right
+  margin-top 7px
+  margin-right 10px
+
+.navbar-fixed-top
+  z-index 400 !important
+
+#overlay.hide
+  display block
+
+.modal-header h4
+  float left
+  max-width 500px
+
+#modal-doc
+  overflow hidden
+
+  & .modal-body
+    max-height 320px
+
+#swipe
+  list-style-type none
+  padding-left 19px
+  margin-left 0
+
+#swipe-container
+  overflow hidden
+
+#swipe-container ul#swipe
+  margin 0
+  padding 0
+  height 400px
+  box-sizing border-box
+
+  & .swipe-content
+    overflow-x auto
+    padding-bottom 15px
+    box-sizing border-box
+
+  & li.swipe-item
+    display inline-block
+    box-sizing border-box
+    height 400px
+    margin 0
+    vertical-align top
+    list-style none
+
+#form-swipe .swipe-content
+  overflow-x auto
+
+#sort-wrapper
+  float right
+  min-width 240px
+
+  & select
+    margin-top 5px
+    margin-bottom 0
+
+  & a
+    margin-left 10px
+
+.sortby
+  margin-right 10px
+
+#listing
+  padding 15px
+  border-top-left-radius 0
+  border-top-right-radius 0
+
+#list-navbar .navbar-inner
+  border-bottom-left-radius 0
+  border-bottom-right-radius 0
+
+#list-navbar
+  margin-bottom 0
+
+img.logo
+  display block
+  margin 50px auto
+  max-width 500px
+
+img.document-summary-image
+  display block
+  margin 10px 0
+
+#primary-navigation li a.active
+  color: #ffffff
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2)
+  background-color: #0088cc
+
+a#edit-document
+  margin-top 15px
+
+textarea.fullDescription
+  min-height 400px
+
+textarea.resource
+  min-height 100px
+  box-sizing: border-box
+
+.form-field input
+  margin-bottom 0
+
+p.prod-listing
+  text-transform capitalize
+
+.connection-list
+  padding 0
+  margin 0 7px
+  width 48%
+  float left
+  height 230px
+  box-sizing border-box
+
+  & select.strength
+    width 100px
+    height 27px
+    margin-right 5px
+    float right
+
+  & .well
+    height 160px
+    overflow auto
+
+  ul
+    list-style-type none
+    margin 0
+    padding 0
+
+    li
+      margin 2px 0
+
+    li .add,
+    li .remove
+      float right
+
+#connections
+  width 800px
+  margin -200px 0 0 -400px

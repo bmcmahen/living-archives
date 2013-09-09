@@ -1,0 +1,77 @@
+#accordion-wrapper{width:100%;position:relative;margin:0;padding:0;overflow:hidden;height:500px}
+.white{margin:30px;padding:25px;background:#fff;background:rgba(255,255,255,0.95)}
+.accordion-child{height:500px;width:25%;-webkit-transition:width .5s, opacity .5s;-moz-transition:width .5s, opacity .5s;-o-transition:width .5s, opacity .5s;-ms-transition:width .5s, opacity .5s;transition:width .5s,opacity .5s;-webkit-transition-timing-function:ease-in-out;-moz-transition-timing-function:ease-in-out;-o-transition-timing-function:ease-in-out;-ms-transition-timing-function:ease-in-out;transition-timing-function:ease-in-out;float:left;cursor:pointer;-webkit-background-size:cover !important;-moz-background-size:cover !important;background-size:cover !important;overflow:hidden;-webkit-transform:translate3d(0,0,0);-moz-transform:translate3d(0,0,0);-o-transform:translate3d(0,0,0);-ms-transform:translate3d(0,0,0);transform:translate3d(0,0,0);}
+.accordion-child .accordion-content{display:block}
+.accordion-child .accordion-content h3{font-size:25px;margin:25px;padding:3px 7px;line-height:29px;border-bottom:none;-webkit-border-radius:3px;border-radius:3px;background:#fff;background:rgba(255,255,255,0.95)}
+.accordion-child .accordion-active-content{display:none}
+.accordion-child.active.rendered .accordion-active-content{display:block}
+.accordion-child.active .accordion-content{display:none}
+.accordion-child p{margin:0;padding:0;font-family:ff-meta-serif-web-pro,"Georgia",Times,serif;font-size:16px;line-height:23px}
+.accordion-child:hover{-webkit-box-shadow:inset 40px 40px 80px rgba(0,0,0,0.3);box-shadow:inset 40px 40px 80px rgba(0,0,0,0.3)}
+.accordion-child h3{font:bold 40px ff-meta-web-pro,helvetica,arial,sans-serif;opacity:1;-ms-filter:none;filter:none;margin:25px 0 15px 0;border-bottom:2px solid;display:inline-block;-webkit-transition:opacity .5s;-moz-transition:opacity .5s;-o-transition:opacity .5s;-ms-transition:opacity .5s;transition:opacity .5s}
+.accordion-child.active{cursor:default;width:70%;}
+.accordion-child.active:hover{-webkit-box-shadow:none;box-shadow:none}
+.accordion-child.collapsed{width:10%;}
+.accordion-child.collapsed h3{opacity:0;filter:alpha(opacity=0);-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"}
+.accordion-child.collapsed:hover{opacity:1;-ms-filter:none;filter:none}
+.accordion-child.content{opacity:0;filter:alpha(opacity=0);-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";-webkit-transition:opacity .3s;-moz-transition:opacity .3s;-o-transition:opacity .3s;-ms-transition:opacity .3s;transition:opacity .3s;}
+.accordion-child.content.visible{opacity:1;-ms-filter:none;filter:none}
+a.learn-more,a.previous{display:inline-block;margin-top:20px;font-size:16px;line-height:22px;font-family:ff-meta-web-pro,helvetica,arial,sans-serif;color:#fff;-webkit-transition:background .4s;-moz-transition:background .4s;-o-transition:background .4s;-ms-transition:background .4s;transition:background .4s;background:#049cdb;padding:5px 10px;-webkit-border-radius:3px;border-radius:3px;}
+a.learn-more:hover,a.previous:hover{text-decoration:none;background:#24252b}
+a.controls{display:inline-block;font-family:ff-meta-web-pro,helvetica,arial,sans-serif;color:#fff;background:#3c4e5a;opacity:1;-ms-filter:none;filter:none;-webkit-transition:opacity .5s;-moz-transition:opacity .5s;-o-transition:opacity .5s;-ms-transition:opacity .5s;transition:opacity .5s;padding:7px 14px;border:none;-webkit-border-radius:3px;border-radius:3px;text-transform:uppercase;margin:8px 5px}
+.institutions{background:url("/img/frontend/institutions/inst7.jpg") no-repeat center center}
+.leaving{background:url("/img/frontend/institutions/inst10.jpg") no-repeat center center}
+.people{background:url("/img/frontend/institutions/EugenicsBoard1936b_UniversityofAlbertaArchives.jpg") no-repeat center center}
+.contemporary{background:url("/img/frontend/institutions/inst3.jpg") no-repeat center center}
+#swipe-block{position:fixed;top:0;height:100%;right:0;bottom:0;left:0;z-index:1200;opacity:1;-ms-filter:none;filter:none}
+#swipe-content{display:block;max-height:90%;overflow-y:auto;overflow-x:hidden;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;}
+#swipe-content.hidden{display:none}
+#swipe-content h3{font-size:30px;line-height:35px;padding-bottom:3px;font-weight:bold;margin:0;opacity:1;-ms-filter:none;filter:none;display:inline-block;-webkit-transition:opacity .5s;-moz-transition:opacity .5s;-o-transition:opacity .5s;-ms-transition:opacity .5s;transition:opacity .5s}
+a.exit{position:fixed;top:15px;right:10px;color:#fff;padding:5px 10px;border:2px solid;z-index:1500}
+#swipe-container{width:100%;height:500px;margin-top:67px;overflow:hidden;}
+#swipe-container ul{margin:0;padding:0;height:380px;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+#swipe-container ul li{display:table-cell;background:#f8f8f8;color:#888;width:100%;height:500px;list-style:none;margin:0;-webkit-user-select:none;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;-webkit-background-size:cover !important;-moz-background-size:cover !important;background-size:cover !important;overflow:auto;}
+#swipe-container ul li.no-padding{padding:0}
+#swipe-container ul li p{font-size:14px;font-family:ff-meta-serif-web-pro,"Georgia",Times,serif;line-height:23px}
+#swipe-container ul li h3{font-size:30px;font-weight:bold;margin:0;opacity:1;-ms-filter:none;filter:none;display:inline-block;-webkit-transition:opacity .5s;-moz-transition:opacity .5s;-o-transition:opacity .5s;-ms-transition:opacity .5s;transition:opacity .5s}
+#swipe-container ul li img.pull-left{float:left;margin-right:15px;margin-bottom:10px}
+#swipe-container ul li h4{font-size:20px;color:#049cdb;font-weight:bold;margin:5px 0;background:rgba(238,238,238,0.9);padding:2px 7px;display:inline-block}
+#swipe-container ul li a.learn-more{float:right}
+#swipe-container ul li a.previous{float:left}
+#swipe-container ul li.one{background:url("/img/frontend/institutions/inst10.jpg") no-repeat center center}
+#swipe-container ul li.two{background:url("/img/frontend/institutions/EugenicsBoard1936b_UniversityofAlbertaArchives.jpg") no-repeat center center}
+#swipe-container button{margin:5px 0;border:1px solid #ddd;padding:5px 10px;background:#eee;-webkit-border-radius:2px;border-radius:2px;cursor:pointer}
+#swipe-container button:hover{background:#fff}
+#overlay{background:#000;background:rgba(0,0,0,0.85)}
+#app.full{position:fixed;margin-top:0;min-height:none;top:0;height:100%;overflow:auto;right:0;bottom:0;left:0;z-index:1200}
+#modalbackdrop.open.black{background:#000;background:rgba(0,0,0,0.9)}
+#swipe-controller{position:fixed;bottom:0;left:0;right:0;display:block;height:67px;z-index:1250;text-align:center}
+a.previous.hidden,a.learn-more.hidden{opacity:0;filter:alpha(opacity=0);-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";pointer-events:none}
+.swipe-content{padding:25px;position:absolute;}
+.swipe-content h3{border-bottom:2px solid;margin-top:35px}
+.swipe-content.white{background:#fff;background:rgba(255,255,255,0.95)}
+.swipe-content.one-thirds{width:30%}
+.swipe-content.two-thirds{width:60%}
+.swipe-content.half{width:45%}
+.swipe-content.right{right:0}
+.swipe-content.top{top:0}
+.swipe-content.left{left:0}
+.swipe-content.bottom{bottom:0}
+#map{width:100%;height:100%}
+#map-wrapper{position:relative}
+ul.switch{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;min-height:50px;margin-top:2px;}
+ul.switch li{cursor:pointer;height:50px;line-height:50px;width:50px;display:inline-block;margin-right:5px;text-align:center;}
+ul.switch li a{font-weight:bold;vertical-align:middle;display:inline-block;text-align:center;-webkit-border-radius:50%;border-radius:50%;-webkit-transition:all 150ms ease-in;-moz-transition:all 150ms ease-in;-o-transition:all 150ms ease-in;-ms-transition:all 150ms ease-in;transition:all 150ms ease-in;text-decoration:none;overflow:hidden;background:#3e7186;color:rgba(255,255,255,0.5);width:30px;height:30px;line-height:30px;}
+ul.switch li a:hover{text-decoration:none}
+ul.switch li.active a{color:#fff;width:50px;height:50px;line-height:50px;background:#3bb2d0}
+p.small{font-size:13px;line-height:18px}
+#map-wrapper .swipe-content{display:none;max-height:90%;overflow-x:hidden;overflow-y:auto;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;width:40%;}
+#map-wrapper .swipe-content.active{display:block}
+.leaflet-label{background:#fff;-webkit-background-clip:padding;-moz-background-clip:padding;background-clip:padding-box;-webkit-border-radius:4px;border-radius:4px;border-style:solid;color:#333;display:block;font-size:10px;font-weight:bold;padding:1px 6px;text-transform:uppercase;border:2px solid rgba(0,0,0,0.5);margin-top:-7px;margin-left:5px;position:absolute;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;white-space:nowrap;z-index:6}
+.leaflet-label:before{display:none}
+img.full{position:absolute;bottom:10%;right:110%;display:none;}
+img.full.active{display:block}
+img.thumbnail{opacity:1;-ms-filter:none;filter:none;-webkit-transition:opacity .3s;-moz-transition:opacity .3s;-o-transition:opacity .3s;-ms-transition:opacity .3s;transition:opacity .3s;}
+img.thumbnail:hover{opacity:.3;filter:alpha(opacity=30);-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=30)"}
+p.subhead{margin:3px 0;font-family:ff-meta-web-pro,helvetica,arial,sans-serif;font-size:12px;text-transform:uppercase;color:#aaa}
+.relative{position:relative;height:100%;width:100%}

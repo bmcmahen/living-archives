@@ -1,0 +1,41 @@
+{
+  "name": "mindmap",
+  "repo": "eugenicsarchiveca/mindmap",
+  "description": "create an interactive network / mindmap",
+  "version": "0.0.1",
+  "keywords": [
+    "network",
+    "mindmap",
+    "canvas"
+  ],
+  "dependencies": {
+    "component/raf": "*",
+    "component/indexof": "*",
+    "component/rounded-rect": "*",
+    "component/events": "*",
+    "component/each": "*",
+    "component/type": "*",
+    "component/emitter": "*",
+    "component/bind": "*",
+    "bmcmahen/linear-conversion": "*",
+    "bmcmahen/canvas-string-ellipsis": "*",
+    "component/tween": "*",
+    "component/classes": "*",
+    "timoxley/offset": "*",
+    "yields/scrolltop": "*",
+    "anthonyshort/emitter-manager": "*",
+    "component/autoscale-canvas": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js",
+    "lib/app.js",
+    "lib/constants.js",
+    "lib/collection.js",
+    "lib/nodes.js",
+    "lib/links.js",
+    "lib/canvas.js"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "application",
+  "description": "universal application assets",
+  "dependencies": {
+    "ftlabs/fastclick" : "*",
+    "CamShaft/bootstrap-grid" : "*",
+    "CamShaft/bootstrap-reset" : "*"
+  },
+  "development": {
+
+    },
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ],
+  "styles": [
+    "styles/base.styl",
+    "styles/buttons.styl",
+    "styles/navigation.styl"
+  ],
+  "templates": []
+}

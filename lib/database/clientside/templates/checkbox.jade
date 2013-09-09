@@ -1,0 +1,8 @@
+h5 Select PRODs:
+.well
+	each field in object.fields
+		each f in field
+			label.prod
+				input(type='checkbox', name=f.name, checked=f.value)
+				| #{f.label}
+	span.help-block Selecting a PROD from the list above will include this document on that PROD. It will also append fields to this form that are required for that PROD.

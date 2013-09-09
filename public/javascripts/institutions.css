@@ -1,0 +1,614 @@
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 1;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,.75);
+  transition: opacity 500ms;
+  -webkit-transition: opacity 500ms;
+  -moz-transition: opacity 500ms;
+  -ms-transition: opacity 500ms;
+  -o-transition: opacity 500ms;
+  z-index: 500;
+}
+
+#overlay.hide {
+  pointer-events: none;
+  opacity: 0;
+}
+
+
+
+
+
+
+
+
+
+
+/* line 1 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/node_modules/component-stylus-plugin/node_modules/stylus/lib/functions/index.styl */
+
+/* line 3 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/variables.styl */
+
+/* line 2 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#accordion-wrapper {
+  width: 100%;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 500px;
+}
+
+/* line 10 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.white {
+  margin: 30px;
+  padding: 25px;
+  background: #fff;
+  background: rgba(255,255,255,0.95);
+}
+
+/* line 16 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child {
+  height: 500px;
+  width: 25%;
+  transition: width 0.5s, opacity 0.5s;
+  transition-timing-function: ease-in-out;
+  float: left;
+  cursor: pointer;
+  background-size: cover !important;
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+/* line 27 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child .accordion-content {
+  display: block;
+}
+
+/* line 30 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child .accordion-content h3 {
+  font-size: 25px;
+  margin: 25px;
+  padding: 3px 7px;
+  line-height: 29px;
+  border-bottom: none;
+  border-radius: 3px;
+  background: #fff;
+  background: rgba(255,255,255,0.95);
+}
+
+/* line 40 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child .accordion-active-content {
+  display: none;
+}
+
+/* line 43 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child.active.rendered .accordion-active-content {
+  display: block;
+}
+
+/* line 46 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child.active .accordion-content {
+  display: none;
+}
+
+/* line 49 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child p {
+  margin: 0;
+  padding: 0;
+  font-family: ff-meta-serif-web-pro, "Georgia", Times, serif;
+  font-size: 16px;
+  line-height: 23px;
+}
+
+/* line 56 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child:hover {
+  box-shadow: inset 40px 40px 80px rgba(0,0,0,0.3);
+}
+
+/* line 59 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child h3 {
+  font: bold 40px ff-meta-web-pro, helvetica, arial, sans-serif;
+  opacity: 1;
+  margin: 25px 0 15px 0;
+  border-bottom: 2px solid;
+  display: inline-block;
+  transition: opacity 0.5s;
+}
+
+/* line 67 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child.active {
+  cursor: default;
+  width: 70%;
+}
+
+/* line 71 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child.active:hover {
+  box-shadow: none;
+}
+
+/* line 74 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child.collapsed {
+  width: 10%;
+}
+
+/* line 77 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child.collapsed h3 {
+  opacity: 0;
+}
+
+/* line 80 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child.collapsed:hover {
+  opacity: 1;
+}
+
+/* line 83 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child.content {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* line 88 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.accordion-child.content.visible {
+  opacity: 1;
+}
+
+/* line 91 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+a.learn-more,
+a.previous {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 16px;
+  line-height: 22px;
+  font-family: ff-meta-web-pro, helvetica, arial, sans-serif;
+  color: #fff;
+  transition: background 0.4s;
+  background: #049cdb;
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+
+/* line 103 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+a.learn-more:hover,
+a.previous:hover {
+  text-decoration: none;
+  background: #24252b;
+}
+
+/* line 107 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+a.controls {
+  display: inline-block;
+  font-family: ff-meta-web-pro, helvetica, arial, sans-serif;
+  color: #fff;
+  background: #3c4e5a;
+  opacity: 1;
+  transition: opacity 0.5s;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin: 8px 5px;
+}
+
+/* line 121 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.institutions {
+  background: url("/img/frontend/institutions/inst7.jpg") no-repeat center center;
+}
+
+/* line 124 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.leaving {
+  background: url("/img/frontend/institutions/inst10.jpg") no-repeat center center;
+}
+
+/* line 127 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.people {
+  background: url("/img/frontend/institutions/EugenicsBoard1936b_UniversityofAlbertaArchives.jpg") no-repeat center center;
+}
+
+/* line 130 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.contemporary {
+  background: url("/img/frontend/institutions/inst3.jpg") no-repeat center center;
+}
+
+/* line 135 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-block {
+  position: fixed;
+  top: 0;
+  height: 100%;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1200;
+  opacity: 1;
+}
+
+/* line 146 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-content {
+  display: block;
+  max-height: 90%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* line 153 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-content.hidden {
+  display: none;
+}
+
+/* line 156 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-content h3 {
+  font-size: 30px;
+  line-height: 35px;
+  padding-bottom: 3px;
+  font-weight: bold;
+  margin: 0;
+  opacity: 1;
+  display: inline-block;
+  transition: opacity 0.5s;
+}
+
+/* line 166 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+a.exit {
+  position: fixed;
+  top: 15px;
+  right: 10px;
+  color: #fff;
+  padding: 5px 10px;
+  border: 2px solid;
+  z-index: 1500;
+}
+
+/* line 176 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container {
+  width: 100%;
+  height: 500px;
+  margin-top: 67px;
+  overflow: hidden;
+}
+
+/* line 182 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul {
+  margin: 0;
+  padding: 0;
+  height: 380px;
+  box-sizing: border-box;
+}
+
+/* line 188 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul li {
+  display: table-cell;
+  background: #f8f8f8;
+  color: #888;
+  width: 100%;
+  height: 500px;
+  list-style: none;
+  margin: 0;
+  -webkit-user-select: none;
+  box-sizing: border-box;
+  background-size: cover !important;
+  overflow: auto;
+}
+
+/* line 201 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul li.no-padding {
+  padding: 0;
+}
+
+/* line 204 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul li p {
+  font-size: 14px;
+  font-family: ff-meta-serif-web-pro, "Georgia", Times, serif;
+  line-height: 23px;
+}
+
+/* line 209 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul li h3 {
+  font-size: 30px;
+  font-weight: bold;
+  margin: 0;
+  opacity: 1;
+  display: inline-block;
+  transition: opacity 0.5s;
+}
+
+/* line 217 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul li img.pull-left {
+  float: left;
+  margin-right: 15px;
+  margin-bottom: 10px;
+}
+
+/* line 222 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul li h4 {
+  font-size: 20px;
+  color: #049cdb;
+  font-weight: bold;
+  margin: 5px 0;
+  background: rgba(238,238,238,0.9);
+  padding: 2px 7px;
+  display: inline-block;
+}
+
+/* line 231 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul li a.learn-more {
+  float: right;
+}
+
+/* line 234 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul li a.previous {
+  float: left;
+}
+
+/* line 237 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul li.one {
+  background: url("/img/frontend/institutions/inst10.jpg") no-repeat center center;
+}
+
+/* line 240 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container ul li.two {
+  background: url("/img/frontend/institutions/EugenicsBoard1936b_UniversityofAlbertaArchives.jpg") no-repeat center center;
+}
+
+/* line 243 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container button {
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  padding: 5px 10px;
+  background: #eee;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+/* line 251 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-container button:hover {
+  background: #fff;
+}
+
+/* line 254 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#overlay {
+  background: #000;
+  background: rgba(0,0,0,0.85);
+}
+
+/* line 258 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#app.full {
+  position: fixed;
+  margin-top: 0px;
+  min-height: none;
+  top: 0;
+  height: 100%;
+  overflow: auto;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1200;
+}
+
+/* line 270 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#modalbackdrop.open.black {
+  background: #000;
+  background: rgba(0,0,0,0.9);
+}
+
+/* line 274 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#swipe-controller {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: block;
+  height: 67px;
+  z-index: 1250;
+  text-align: center;
+}
+
+/* line 284 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+a.previous.hidden,
+a.learn-more.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* line 288 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.swipe-content {
+  padding: 25px;
+  position: absolute;
+}
+
+/* line 292 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.swipe-content h3 {
+  border-bottom: 2px solid;
+  margin-top: 35px;
+}
+
+/* line 296 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.swipe-content.white {
+  background: #fff;
+  background: rgba(255,255,255,0.95);
+}
+
+/* line 300 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.swipe-content.one-thirds {
+  width: 30%;
+}
+
+/* line 303 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.swipe-content.two-thirds {
+  width: 60%;
+}
+
+/* line 306 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.swipe-content.half {
+  width: 45%;
+}
+
+/* line 309 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.swipe-content.right {
+  right: 0;
+}
+
+/* line 312 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.swipe-content.top {
+  top: 0;
+}
+
+/* line 315 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.swipe-content.left {
+  left: 0;
+}
+
+/* line 318 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.swipe-content.bottom {
+  bottom: 0;
+}
+
+/* line 324 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* line 328 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#map-wrapper {
+  position: relative;
+}
+
+/* line 331 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+ul.switch {
+  box-sizing: border-box;
+  min-height: 50px;
+  margin-top: 2px;
+}
+
+/* line 336 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+ul.switch li {
+  cursor: pointer;
+  height: 50px;
+  line-height: 50px;
+  width: 50px;
+  display: inline-block;
+  margin-right: 5px;
+  text-align: center;
+}
+
+/* line 345 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+ul.switch li a {
+  font-weight: bold;
+  vertical-align: middle;
+  display: inline-block;
+  text-align: center;
+  border-radius: 50%;
+  transition: all 150ms ease-in;
+  text-decoration: none;
+  overflow: hidden;
+  background: #3e7186;
+  color: rgba(255,255,255,0.5);
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+}
+
+/* line 360 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+ul.switch li a:hover {
+  text-decoration: none;
+}
+
+/* line 363 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+ul.switch li.active a {
+  color: #fff;
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  background: #3bb2d0;
+}
+
+/* line 370 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+p.small {
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* line 374 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#map-wrapper .swipe-content {
+  display: none;
+  max-height: 90%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  width: 40%;
+}
+
+/* line 382 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+#map-wrapper .swipe-content.active {
+  display: block;
+}
+
+/* line 385 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.leaflet-label {
+  background: #fff;
+  background-clip: padding-box;
+  border-radius: 4px;
+  border-style: solid;
+  color: #333;
+  display: block;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 1px 6px;
+  text-transform: uppercase;
+  border: 2px solid rgba(0,0,0,0.5);
+  margin-top: -7px;
+  margin-left: 5px;
+  position: absolute;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 6;
+}
+
+/* line 404 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.leaflet-label:before {
+  display: none;
+}
+
+/* line 407 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+img.full {
+  position: absolute;
+  bottom: 10%;
+  right: 110%;
+  display: none;
+}
+
+/* line 413 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+img.full.active {
+  display: block;
+}
+
+/* line 416 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+img.thumbnail {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+/* line 420 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+img.thumbnail:hover {
+  opacity: 0.3;
+}
+
+/* line 423 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+p.subhead {
+  margin: 3px 0;
+  font-family: ff-meta-web-pro, helvetica, arial, sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #aaa;
+}
+
+/* line 430 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
+.relative {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}

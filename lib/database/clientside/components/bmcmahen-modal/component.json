@@ -1,0 +1,21 @@
+{
+  "name": "modal",
+  "repo": "bmcmahen/modal",
+  "description": "a simple modal written in vanilla javscript",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+    "component/emitter": "*",
+    "eugenicsarchivesca/overlay": "*",
+    "component/classes": "*",
+    "bmcmahen/animate-css": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "scripts": [
+    "index.js"
+  ],
+  "styles": [
+    "modal.css"
+  ]
+}

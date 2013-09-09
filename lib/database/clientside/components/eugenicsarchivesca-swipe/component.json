@@ -1,0 +1,25 @@
+{
+  "name": "swipe",
+  "repo": "component/swipe",
+  "description": "Swipe component with touch support",
+  "version": "1.4.1",
+  "keywords": [
+    "carousel",
+    "slide",
+    "slides",
+    "swipe",
+    "touch",
+    "ui"
+  ],
+  "dependencies": {
+    "component/emitter": "*",
+    "component/events": "*",
+    "component/has-translate3d": "*",
+    "component/transform-property": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "scripts": [
+    "index.js"
+  ]
+}

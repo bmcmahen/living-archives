@@ -1,0 +1,68 @@
+mixin field(label, value)
+  dt #{label}
+  dd !{value}
+
+div
+  h4 !{title}
+dl
+  mixin field('Type', type)
+  - if (locals.prods && locals.prods.length > 0){
+      dt Prods
+      dd
+        each prod in locals.prods
+          p.prod-listing=prod
+  - }
+  if locals.alternativeNames
+    mixin field('Alternative Names', alternativeNames)
+  if locals.location
+    mixin field('Location', location)
+  if locals.latitude
+    mixin field('Latitude', latitude)
+  if locals.longitude
+    mixin field('Longitude', longitude)
+  if locals.date
+    mixin field('Date', date)
+  if locals.dateOfBirth
+    mixin field('Date of Birth', dateOfBirth)
+  if locals.dateOfDeath
+    mixin field('Date of Death', dateOfDeath)
+  if locals.startDate
+    mixin field('Start Date', startDate)
+  if locals.endDate
+    mixin field('End Date', endDate)
+
+  mixin field('Full Description', fullDescription)
+
+  if locals.resources
+    dt Citations
+    for resource in resources
+      dd
+        if resource.resource !== ''
+          p !{resource.resource}
+        else
+          p Citation Missing
+
+  if locals.image
+    dt Image
+    dd
+      img.document-summary-image.img-polaroid(src=image.url + '/convert?w=300&h=200&fit=max')
+
+  if locals.heroQuote
+    mixin field('Hero Quote', heroQuote)
+    if locals.heroQuoteSource
+      dd heroQuoteSource
+
+  if locals.villainQuote
+    mixin field('Villain Quote', villainQuote)
+    if locals.villainQuoteSource
+      dd villainQuoteSource
+
+  if locals.ambiQuote
+    mixin field('Ambiguous Quote', ambiQuote)
+    if locals.ambiQuoteSource
+      dd ambiQuoteSource
+
+  if locals.currentUser
+    div
+      a.btn.btn-primary#edit-document Edit Document
+

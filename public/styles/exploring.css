@@ -1,0 +1,6 @@
+.pop-up{position:fixed;color:#fff;font-size:14px;background:#394f50;padding:5px 10px 5px 10px;min-height:150px;width:250px;border-radius:3px;pointer-events:none;}
+.pop-up p{color:#fff;text-align:left;font-size:13px}
+.pop-up .in{display:block}
+.archive-label{cursor:pointer}
+#app.exploring{position:relative}
+svg{display:block;margin:0 auto}

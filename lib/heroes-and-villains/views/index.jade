@@ -1,0 +1,26 @@
+extends ../../prods/layout
+
+block append styles
+  link(href='/javascripts/heroes.css', rel='stylesheet')
+
+block append components
+  script(src='/javascripts/heroes.js')
+  script require('heroes-and-villains')();
+
+block subnav-heroes
+  .prod.active
+    img(src='/img/frontend/hero.png', role='presentation')
+    span.label Heroes & Villains
+
+
+block content
+  #app.heroes.transparent
+    .toolbar
+      a#fullscreenmode(href='#')
+        i.icon-fullscreen.icon-large
+      #flipcard-toolbar
+        input.filter(type='text', name='filter people', placeholder='Filter by Name')
+    .content
+      #flipcard-wrapper
+
+  #modalbackdrop

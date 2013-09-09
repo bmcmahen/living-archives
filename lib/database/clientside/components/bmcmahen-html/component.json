@@ -1,0 +1,17 @@
+{
+  "name": "html",
+  "repo": "bmcmahen/html",
+  "description": "replace the html content of a DOM element with a string or node",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+    "bmcmahen/append": "*",
+    "yields/empty": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ]
+}

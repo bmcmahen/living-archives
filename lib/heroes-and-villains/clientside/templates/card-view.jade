@@ -1,0 +1,22 @@
+.front(tabindex='0')
+  img(src=locals.image.url+ '/convert?w=170&h=250&fit=crop&align=faces')
+  .caption
+    p.name
+      strong= locals.title
+    p.blurb= locals.shortDescription
+.back
+  .quotes
+    em
+      if locals.heroQuote
+        p=heroQuote
+        if locals.heroQuoteSource
+          a.tooltip-trigger(href='#', title=heroQuoteSource) Source
+      if locals.villainQuote
+        p=villainQuote
+        if locals.villainQuoteSource
+          a.tooltip-trigger(href='#', title=villainQuoteSource) Source
+      if locals.ambiQuote
+        p=ambiQuote
+        if locals.ambiQuoteSource
+          a.tooltip-trigger(href='#', title=ambiQuoteSource) Source
+  a.personInfo More Info

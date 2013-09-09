@@ -1,0 +1,32 @@
+{
+  "name": "model",
+  "repo": "component/model",
+  "description": "Elegant data models",
+  "version": "0.0.1",
+  "keywords": [
+    "collection",
+    "model",
+    "orm",
+    "db",
+    "database"
+  ],
+  "dependencies": {
+    "component/each": "*",
+    "component/json": "*",
+    "component/emitter": "*",
+    "component/collection": "*",
+    "visionmedia/superagent": "*"
+  },
+  "development": {
+    "component/reactive": "0.11.0",
+    "component/assert": "*",
+    "component/domify": "*"
+  },
+  "scripts": [
+    "lib/index.js",
+    "lib/static.js",
+    "lib/proto.js"
+  ],
+  "main": "lib/index.js",
+  "license": "MIT"
+}

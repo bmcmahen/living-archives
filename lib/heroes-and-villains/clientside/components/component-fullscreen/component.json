@@ -1,0 +1,15 @@
+{
+  "name": "fullscreen",
+  "repo": "component/fullscreen",
+  "description": "Fullscreen api",
+  "version": "1.0.0",
+  "keywords": [],
+  "dependencies": {
+    "component/emitter": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "scripts": [
+    "index.js"
+  ]
+}

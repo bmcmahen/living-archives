@@ -1,0 +1,9 @@
+.modal.animated.hide(id=locals._id)
+	if locals.image
+		img(width='200px', src=image.url+ '/convert?w=200&h=400')
+	strong !{title}
+	p(title='Press escape to return to timeline') !{locals.fullDescription}
+	if locals.resources
+		for resource in resources
+			p !{resource.resource}
+	a.close(href='#')

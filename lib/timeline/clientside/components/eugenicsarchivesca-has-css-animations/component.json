@@ -1,0 +1,14 @@
+{
+  "name": "has-css-animations",
+  "repo": "eugenicsarchivesca/has-css-animations",
+  "description": "determines if the browser supports css animations (basically, IE 9 and below)",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {},
+  "development": {},
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ]
+}

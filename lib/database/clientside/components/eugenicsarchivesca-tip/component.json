@@ -1,0 +1,34 @@
+{
+  "name": "tip",
+  "description": "Tip component",
+  "version": "0.2.0",
+  "keywords": [
+    "tooltip",
+    "tip",
+    "ui"
+  ],
+  "dependencies": {
+    "component/emitter": "*",
+    "component/inherit": "*",
+    "component/query": "*",
+    "component/each": "*",
+    "component/domify": "*",
+    "component/event": "*",
+    "component/bind": "*",
+    "component/classes": "*",
+    "component/css": "*",
+    "yields/isArray": "*"
+  },
+  "development": {
+    "component/aurora-tip": "*"
+  },
+  "scripts": [
+    "index.js",
+    "template.js"
+  ],
+  "styles": [
+    "tip.css"
+  ],
+  "license": "MIT",
+  "repo": "https://raw.github.com/eugenicsarchivesca/tip"
+}

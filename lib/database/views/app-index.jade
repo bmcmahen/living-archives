@@ -1,0 +1,271 @@
+extends app-layout
+
+block append scripts
+  script(src='/javascripts/database.js')
+  script require('eugenicsdatabase');
+
+block content
+  ul.breadcrumb#bread
+    li
+      a(href='#') Home
+      span.divider /
+  #swipe-container
+    ul#swipe
+
+      li.swipe-item
+        .swipe-content.well
+          img.logo(src='/eugenics-logo.png')
+          p(style='margin: 10px auto; max-width: 540px; text-align: center;') Welcome to the Living Archives on Eugenics in Western Canada Database. Select a category or PROD on the left to view documents in the database.
+
+      li.swipe-item
+        .navbar#list-navbar
+          .navbar-inner
+            form.navbar-search.pull-left
+              input#query.search-query(type='text', placeholder='Search')
+            ul.nav.pull-right.clearfix
+              li.pull-right
+                p#total.navbar-text.pull-right
+              li.divider-vertical
+              li.pull-right
+                #sort-wrapper
+                p.sortby.navbar-text.pull-right Sort by:
+        #listing.swipe-content.well
+          #cast-wrapper
+
+      li.swipe-item
+        .swipe-content#document-summary.well
+
+      li.swipe-item#form-swipe
+        .swipe-content.well
+          #form-wrapper
+
+  #connections.modal.hide.animated
+    .modal-header
+      button.close.cancel(type='button') ×
+      h3 Add Mind-Map Connections
+    .modal-body
+      .connection-list
+        p <strong> Potential Connections </strong>
+        .well
+          ul#mindmap-nodes
+      .connection-list
+        p <strong> Selected Connections </strong>
+        .well
+          ul#selected-nodes
+    .modal-footer
+      a.btn.cancel Close
+      a.add-connections.btn.btn-primary Set Connections
+
+      script#cast-template(type='text/template').
+        {{#image}}
+          <img width='40px' height='40px' src='{{image.url}}/convert?w=40&h=40&fit=crop&align=faces'>
+        {{/image}}
+        {{^image}}
+          <div class='image-placeholder'></div>
+        {{/image}}
+        <a href='#' class='title'> {{{title}}} </a>
+        {{#currentUser}}
+          <a class='edit-btn btn btn-small' href='#'>Edit</a>
+        {{/currentUser}}
+        {{#date}}
+          <span class='date'> {{date}} </span>
+        {{/date}}
+        {{#startDate}}
+          <span class='date'> {{startDate}} - {{endDate}}</span>
+        {{/startDate}}
+
+
+      script#textarea(type='text/html').
+          {{#with object}}
+            <label>
+              {{label}}
+              {{#if required}} * {{/if}}
+              <textarea id="{{name}}" name="{{name}}" class='{{className}}'>{{value}}</textarea>
+            </label>
+            {{#if error}}
+              <p class='error-text'>{{error}}</p>
+            {{/if}}
+            {{#if helpText}}
+              <span class="help-block"> {{helpText}} </span>
+            {{/if}}
+          {{/with}}
+
+      script#button(type='text/html').
+        {{#with object}}
+          <label>
+            {{label}}
+            {{#if required}} * {{/if}}
+            <span class='target-link'></span>
+            <button name='{{name}}' class='btn btn-primary {{className}}'>Select Connection</button>
+          </label>
+          {{#if error}}
+            <p class='error-text'>{{error}}</p>
+          {{/if}}
+          {{#if helpText}}
+            <span class='help-block'> {{helpText}} </span>
+          {{/if}}
+        {{/with}}
+
+      script#text(type='text/html').
+          {{#with object}}
+            <label>
+              {{label}}
+              {{#if required}} * {{/if}}
+              <input id="{{name}}" type="text" name="{{name}}" value="{{value}}">
+            </label>
+            {{#if error}}
+              <p class='error-text'>{{error}}</p>
+            {{/if}}
+            {{#if helpText}}
+              <span class="help-block"> {{helpText}} </span>
+            {{/if}}
+          {{/with}}
+
+      script#checkbox(type='text/html').
+        {{#with object}}
+          <h5> Select PRODs: </h5>
+          <div class='well'>
+            {{#each fields}}
+              {{#each this}}
+              <label class="prod {{this.name}}">
+                <input type="checkbox" name="{{this.name}}" {{this.value}} >
+                {{this.label}}
+              </label>
+              {{#if this.helpText}}
+                <span class="help-block"> {{this.helpText}} </span>
+              {{/if}}
+              {{/each}}
+            {{/each}}
+          </div>
+          <span class='help-block'> Selecting a PROD from the list above will
+          include this document on that PROD. It will also append fields to this form that
+          are required for that PROD.</span>
+        {{/with}}
+
+      script#formset(type='text/html').
+        <div class='formset' id='<%= name %>'>
+          <h5> Links </h5>
+          <div class='well'>
+          <%= forms %>
+          <button class='btn'>Add Another</button>
+          </div>
+        </div>
+
+      script#forms(type='text/html').
+        <div class='form'>
+        <%= fields %>
+        </div>
+
+      script#select(type='text/html').
+          <label class="<%= name %>">
+            <%= object.label %>
+            <select>
+            <% _.each(object.options, function(val) { %>
+              <option value="<%= val.name %>"
+                <% if (val.name.toLowerCase() === object.value) { %>
+                  selected
+                <% } %> >
+                <%= val.label %>
+              </option>
+            <% }); %>
+            </select>
+          </label>
+          <% if (object.helpText) { %>
+            <span class="help-block"> <%= object.helpText %> </span>
+          <% } %>
+
+
+      script#image(type='text/html').
+          {{#with object}}
+
+            {{#if loading}}
+              <img src='/img/loading.gif'>
+            {{/if}}
+
+            {{#if value}}
+            <img class='document-image' src='{{value.url}}/convert?w=250&h=250'>
+            {{/if}}
+             <input id='filepicker' data-fp-maxSize='10485760' data-fp-button-class='btn btn-primary filepicker' data-fp-button-text='Select an Image'>
+              {{#if value}}
+              <button id='remove-image' class='btn btn-warning' href='#'> Remove Image </a>
+              {{/if}}
+            {{#if helpText}}
+            <span class="help-block"> {{helpText}} </span>
+            {{/if}}
+          {{/with}}
+
+    script#document-template(type='text/template').
+      <div>
+        <h3>{{{title}}}</h3>
+      </div>
+      <div>
+        <p class='type'><strong>Type: </strong>{{{type}}}</p>
+        {{#if prods}}
+          <p><strong> Prods: </strong>
+          {{#each prods}}
+            <span class='prod'> {{this}} </span>
+          {{/each}}
+        {{/if}}
+        {{#if alternativeNames}}
+          <p> <strong>Alternative Names:</strong> {{alternativeNames}}</p>
+        {{/if}}
+        {{#if location}}
+          <p> <strong>Location: </strong> {{location}} </p>
+        {{/if}}
+        {{#if latitude}}
+          <p> <strong>Latitude: </strong> {{latitude}}</p>
+        {{/if}}
+        {{#if longitude}}
+          <p> <strong>Longitude: </strong> {{longitude}}</p>
+        {{/if}}
+        {{#if date}}
+          <p><strong>Date: </strong> {{date}} </p>
+        {{/if}}
+        {{#if dateOfBirth}}
+          <p> <strong>Date of Birth: </strong>{{dateOfBirth}} </p>
+        {{/if}}
+        {{#if dateOfDeath}}
+          <p> <strong> Date of Death: </strong>{{dateOfDeath}}</p>
+        {{/if}}
+        {{#if startDate}}
+          <p> <strong>Start Date: </strong> {{startDate}}</p>
+        {{/if}}
+        {{#if endDate}}
+          <p> <strong>End Date: </strong> {{endDate}} </p>
+        {{/if}}
+        <p class='shortDescription'><strong><p> Short Description: </p></strong>{{{shortDescription}}}</p>
+        <p class='fullDescription'><strong> Full Description: </strong>{{{fullDescription}}}</p>
+        {{#if resources}}
+          <p><strong>Resources</strong>
+          {{#each resources}}
+            <p> {{{this.resource}}} </p>
+          {{/each}}
+          </p>
+        {{/if}}
+
+        {{#if image}}
+          <img class='document-summary-image' src='{{image.url}}/convert?w=300&h=200&fit=max'>
+        {{/if}}
+
+        {{#if heroQuote}}
+          <p><strong> Hero Quote: </strong> {{heroQuote}}</p>
+          <p> Source: {{heroQuoteSource}} </p>
+        {{/if}}
+        {{#if villainQuote}}
+          <p><strong> Villain Quote: </strong> {{villainQuote}}</p>
+          <p> Source: {{villainQuoteSource}}</p>
+        {{/if}}
+        {{#if ambiQuote}}
+          <p><strong> Ambiguous Quote: </strong> {{ambiQuote}}</p>
+          <p> Source: {{ambiQuoteSource}} </p>
+        {{/if}}
+        {{#if currentUser}}
+          {{#if modifiedBy}}
+            <p><strong> Last Edited By: </strong> {{modifiedBy.name}} </p>
+          {{/if}}
+          <div>
+            <a class='btn btn-primary' id='edit-document'> Edit Document </a>
+          </div>
+        {{/if}}
+      </div>
+

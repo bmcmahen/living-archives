@@ -1,0 +1,23 @@
+{
+  "name": "timeline",
+  "description": "eugenics in western canada timeline",
+  "dependencies": {
+  	"component/moment" : "*",
+    "component/jquery": "*",
+    "component/underscore": "*",
+    "bmcmahen/modal": "*"
+  },
+  "development": {},
+  "main": "index.js",
+  "scripts": [
+    "index.js",
+    "timeline.js",
+    "timeline-fullscreen.js",
+    "jquery-ui-slider.js"
+  ],
+  "templates": [
+    "templates/text.jade",
+    "templates/image.jade",
+    "templates/modal.jade"
+  ]
+}

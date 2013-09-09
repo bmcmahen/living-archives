@@ -1,0 +1,31 @@
+doctype 5
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/styles/database.css')
+  body
+
+    block navigation
+      .navbar.navbar-inverse.navbar-fixed-top
+        .navbar-inner
+          .container-fluid
+            a.brand(href='/database') LAE Database
+            #loading-wrapper
+            if currentUser
+              ul.nav.pull-right
+                li
+                  a(href='/auth/accounts') Accounts
+                li
+                  a(href='/auth/logout') Logout
+                li.divider-vertical
+
+    .main-content
+      .container-fluid
+        if currentUser
+          ul.breadcrumb
+            block breadcrumbs
+
+      block content
+
+
+    block scripts

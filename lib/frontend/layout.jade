@@ -1,0 +1,51 @@
+//- Universal to the entire site.
+
+doctype 5
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title Eugenics in Western Canada
+
+    block styles
+      link(href='/javascripts/application.css', rel='stylesheet')
+      link(href='/font-awesome.css', rel='stylesheet')
+
+    block scripts
+      script(type="text/javascript", src="//use.typekit.net/meo7zwz.js")
+      script(type='text/javascript') try{Typekit.load();}catch(e){}
+
+  body
+    block header
+      header#header
+        .navbar
+          .navbar-inner
+            .container
+              a.btn.btn-navbar(data-toggle='collapse', data-target='.nav-collapse')
+                span.icon-bar
+                span.icon-bar
+                span.icon-bar
+              img.logo(src='/img/logo.png')
+              a.logo(href='#', name='Eugenics Archives Canada', aria-hidden='true') Eugenics Archive
+              .nav-collapse
+                ul.nav(role='navigation')
+                  li
+                    block nav-discover
+                      a(href='/discover') Discovery Tools
+                  li
+                    block nav-av
+                      a(href='/audio-video') Audio & Video
+                  li
+                    block nav-info
+                      a(href='http://eugenicsarchive.ca') About the Project
+
+    block subheader
+
+    section#main(role='main')
+      .container
+
+        block content
+
+        block templates
+
+  block components

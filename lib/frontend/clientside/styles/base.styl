@@ -1,0 +1,144 @@
+
+/**
+ * Base Element Styles
+ */
+
+body
+  font: $baseFontSize $sansFont
+  margin 0
+  padding-bottom 75px
+  background $lightGray url('img/dotgrid-black.png')
+  height 100%
+
+  &.fullscreen
+    overflow hidden
+
+a
+  color: $brightBlue
+  cursor pointer
+  text-decoration: none
+  &:hover
+    text-decoration: underline
+
+p
+  color: $lightBlack
+  font 16px $serifFont
+  line-height 23px
+
+h1
+  font bold 40px $sansFont
+  margin 25px 0 15px 0
+  border-bottom 2px solid
+  display inline-block
+  color $brightBlue
+
+h2
+  color $darkBlue
+  display inline-block
+  border-bottom 2px solid
+  font 28px/36px $headingFont
+  font-weight bold
+  margin 0px
+
+h3
+  font bold 40px $sansFont
+  margin 25px 0 15px 0
+  border-bottom 2px solid
+  display inline-block
+  color $brightBlue
+
+ul
+  list-style-type none
+  padding-left 0px
+
+// Standard App Layout
+
+#app
+  min-height 500px
+  background white
+  padding 15px
+  border-radius 3px
+  padding-top 15px
+
+  &.fullscreen
+    position fixed
+    margin-top 0px
+    min-height none
+    top 0
+    height 100%
+    overflow auto
+    right 0
+    bottom 0
+    left 0
+    z-index 1200
+
+  &.transparent
+    background none
+    padding 0
+    border-radius 0
+
+  &.hidden
+    opacity 0
+    transition opacity 0.8s
+
+.fullscreen .prod-heading
+  width 100%
+  padding 0 15px 0 18px
+  box-sizing border-box
+
+.content
+  position relative
+
+#modalbackdrop
+  display none
+
+  &.open
+    display block
+    position fixed
+    top 0
+    right 0
+    bottom 0
+    left 0
+    z-index 1040
+    background black
+    background-color rgba(0, 0, 0, 0.63)
+
+/**
+ * Utility Classes
+ */
+
+.center
+  display block
+  margin-left auto
+  margin-right auto
+
+.pull-left
+  text-align left
+
+.pull-right
+  text-align right
+
+.highlight
+  background #007D7F
+  color white
+  border-radius 3px
+  padding 2px 4px
+
+input.short
+  width 100px
+
+/**
+ * Discover Introduction
+ */
+
+.introductory-content
+  background url('/img/frontend/institutions/reddeer.png') center no-repeat
+  background-size cover
+  height 500px
+  padding 25px
+
+  & div
+    max-width 600px
+    background white
+    background rgba(255,255,255,0.8)
+    padding 15px

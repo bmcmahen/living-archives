@@ -1,0 +1,21 @@
+{
+  "name": "cast",
+  "repo": "bmcmahen/cast",
+  "description": "For creating animated grid layouts given an array of attributes.",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+    "component/emitter": "*",
+    "component/clone": "*",
+    "component/bind": "*",
+    "component/type": "*",
+    "bmcmahen/ordered-dictionary": "*",
+    "component/indexof": "*",
+    "component/translate": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "scripts": [
+    "index.js"
+  ]
+}

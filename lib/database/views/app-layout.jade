@@ -1,0 +1,58 @@
+doctype 5
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/javascripts/database.css')
+  body
+
+    block navigation
+      .navbar.navbar-inverse.navbar-fixed-top
+        .navbar-inner
+          .container-fluid
+            a.brand(href='/database') LAE Database
+            #loading-wrapper
+            ul.nav.pull-right
+              if currentUser
+                li
+                  a(href='/auth/accounts') Accounts
+                li
+                  a(href='/auth/logout') Logout
+              else
+                li
+                  a(href='/auth/login') Login
+
+    .container-fluid
+      .row-fluid
+        .span3
+          .well(style='padding: 8px 0;')
+            ul.nav.nav-list#primary-navigation
+              li.nav-header Documents
+              li
+                a.category(href='#', data-name='events') Events
+              li
+                a.category(href='#', data-name='concepts') Concepts
+              li
+                a.category(href='#', data-name='people') People & Groups
+              li
+                a.category(href='#', data-name='places') Places
+              li
+                a.category(href='#', data-name='publications') Publications
+              li.nav-header PRODs
+              li
+                a.prod(href='#', data-name='timeline') Timeline
+              li
+                a.prod(href='#', data-name='heroes-and-villains') Heroes and Villains
+              li
+                a.prod(href='#', data-name='institutions') Institutions
+              li
+                a.prod(href='#', data-name='mindmap') Mind Map
+
+              if currentUser
+                li.divider
+                li
+                  a.new-document(href='#') <i class='icon-pencil'></i> New Entry
+        .span9
+          block content
+
+
+    block scripts

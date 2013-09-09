@@ -1,0 +1,433 @@
+
+#accordion-wrapper
+  width 100%
+  position relative
+  margin 0
+  padding 0
+  overflow hidden
+  height 500px
+
+.white
+  margin 30px
+  padding 25px
+  background white
+  background rgba(255,255,255,0.95)
+
+.accordion-child
+  height 500px
+  width 25%
+  transition width .5s, opacity .5s
+  transition-timing-function ease-in-out
+  float left
+  cursor pointer
+  background-size cover !important
+  overflow hidden
+  transform translate3d(0,0,0)
+
+  & .accordion-content
+    display block
+
+  & .accordion-content h3
+    font-size 25px
+    margin 25px
+    padding 3px 7px
+    line-height 29px
+    border-bottom none
+    border-radius 3px
+    background white
+    background rgba(255,255,255,0.95)
+
+  & .accordion-active-content
+    display none
+
+  &.active.rendered .accordion-active-content
+    display block
+
+  &.active .accordion-content
+    display none
+
+  & p
+    margin 0
+    padding 0
+    font-family $serifFont
+    font-size 16px
+    line-height 23px
+
+  &:hover
+    box-shadow inset 40px 40px 80px rgba(0,0,0,0.3)
+
+  & h3
+    font bold 40px $sansFont
+    opacity 1
+    margin 25px 0 15px 0
+    border-bottom 2px solid
+    display inline-block
+    transition opacity .5s
+
+  &.active
+    cursor default
+    width 70%
+
+    &:hover
+      box-shadow none
+
+  &.collapsed
+    width 10%
+
+    & h3
+      opacity 0
+
+    &:hover
+      opacity 1
+
+  &.content
+    opacity 0
+    transition opacity .3s
+    // position absolute
+
+    &.visible
+      opacity 1
+
+a.learn-more, a.previous
+  display: inline-block
+  margin-top: 20px
+  font-size: 16px
+  line-height 22px
+  font-family: $sansFont
+  color: $white
+  transition background 0.4s
+  background $brightBlue
+  padding 5px 10px
+  border-radius 3px
+
+  &:hover
+    text-decoration none
+    background rgb(36, 37, 43)
+
+a.controls
+  display inline-block
+  font-family $sansFont
+  color $white
+  background $blue
+  opacity 1
+  transition opacity 0.5s
+  padding 7px 14px
+  border none
+  border-radius 3px
+  text-transform uppercase
+  margin 8px 5px
+
+
+.institutions
+  background url('/img/frontend/institutions/inst7.jpg') no-repeat center center
+
+.leaving
+  background url('/img/frontend/institutions/inst10.jpg') no-repeat center center
+
+.people
+  background url('/img/frontend/institutions/EugenicsBoard1936b_UniversityofAlbertaArchives.jpg') no-repeat center center
+
+.contemporary
+  background url('/img/frontend/institutions/inst3.jpg') no-repeat center center
+
+// Institutions - Places
+
+#swipe-block
+  position fixed
+  top 0
+  height 100%
+  right 0
+  bottom 0
+  left 0
+  z-index 1200
+  opacity 1
+
+
+#swipe-content
+  display block
+  max-height 90%
+  overflow-y auto
+  overflow-x hidden
+  box-sizing border-box
+
+  &.hidden
+    display none
+
+  & h3
+    font-size 30px
+    line-height 35px
+    padding-bottom 3px
+    font-weight bold
+    margin 0
+    opacity 1
+    display inline-block
+    transition opacity .5s
+
+a.exit
+  position fixed
+  top 15px
+  right 10px
+  color white
+  padding 5px 10px
+  border 2px solid
+  z-index 1500
+
+
+#swipe-container
+  width: 100%;
+  height: 500px;
+  margin-top: 67px;
+  overflow: hidden;
+
+  ul
+    margin: 0;
+    padding: 0;
+    height: 380px;
+    box-sizing: border-box
+
+  ul li
+    display: table-cell;
+    background: #f8f8f8;
+    color: #888;
+    width: 100%;
+    height: 500px;
+    list-style: none;
+    margin: 0;
+    -webkit-user-select: none;
+    box-sizing: border-box;
+    background-size cover !important
+    overflow auto
+
+    &.no-padding
+      padding: 0
+
+    & p
+      font-size: 14px
+      font-family $serifFont
+      line-height: 23px
+
+    & h3
+      font-size 30px
+      font-weight bold
+      margin 0
+      opacity 1
+      display inline-block
+      transition opacity .5s
+
+    & img.pull-left
+      float left
+      margin-right 15px
+      margin-bottom 10px
+
+    & h4
+      font-size 20px
+      color #049cdb
+      font-weight bold
+      margin 5px 0
+      background rgba(238, 238, 238, 0.9)
+      padding 2px 7px
+      display inline-block
+
+    & a.learn-more
+      float right
+
+    & a.previous
+      float left
+
+    &.one
+      background url('/img/frontend/institutions/inst10.jpg') no-repeat center center
+
+    &.two
+      background url('/img/frontend/institutions/EugenicsBoard1936b_UniversityofAlbertaArchives.jpg') no-repeat center center
+
+  button
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    background: #eee;
+    border-radius: 2px;
+    cursor: pointer;
+
+  button:hover
+    background: #fff;
+
+#overlay
+  background black
+  background rgba(0,0,0,0.85)
+
+#app.full
+  position fixed
+  margin-top 0px
+  min-height none
+  top 0
+  height 100%
+  overflow auto
+  right 0
+  bottom 0
+  left 0
+  z-index 1200
+
+#modalbackdrop.open.black
+  background black
+  background rgba(0,0,0,0.9)
+
+#swipe-controller
+  position fixed
+  bottom 0
+  left 0
+  right 0
+  display block
+  height 67px
+  z-index 1250
+  text-align center
+
+a.previous.hidden, a.learn-more.hidden
+  opacity 0
+  pointer-events none
+
+.swipe-content
+  padding 25px
+  position absolute
+
+  h3
+    border-bottom 2px solid
+    margin-top 35px
+
+  &.white
+    background white
+    background rgba(255,255,255,0.95)
+
+  &.one-thirds
+    width 30%
+
+  &.two-thirds
+    width 60%
+
+  &.half
+    width 45%
+
+  &.right
+    right 0
+
+  &.top
+    top 0
+
+  &.left
+    left 0
+
+  &.bottom
+    bottom 0
+
+
+// Map
+
+#map
+  width 100%
+  height 100%
+
+#map-wrapper
+  position relative
+
+ul.switch
+  box-sizing border-box
+  min-height 50px
+  margin-top 2px
+
+  & li
+    cursor pointer
+    height 50px
+    line-height 50px
+    width 50px
+    display inline-block
+    margin-right 5px
+    text-align center
+
+    & a
+      font-weight bold
+      vertical-align middle
+      display inline-block
+      text-align center
+      border-radius 50%
+      transition all 150ms ease-in
+      text-decoration none
+      overflow hidden
+      background rgb(62, 113, 134)
+      color rgba(255,255,255,0.5)
+      width 30px
+      height 30px
+      line-height 30px
+
+      &:hover
+        text-decoration none
+
+    &.active a
+      color white
+      width 50px
+      height 50px
+      line-height 50px
+      background #3bb2d0
+
+p.small
+  font-size: 13px
+  line-height: 18px
+
+#map-wrapper .swipe-content
+  display none
+  max-height: 90%
+  overflow-x: hidden
+  overflow-y: auto
+  box-sizing: border-box
+  width: 40%
+
+  &.active
+    display block
+
+.leaflet-label
+  background: white
+  background-clip: padding-box
+  border-radius: 4px
+  border-style: solid
+  color: #333
+  display: block
+  font-size 10px
+  font-weight: bold
+  padding: 1px 6px
+  text-transform uppercase
+  border 2px solid rgba(0, 0, 0, 0.5)
+  margin-top -7px
+  margin-left 5px
+  position: absolute
+  user-select: none
+  white-space: nowrap
+  z-index: 6
+
+.leaflet-label:before
+  display none
+
+img.full
+  position absolute
+  bottom 10%
+  right 110%
+  display none
+
+  &.active
+    display block
+
+img.thumbnail
+  opacity 1
+  transition opacity 0.3s
+
+  &:hover
+    opacity 0.3
+
+p.subhead
+  margin 3px 0
+  font-family $sansFont
+  font-size 12px
+  text-transform uppercase
+  color #aaa
+
+.relative
+  position relative
+  height 100%
+  width 100%

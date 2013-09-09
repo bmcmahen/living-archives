@@ -1,0 +1,8 @@
+label=object.label
+	if object.required
+		span *
+	textarea(name=object.name, class=object.name)=object.value
+if object.error
+	p.error-text=object.error
+if object.helpText
+	span.help-block=object.helpText

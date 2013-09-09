@@ -1,0 +1,12 @@
+{
+  "name": "sinon",
+  "description": "JavaScript test spies, stubs and mocks.",
+  "version": "1.7.3",
+  "homepage": "http://cjohansen.no/sinon/",
+  "author": "Christian Johansen",
+  "repo": "http://github.com/cjohansen/Sinon.JS.git",
+  "main": "./lib/sinon.js",
+  "scripts": [
+    "./lib/sinon.js"
+  ]
+}

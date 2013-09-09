@@ -1,0 +1,20 @@
+{
+  "name": "eugenics-mindmap",
+  "description": "the eugenics mindmap",
+  "dependencies": {
+  	"component/fullscreen" : "*",
+  	"eugenicsarchivesca/mind-map" : "*",
+  	"bmcmahen/linear-conversion" : "*",
+    "component/jquery": "*",
+    "component/underscore": "*"
+  },
+  "development": {},
+  "main": "index.js",
+  "styles": [
+    "styles/mindmap.styl"
+  ],
+  "scripts": [
+    "index.js"
+  ],
+  "templates": ["template.jade"]
+}

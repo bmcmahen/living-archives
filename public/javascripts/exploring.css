@@ -1,0 +1,44 @@
+/* line 1 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/node_modules/component-stylus-plugin/node_modules/stylus/lib/functions/index.styl */
+
+/* line 3 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/variables.styl */
+
+/* line 1 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/exploring-archives/clientside/styles/exploring.styl */
+.pop-up {
+  position: fixed;
+  color: #fff;
+  font-size: 14px;
+  background: #394f50;
+  padding: 5px 10px 5px 10px;
+  min-height: 150px;
+  width: 250px;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* line 12 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/exploring-archives/clientside/styles/exploring.styl */
+.pop-up p {
+  color: #fff;
+  text-align: left;
+  font-size: 13px;
+}
+
+/* line 17 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/exploring-archives/clientside/styles/exploring.styl */
+.pop-up .in {
+  display: block;
+}
+
+/* line 20 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/exploring-archives/clientside/styles/exploring.styl */
+.archive-label {
+  cursor: pointer;
+}
+
+/* line 23 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/exploring-archives/clientside/styles/exploring.styl */
+#app.exploring {
+  position: relative;
+}
+
+/* line 26 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/exploring-archives/clientside/styles/exploring.styl */
+svg {
+  display: block;
+  margin: 0 auto;
+}

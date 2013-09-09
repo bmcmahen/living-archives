@@ -1,0 +1,4 @@
+label(class=object.name)=object.label
+	select
+		each option in object.options
+			option(value=option.name, selected= option.name == object.value)= option.label

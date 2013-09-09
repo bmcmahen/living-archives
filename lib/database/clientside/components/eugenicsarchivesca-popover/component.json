@@ -1,0 +1,27 @@
+{
+  "name": "popover",
+  "description": "Popover component",
+  "version": "1.0.1",
+  "keywords": [
+    "toolpopover",
+    "popover",
+    "ui"
+  ],
+  "dependencies": {
+    "eugenicsarchivesca/tip": "*",
+    "component/inherit": "0.0.2",
+    "yields/empty": "*",
+    "component/domify": "*",
+    "component/classes": "*",
+    "component/query": "*",
+    "bmcmahen/html": "*"
+  },
+  "development": {
+    "component/aurora-popover": "*"
+  },
+  "scripts": [
+    "index.js",
+    "template.js"
+  ],
+  "repo": "https://raw.github.com/eugenicsarchivesca/popover"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "horizontal-accordion",
+  "repo": "eugenicsarchivesca/horizontal-accordion",
+  "description": "a horizontal accordian'",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+    "component/emitter": "*",
+    "component/bind": "*",
+    "component/events": "*",
+    "component/classes": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "scripts": [
+    "index.js"
+  ],
+  "styles": [
+    "pamphlet.css"
+  ]
+}

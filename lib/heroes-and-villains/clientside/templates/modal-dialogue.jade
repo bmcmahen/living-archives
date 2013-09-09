@@ -1,0 +1,19 @@
+.modal.animated.hide
+  img(width='250px', src=locals.image.url+ '/convert?w=250&h=400', alt='A picture of' + locals.title)
+  strong=locals.title
+  em
+    if locals.heroQuote
+      p.quote
+        em= heroQuote
+    if locals.villainQuote
+      p.quote
+        em= villainQuote
+    if locals.ambiQuote
+      p.quote
+        em= ambiQuote
+  p(title='Press escape to return to heroes and villains', aria-labelledby=locals._id)=locals.fullDescription
+  p
+    if locals.resources
+      for resource in resources
+        p=resource.resource
+  a.close Close

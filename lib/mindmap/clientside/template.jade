@@ -1,0 +1,13 @@
+h2=title
+p=fullDescription
+if locals.resources
+	for resource in resources
+		p.small=resource
+h5 Related Nodes
+if locals.links
+	for link in links
+		div
+			a.link(href='#', data-id=link._id, style='font-size:'+link.size+'px;')=link.title
+if locals.image
+	.images
+		img(src=image.url)

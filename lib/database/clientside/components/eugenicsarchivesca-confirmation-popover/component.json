@@ -1,0 +1,31 @@
+{
+  "name": "confirmation-popover",
+  "description": "Popover confirmation component",
+  "version": "0.0.1",
+  "keywords": [
+    "confirm",
+    "confirmation",
+    "popover",
+    "ui"
+  ],
+  "dependencies": {
+    "eugenicsarchivesca/popover": "*",
+    "component/domify": "*",
+    "component/query": "*",
+    "component/event": "*",
+    "component/bind": "*",
+    "bmcmahen/html": "*"
+  },
+  "development": {
+    "component/aurora": "*"
+  },
+  "scripts": [
+    "index.js",
+    "template.js"
+  ],
+  "styles": [
+    "popover.css"
+  ],
+  "license": "MIT",
+  "repo": "https://raw.github.com/eugenicsarchivesca/confirmation-popover"
+}
