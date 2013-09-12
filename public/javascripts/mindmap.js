@@ -14694,6 +14694,7 @@ EugenicsMap.prototype.selectRandom = function(){
 };
 
 EugenicsMap.prototype.onNodeSelected = function(node){
+  console.log('node selected');
   if (this.selectedNode) mymap.unselectNode(this.selectedNode._id);
   this.currentSideview = new SideView(node.attr).render();
   this.selectedNode = node.attr;
@@ -14784,6 +14785,23 @@ $.get('/api/prods/mindmap', function(docs){
   mymap.animate();
   eugenicsMap.bind();
 });
+
+
+
+var lazySearch = _.debounce(search, 350);
+
+function search(e){
+  var val = $(e.currentTarget).val();
+  var re = new RegExp(val, 'i');
+  var filtered = _.filter(eugenicsMap.docs, function(doc){
+   return re.test(doc.title);
+  });
+  if (filtered.length < 1) return;
+  if (filtered[0] == eugenicsMap.selectedNode) return;
+  mymap.selectNode(filtered[0]._id);
+}
+
+$('#query').on('input', lazySearch);
 
 
 
