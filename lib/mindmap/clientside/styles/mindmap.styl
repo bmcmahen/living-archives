@@ -33,10 +33,12 @@ a.link {
 	width: 30%;
 	bottom: 0;
 	position: absolute;
+	background: white;
 	top: 0;
 	padding: 10px 15px;
 	box-sizing: border-box;
 	overflow: auto;
+	overflow-x: hidden;
 	right: 0;
 	border-left: 2px dashed #eee;
 	border-radius: 3px;
@@ -47,4 +49,62 @@ a.link {
 	margin-top: 15px;
 	padding-bottom: 10px;
 	color: #049cdb;
+}
+
+#query {
+	position: absolute;
+	top: 8px;
+	background: none;
+	left: 40px;
+}
+
+p.small {
+	font-size: 13px;
+	line-height: 18px;
+}
+
+#query .select {
+	width: 200px;
+}
+
+#query .select .select-dropdown {
+	overflow: hidden;
+	max-height: 350px;
+}
+
+#query .select .select-box {
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+
+#query .select .select-label {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	width: 100%;
+}
+
+#query .select .select-options {
+	max-height: 320px;
+	overflow: hidden;
+}
+
+#query .select .select-option {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.select-option.highlight {
+	border-radius: 0;
+}
+
+#query input {
+	width: 100%;
+	box-sizing: border-box;
 }

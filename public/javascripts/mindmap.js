@@ -27,11 +27,9 @@ function require(path, parent, orig) {
   // by invoking the module's
   // registered function
   if (!module.exports) {
-    var mod = {};
-    mod.exports = {};
-    mod.client = mod.component = true;
-    module.call(this, mod.exports, require.relative(resolved), mod);
-    module.exports = mod.exports;
+    module.exports = {};
+    module.client = module.component = true;
+    module.call(this, module.exports, require.relative(resolved), module);
   }
 
   return module.exports;
@@ -500,345 +498,6 @@ module.exports = function(ctx, x, y, w, h, r) {
   ctx.arcTo(x, y + h, x, y, r);
   ctx.arcTo(x, y, x + w, y, r);
 };
-});
-require.register("component-event/index.js", function(exports, require, module){
-
-/**
- * Bind `el` event `type` to `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
-
-exports.bind = function(el, type, fn, capture){
-  if (el.addEventListener) {
-    el.addEventListener(type, fn, capture || false);
-  } else {
-    el.attachEvent('on' + type, fn);
-  }
-  return fn;
-};
-
-/**
- * Unbind `el` event `type`'s callback `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
-
-exports.unbind = function(el, type, fn, capture){
-  if (el.removeEventListener) {
-    el.removeEventListener(type, fn, capture || false);
-  } else {
-    el.detachEvent('on' + type, fn);
-  }
-  return fn;
-};
-
-});
-require.register("component-query/index.js", function(exports, require, module){
-
-function one(selector, el) {
-  return el.querySelector(selector);
-}
-
-exports = module.exports = function(selector, el){
-  el = el || document;
-  return one(selector, el);
-};
-
-exports.all = function(selector, el){
-  el = el || document;
-  return el.querySelectorAll(selector);
-};
-
-exports.engine = function(obj){
-  if (!obj.one) throw new Error('.one callback required');
-  if (!obj.all) throw new Error('.all callback required');
-  one = obj.one;
-  exports.all = obj.all;
-};
-
-});
-require.register("component-matches-selector/index.js", function(exports, require, module){
-/**
- * Module dependencies.
- */
-
-var query = require('query');
-
-/**
- * Element prototype.
- */
-
-var proto = Element.prototype;
-
-/**
- * Vendor function.
- */
-
-var vendor = proto.matchesSelector
-  || proto.webkitMatchesSelector
-  || proto.mozMatchesSelector
-  || proto.msMatchesSelector
-  || proto.oMatchesSelector;
-
-/**
- * Expose `match()`.
- */
-
-module.exports = match;
-
-/**
- * Match `el` to `selector`.
- *
- * @param {Element} el
- * @param {String} selector
- * @return {Boolean}
- * @api public
- */
-
-function match(el, selector) {
-  if (vendor) return vendor.call(el, selector);
-  var nodes = query.all(selector, el.parentNode);
-  for (var i = 0; i < nodes.length; ++i) {
-    if (nodes[i] == el) return true;
-  }
-  return false;
-}
-
-});
-require.register("component-delegate/index.js", function(exports, require, module){
-
-/**
- * Module dependencies.
- */
-
-var matches = require('matches-selector')
-  , event = require('event');
-
-/**
- * Delegate event `type` to `selector`
- * and invoke `fn(e)`. A callback function
- * is returned which may be passed to `.unbind()`.
- *
- * @param {Element} el
- * @param {String} selector
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
-
-exports.bind = function(el, selector, type, fn, capture){
-  return event.bind(el, type, function(e){
-    if (matches(e.target, selector)) fn(e);
-  }, capture);
-  return callback;
-};
-
-/**
- * Unbind event `type`'s callback `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @api public
- */
-
-exports.unbind = function(el, type, fn, capture){
-  event.unbind(el, type, fn, capture);
-};
-
-});
-require.register("component-events/index.js", function(exports, require, module){
-
-/**
- * Module dependencies.
- */
-
-var events = require('event');
-var delegate = require('delegate');
-
-/**
- * Expose `Events`.
- */
-
-module.exports = Events;
-
-/**
- * Initialize an `Events` with the given
- * `el` object which events will be bound to,
- * and the `obj` which will receive method calls.
- *
- * @param {Object} el
- * @param {Object} obj
- * @api public
- */
-
-function Events(el, obj) {
-  if (!(this instanceof Events)) return new Events(el, obj);
-  if (!el) throw new Error('element required');
-  if (!obj) throw new Error('object required');
-  this.el = el;
-  this.obj = obj;
-  this._events = {};
-}
-
-/**
- * Subscription helper.
- */
-
-Events.prototype.sub = function(event, method, cb){
-  this._events[event] = this._events[event] || {};
-  this._events[event][method] = cb;
-};
-
-/**
- * Bind to `event` with optional `method` name.
- * When `method` is undefined it becomes `event`
- * with the "on" prefix.
- *
- * Examples:
- *
- *  Direct event handling:
- *
- *    events.bind('click') // implies "onclick"
- *    events.bind('click', 'remove')
- *    events.bind('click', 'sort', 'asc')
- *
- *  Delegated event handling:
- *
- *    events.bind('click li > a')
- *    events.bind('click li > a', 'remove')
- *    events.bind('click a.sort-ascending', 'sort', 'asc')
- *    events.bind('click a.sort-descending', 'sort', 'desc')
- *
- * @param {String} event
- * @param {String|function} [method]
- * @return {Function} callback
- * @api public
- */
-
-Events.prototype.bind = function(event, method){
-  var e = parse(event);
-  var el = this.el;
-  var obj = this.obj;
-  var name = e.name;
-  var method = method || 'on' + name;
-  var args = [].slice.call(arguments, 2);
-
-  // callback
-  function cb(){
-    var a = [].slice.call(arguments).concat(args);
-    obj[method].apply(obj, a);
-  }
-
-  // bind
-  if (e.selector) {
-    cb = delegate.bind(el, e.selector, name, cb);
-  } else {
-    events.bind(el, name, cb);
-  }
-
-  // subscription for unbinding
-  this.sub(name, method, cb);
-
-  return cb;
-};
-
-/**
- * Unbind a single binding, all bindings for `event`,
- * or all bindings within the manager.
- *
- * Examples:
- *
- *  Unbind direct handlers:
- *
- *     events.unbind('click', 'remove')
- *     events.unbind('click')
- *     events.unbind()
- *
- * Unbind delegate handlers:
- *
- *     events.unbind('click', 'remove')
- *     events.unbind('click')
- *     events.unbind()
- *
- * @param {String|Function} [event]
- * @param {String|Function} [method]
- * @api public
- */
-
-Events.prototype.unbind = function(event, method){
-  if (0 == arguments.length) return this.unbindAll();
-  if (1 == arguments.length) return this.unbindAllOf(event);
-
-  // no bindings for this event
-  var bindings = this._events[event];
-  if (!bindings) return;
-
-  // no bindings for this method
-  var cb = bindings[method];
-  if (!cb) return;
-
-  events.unbind(this.el, event, cb);
-};
-
-/**
- * Unbind all events.
- *
- * @api private
- */
-
-Events.prototype.unbindAll = function(){
-  for (var event in this._events) {
-    this.unbindAllOf(event);
-  }
-};
-
-/**
- * Unbind all events for `event`.
- *
- * @param {String} event
- * @api private
- */
-
-Events.prototype.unbindAllOf = function(event){
-  var bindings = this._events[event];
-  if (!bindings) return;
-
-  for (var method in bindings) {
-    this.unbind(event, method);
-  }
-};
-
-/**
- * Parse `event`.
- *
- * @param {String} event
- * @return {Object}
- * @api private
- */
-
-function parse(event) {
-  var parts = event.split(/ +/);
-  return {
-    name: parts.shift(),
-    selector: parts.join(' ')
-  }
-}
-
 });
 require.register("component-to-function/index.js", function(exports, require, module){
 
@@ -2413,116 +2072,6 @@ module.exports = function(){
 };
 
 });
-require.register("anthonyshort-map/index.js", function(exports, require, module){
-var SimpleMap = function(values){
-  this._keys = [];
-  this._values = [];
-  if(values) {
-    values.forEach(function(data){
-      this.set.apply(this, data);
-    });
-  }
-};
-
-SimpleMap.prototype.set = function(key, value) {
-  var index = this._keys.indexOf(key);
-  if (index === -1) {
-    index = this._keys.length;
-  }
-  this._values[index] = value;
-  this._keys[index] = key;
-};
-
-SimpleMap.prototype.get = function(key) {
-  if ( this.has(key) === false ) return undefined;
-  var index = this._keys.indexOf(key);
-  return this._values[index];
-};
-
-SimpleMap.prototype.size = function() {
-  return this._keys.length;
-};
-
-SimpleMap.prototype.remove = function(key) {
-  if ( this.has(key) === false ) return true;
-  var index = this._keys.indexOf(key);
-  this._keys.splice(index, 1);
-  this._values.splice(index, 1);
-  return true;
-};
-
-SimpleMap.prototype.values = function() {
-  return this._values;
-};
-
-SimpleMap.prototype.keys = function() {
-  return this._keys;
-};
-
-SimpleMap.prototype.forEach = function(callback, context) {
-  var i;
-  for(i = 0; i < this._keys.length; i++) {
-    callback.call(context || this._values[i], this._values[i], this._keys[i]);
-  }
-};
-
-SimpleMap.prototype.has = function(key) {
-  return this._keys.indexOf(key) > -1;
-};
-
-module.exports = SimpleMap;
-});
-require.register("anthonyshort-emitter-manager/index.js", function(exports, require, module){
-var HashMap = require('map');
-
-function mixin(obj) {
-  obj._eventManager = new Manager();
-  obj.listenTo = function(emitter, type, fn){
-    this._eventManager.on(emitter, type, fn, this);
-  };
-  obj.stopListening = function(emitter, type, fn){
-    this._eventManager.off(emitter, type, fn);
-  };
-}
-
-function Manager(obj) {
-  if(obj) return mixin(obj);
-  this._events = new HashMap();
-}
-
-Manager.prototype.on = function(obj, type, fn, context) {
-  var data = this._events.get(obj) || {};
-  var fns = data[type] || (data[type] = []);
-  var bound = fn.bind(context);
-  obj.on(type, bound);
-  fns.push({ original: fn, bound: bound });
-  this._events.set(obj, data);
-};
-
-Manager.prototype.off = function(obj, name, fn) {
-  var events = this._events;
-  if(typeof name === 'function') {
-    fn = name;
-  }
-  if(typeof obj === 'string') {
-    name = obj;
-    obj = null;
-  }
-  var objs = obj ? [obj] : this._events.keys();
-  objs.forEach(function(emitter){
-    var data = events.get(emitter);
-    for (var eventName in data) {
-      data[eventName] = data[eventName].filter(function(callback){
-        if(fn && callback.original !== fn) return true;
-        emitter.off(name || eventName, callback.bound);
-        return false;
-      });
-    }
-  });
-};
-
-module.exports = Manager;
-});
 require.register("component-autoscale-canvas/index.js", function(exports, require, module){
 
 /**
@@ -2545,6 +2094,251 @@ module.exports = function(canvas){
   }
   return canvas;
 };
+});
+require.register("component-pinch/index.js", function(exports, require, module){
+/*
+ * Module dependencies
+ */
+
+var events = require('events');
+var E = require('./e');
+
+/**
+ * Export `Pinch`
+ */
+
+module.exports = Pinch;
+
+/**
+ * Initialize `Pinch`
+ *
+ * @param {Element} el
+ * @param {Function} fn
+ * @return {Pinch}
+ * @api public
+ */
+
+function Pinch(el, fn) {
+  if (!(this instanceof Pinch)) return new Pinch(el, fn);
+  this.el = el;
+  this.parent = el.parentNode;
+  this.fn = fn || function(){};
+  this.midpoint = null;
+  this.scale = 1;
+  this.lastScale = 1;
+  this.pinching = false;
+  this.events = events(el, this);
+  this.events.bind('touchstart');
+  this.events.bind('touchmove');
+  this.events.bind('touchend');
+  this.fingers = {};
+}
+
+/**
+ * Touch start
+ *
+ * @param {Event} e
+ * @return {Pinch}
+ * @api private
+ */
+
+Pinch.prototype.ontouchstart = function(e) {
+  var touches = e.touches;
+  if (!touches || 2 != touches.length) return this;
+  e.preventDefault();
+
+  var coords = [];
+  for(var i = 0, finger; finger = touches[i]; i++) {
+    coords.push(finger.pageX, finger.pageY);
+  }
+
+  this.pinching = true;
+  this.distance = distance(coords);
+  this.midpoint = midpoint(coords);
+  return this;
+};
+
+/**
+ * Touch move
+ *
+ * @param {Event} e
+ * @return {Pinch}
+ * @api private
+ */
+
+Pinch.prototype.ontouchmove = function(e) {
+  var touches = e.touches;
+  if (!touches || touches.length != 2 || !this.pinching) return this;
+
+  var coords = [];
+  for(var i = 0, finger; finger = touches[i]; i++) {
+    coords.push(finger.pageX, finger.pageY);
+  }
+
+  var changed = e.changedTouches;
+
+  var dist = distance(coords);
+  var mid = midpoint(coords);
+
+  // make event properties mutable
+  e = E(e);
+
+  // iphone does scale natively, just use that
+  e.scale = dist / this.distance * this.scale;
+  e.x = mid.x;
+  e.y = mid.y;
+
+  this.fn(e);
+
+  this.lastScale = e.scale;
+  return this;
+};
+
+/**
+ * Touchend
+ *
+ * @param {Event} e
+ * @return {Pinch}
+ * @api private
+ */
+
+Pinch.prototype.ontouchend = function(e) {
+  var touches = e.touches;
+  if (!touches || touches.length == 2 || !this.pinching) return this;
+  this.scale = this.lastScale;
+  this.pinching = false;
+  return this;
+};
+
+/**
+ * Unbind
+ *
+ * @return {Pinch}
+ * @api public
+ */
+
+Pinch.prototype.unbind = function() {
+  this.events.unbind();
+  return this;
+};
+
+
+/**
+ * Get the distance between two points
+ *
+ * @param {Array} arr
+ * @return {Number}
+ * @api private
+ */
+
+function distance(arr) {
+  var x = Math.pow(arr[0] - arr[2], 2);
+  var y = Math.pow(arr[1] - arr[3], 2);
+  return Math.sqrt(x + y);
+}
+
+/**
+ * Get the midpoint
+ *
+ * @param {Array} arr
+ * @return {Object} coords
+ * @api private
+ */
+
+function midpoint(arr) {
+  var coords = {};
+  coords.x = (arr[0] + arr[2]) / 2;
+  coords.y = (arr[1] + arr[3]) / 2;
+  return coords;
+}
+
+});
+require.register("component-pinch/e.js", function(exports, require, module){
+/**
+ * Expose `E`
+ */
+
+module.exports = function(e) {
+  // any property it doesn't find on the object
+  // itself, look up prototype for original `e`
+  E.prototype = e;
+  return new E();
+};
+
+/**
+ * Initialize `E`
+ */
+
+function E() {}
+
+});
+require.register("stagas-within/index.js", function(exports, require, module){
+
+/**
+ * within
+ */
+
+module.exports = within
+
+/**
+ * Check if an event came from inside of a given element
+ *
+ * @param object the event object
+ * @param Element the element in question
+ * @param string the fallback property if relatedTarget is not defined
+ * @return boolean
+ */
+
+function within (evt, elem, fallback) {
+  var targ = evt.relatedTarget, ret;
+  if (targ == null) {
+    targ = evt[fallback] || null;
+  }
+  try {
+    while (targ && targ !== elem) {
+      targ = targ.parentNode;
+    }
+    ret = (targ === elem);
+  } catch(e) {
+    ret = false;
+  }
+  return ret;
+}
+
+});
+require.register("stagas-mouseleave/index.js", function(exports, require, module){
+
+/**
+ * mouseleave
+ */
+
+var within = require('within')
+
+module.exports = mouseleave
+
+var listeners = []
+var fns = []
+
+function mouseleave (el, fn) {
+  function listener (ev) {
+    var inside = within(ev, ev.target, 'toElement')
+    if (inside) return
+    if (fn) fn.call(this, ev)
+  }
+  listeners.push(listener)
+  fns.push(fn)
+  el.addEventListener('mouseout', listener)
+}
+
+mouseleave.bind = mouseleave
+
+mouseleave.unbind = function (el, fn) {
+  var idx = fns.indexOf(fn)
+  if (!~idx) return
+  fns.splice(idx, 1)
+  el.removeEventListener('mouseout', listeners.splice(idx, 1)[0])
+}
+
 });
 require.register("eugenicsarchivesca-mind-map/index.js", function(exports, require, module){
 module.exports = require('./lib/app');
@@ -2620,6 +2414,8 @@ MindMap.prototype.bind = function(){
   this.listenTo(this.view, 'mouseMove', this.onMouseMove);
   this.listenTo(this.view, 'mouseUp', this.onMouseUp);
   this.listenTo(this.view, 'mouseWheel', this.onZoom);
+  this.listenTo(this.view, 'pinch', this.onPinch);
+  this.listenTo(this.view, 'mouseleave', this.onMouseLeave);
 };
 
 /**
@@ -2641,6 +2437,22 @@ MindMap.prototype.height = function(height){
   return this;
 };
 
+MindMap.prototype.onMouseLeave = function(){
+  if (this.activeNode){
+    this.activeNode.isActive = false;
+    this.activeNode.xFixed = false;
+    this.activeNode.yFixed = false;
+    delete this.activeNode;
+  }
+  if (this.hoverNode){
+    this.hoverNode.mouseOver = false;
+    this.hoverNode.mouseOut = true;
+    this.hoverNode.triggeredHover = false;
+    this.emit('hoverOutNode', this.hoverNode);
+    delete this.hoverNode;
+  }
+}
+
 /**
  * Select nodes or begin dragging.
  * @param  {mousePosition} x
@@ -2654,8 +2466,10 @@ MindMap.prototype.onMouseDown = function(x, y){
   var clickedNode = this.nodes.getOverlappingNode(x, y);
 
   if (clickedNode){
-    this.selectedNode = clickedNode;
+    this.activeNode = clickedNode;
     this.clickFlag = true;
+    clickedNode.isActive = true;
+    this.emit('nodeActive', this.activeNode);
     if (!this.animated) this.animate();
     this.view.bindDragging();
     this.dragging = true;
@@ -2674,10 +2488,9 @@ MindMap.prototype.onMouseMove = function(x, y){
     x = this.xToCanvas(this.xMousePosition(x));
     y = this.yToCanvas(this.yMousePosition(y));
 
-
-    if (this.selectedNode && this.dragging){
+    if (this.activeNode && this.dragging){
       this.clickFlag = false;
-      var node = this.selectedNode;
+      var node = this.activeNode;
       node.xFixed = true;
       node.yFixed = true;
       node.x = x;
@@ -2707,11 +2520,15 @@ MindMap.prototype.onMouseMove = function(x, y){
   }
 };
 
-MindMap.prototype.onZoom = function(x, y, delta){
+MindMap.prototype.onZoom = function(x, y, delta, pinch){
   this.animate();
-
-  var zoom = delta / 10;
-  if (delta < 0) zoom = zoom / (1 - zoom);
+  var zoom;
+  if (pinch) {
+    zoom = delta;
+  } else {
+    zoom = delta / 10;
+    if (delta < 0) zoom = zoom / (1 - zoom);
+  }
 
   var oldScale = this.scale;
   var newScale = oldScale * (1 + zoom);
@@ -2730,19 +2547,42 @@ MindMap.prototype.onZoom = function(x, y, delta){
   this.setTranslation(tx, ty);
 };
 
+// xxx redundancy with onZoom event handler
+MindMap.prototype.onPinch = function(x, y, scale){
+  this.animate();
+  var scaleFrac = scale / this.scale;
+  this.scale = scale;
+
+  x = this.xMousePosition(x);
+  y = this.yMousePosition(y);
+
+  var tx = (1 - scaleFrac) * x + this.translation.x * scaleFrac;
+  var ty = (1 - scaleFrac) * y + this.translation.y * scaleFrac;
+  this.setTranslation(tx, ty);
+};
+
 /**
  * Select a node or stop dragging.
  */
 
 MindMap.prototype.onMouseUp = function(){
+  if (this.activeNode) {
+    this.activeNode.isActive = false;
+  }
   if (this.clickFlag){
-    this.selectedNode.isSelected = true;
-    this.emit('nodeSelected', this.selectedNode);
+    if (this.selectedNode != this.activeNode){
+      this.activeNode.select();
+      this.emit('nodeSelected', this.activeNode);
+      this.selectedNode = this.activeNode;
+    }
     this.dragging = false;
+    this.clickFlag = false;
   } else {
-    this.selectedNode.xFixed = false;
-    this.selectedNode.yFixed = false;
-    delete this.selectedNode;
+    if (this.activeNode){
+      this.activeNode.xFixed = false;
+      this.activeNode.yFixed = false;
+      delete this.activeNode;
+    }
   }
 };
 
@@ -2782,11 +2622,12 @@ MindMap.prototype.animate = function(){
     // and if they aren't (over a certain velocity) then stop
     // running our animation.
     var determineIfMoving = function(){
-      if (!_this.nodes.areMoving()){
+      if (!_this.nodes.areMoving() && !_this.nodes.areLoading()){
         _this.isMoving = false;
         clearInterval(timeoutId);
       }
     };
+
     var timeoutId = setInterval(determineIfMoving, 1000);
 
 
@@ -2829,12 +2670,13 @@ MindMap.prototype.determineString = function(ctx){
  * @param  {Boolean} silent
  */
 
-MindMap.prototype.unselectNode = function(nodeId, silent){
+MindMap.prototype.deselectNode = function(nodeId, silent){
   var node = this.nodes.get(nodeId);
   if (node){
-    node.isSelected = false;
+    this.animate();
+    node.unselect();
     delete this.selectedNode;
-    if (!silent) this.emit('nodeUnselected', node);
+    if (!silent) this.emit('nodeDeselected', node);
   }
 };
 
@@ -2847,9 +2689,11 @@ MindMap.prototype.unselectNode = function(nodeId, silent){
  */
 
 MindMap.prototype.selectNode = function(nodeId, silent){
+  console.log('silent?', silent);
   var node = this.nodes.get(nodeId);
   if (node){
-    node.isSelected = true;
+    this.animate();
+    node.select();
     this.selectedNode = node;
     if (!silent) this.emit('nodeSelected', this.selectedNode);
   }
@@ -3119,6 +2963,17 @@ NodeCollection.prototype.areMoving = function(){
   return moving;
 };
 
+NodeCollection.prototype.areLoading = function(){
+  var loading = false;
+  this.forEach(function(node){
+    if (node.loading) {
+      loaded = true;
+      return;
+    }
+  });
+  return loaded;
+};
+
 
 ////////////////
 // NODE MODEL //
@@ -3140,11 +2995,12 @@ var NodeModel = function(attr, context){
     });
   } else {
     this.type = 'text';
+    this.loading = false;
   }
 
-  this.selected = false;
+  this.isSelected = false;
   this.links = [];
-  this.opacity = 0;
+  this.opacity = 0.001;
   this.radius = constants.RADIUS;
   this.mass = 50; // kg
   this.fx = 0.0; // external force x
@@ -3164,8 +3020,8 @@ var NodeModel = function(attr, context){
   this.view = new NodeView(this);
   this.fadeIn = true;
   this.fadeOut = false;
-  this.createFadeInTween();
   this.scale = 1;
+  this.createFadeInTween();
 };
 
 NodeModel.prototype.setDimensions = function(w, h){
@@ -3173,12 +3029,34 @@ NodeModel.prototype.setDimensions = function(w, h){
   this.height = h;
 };
 
-NodeModel.prototype.createFadeInTween = function(){
-  var _this = this;
+NodeModel.prototype.select = function(){
+  this.isSelected = true;
+  if (this.fadeIn){
+    this.createFadeInTween({
+      scale: this.scale,
+      opacity: this.opacity
+    }, {
+      scale: 1.3,
+      opacity: 1
+    });
+  } else {
+    this.scale = 1.3;
+  }
+};
 
-  this.fadeInTween = new Tween({ scale: 0.3, opacity: 0.001 })
+NodeModel.prototype.unselect = function(){
+  this.isSelected = false;
+  this.createScaleTween(1.3, 1, 100, 'hoverOut');
+};
+
+NodeModel.prototype.createFadeInTween = function(source, target){
+  var _this = this;
+  source = source || { scale: 0.3, opacity: 0.001 };
+  target = target || { scale: 1.0, opacity: 1.0 };
+
+  this.fadeInTween = new Tween(source)
     .ease('in-out-cube')
-    .to({  scale: 1.0, opacity: 1.0 })
+    .to(target)
     .duration(600);
 
   this.fadeInTween.update(function(o){
@@ -3188,7 +3066,7 @@ NodeModel.prototype.createFadeInTween = function(){
 
   this.fadeInTween.on('end', function(){
     _this.fadeIn = false;
-    _this.scale = 1;
+    _this.scale = target.scale;
   });
 };
 
@@ -3228,7 +3106,6 @@ NodeModel.prototype.createHoverTween = function(hoverIn){
       _this.mouseOut = false;
       _this.triggeredHoverOut = false;
       _this.scale = 1;
-      console.log('mouse out end!');
     }
   });
 };
@@ -3344,6 +3221,10 @@ NodeModel.prototype.distanceFrom = function(x, y){
 };
 
 NodeModel.prototype.isOverlappingWith = function(x, y){
+  if (this.type === 'image'){
+    return ((Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2)) < Math.pow(42.5, 2));
+  }
+
   var left = this.x - this.width / 2
     , top = this.y - this.height / 2;
 
@@ -3444,8 +3325,6 @@ LinkCollection.prototype.addLink = function(item){
   var nodes = this.nodes
     , from = nodes.get(item.from._id)
     , to = nodes.get(item.to._id);
-
-  console.log(item);
 
   if (from && to){
       var linkModel = new LinkModel(item, from, to, this);
@@ -3577,7 +3456,9 @@ var events = require('events')
   , bind = require('bind')
   , classes = require('classes')
   , offset = require('offset')
-  , autoscale = require('autoscale-canvas');
+  , autoscale = require('autoscale-canvas')
+  , pinch = require('pinch')
+  , mouseleave = require('mouseleave');
 
 // Imports
 var constants = require('./constants');
@@ -3607,13 +3488,14 @@ var CanvasView = exports.CanvasView = function(wrapper, context){
   if (!this.canvas.getContext){
     var noCanvas = document.createElement('div');
     noCanvas.style.color = 'red';
-    noCanvas.innerHTML = 'Your browser does not support Canvas.';
+    noCanvas.innerHTML = 'Your browser does not support this technology. Please upgrade.';
     wrapper.appendChild(noCanvas);
   }
 
   this.scale = window.devicePixelRatio || 1;
   this.originX = 0;
   this.originY = 0;
+
 
   this.events = events(canvas, this);
   this.events.bind('mousemove');
@@ -3625,6 +3507,15 @@ var CanvasView = exports.CanvasView = function(wrapper, context){
   window.onscroll = function(e){
     self.context.determineOffset();
   }
+
+  pinch(canvas, function(e){
+    self.emit('pinch', e.x, e.y, e.scale);
+  });
+
+  mouseleave(canvas, function(e){
+    self.emit('mouseleave');
+  });
+
 
   this.listenTo(this.context, 'hoverNode', this.onHover);
   this.listenTo(this.context, 'hoverOutNode', this.onHover);
@@ -3715,7 +3606,6 @@ CanvasView.prototype.onmousedown = function(e){
   var touches = e.changedTouches;
   if (!touches) return this.emit('mouseDown', e.clientX, e.clientY);
   touches = touches[0];
-  console.log(touches.pageX, touches.pageY);
   this.emit('mouseDown', touches.pageX, touches.pageY);
 };
 
@@ -3801,15 +3691,20 @@ exports.NodeView = NodeView;
 
 NodeView.prototype.determineString = function(){
   var canvas = document.createElement('canvas')
-    , tempCtx = canvas.getContext('2d');
+    , tempCtx = canvas.getContext('2d')
+    , maxWidth = 275;
 
   tempCtx.font = 'bold 13px Arial';
-  var width = tempCtx.measureText(this.model.attr.title).width;
+  var width = tempCtx.measureText(this.model.attr.title).width + 25;
   // if our width is over our maxWidth, then bring in the string ellipsis.
 
-  this.model.width = width + 25;
-  // this.string = this.model.attr.title;
-  // this.string = stringEllipsis(tempCtx, this.model.attr.title, this.model.width - 15);
+  if (width > maxWidth) {
+    this.model.width = maxWidth;
+    this.string = stringEllipsis(tempCtx, this.model.attr.title, maxWidth - 15);
+  } else {
+    this.model.width = width;
+    this.string = this.model.attr.title;
+  }
 };
 
 /**
@@ -3827,27 +3722,40 @@ NodeView.prototype.render = function(ctx){
     ctx.save();
     ctx.translate(model.x, model.y);
     ctx.scale(model.scale, model.scale);
-    if (model.image) {
-      ctx.save();
 
-      //draw a circle
-      ctx.beginPath();
-      ctx.arc(0, 0, 40, 0, Math.PI*2, true);
-      ctx.fill();
-      ctx.closePath();
-      ctx.clip();
+    ctx.save();
 
-      // Draw our image
+    //draw a circle
+    ctx.beginPath();
+    ctx.arc(0, 0, 40, 0, Math.PI*2, true);
+    ctx.lineWidth = 5;
+    if (model.isSelected){
+      ctx.strokeStyle = '#00a10f';
+    }
+    ctx.stroke();
+    if (model.loading) {
+      ctx.fillStyle = '#ddd';
+    }
+    ctx.fill();
+    ctx.closePath();
+    ctx.clip();
+
+    if (model.loading){
+      this.loadingAnimation(ctx);
+    }
+
+    // Draw our image
+    if (!model.loading){
       ctx.drawImage(model.image, -42.5, -42.5, 85, 85);
-      // ctx.fillStyle = 'black';
-      // roundedRect(ctx, -42.5, 100, 85, 30, 5);
-      // ctx.fill();
-      // ctx.strokeStyle = 'black';
-      // ctx.stroke();
+    }
+    ctx.restore();
 
-      ctx.restore();
-
-
+    // Show the title of the image on hover.
+    // Should we just always show it if using touch?
+    if (model.mouseOver && model.attr.title){
+      ctx.fillStyle = 'black';
+      ctx.font = 'bold 13px Arial';
+      ctx.fillText(model.attr.title, 0, 55);
 
     }
     ctx.restore();
@@ -3858,6 +3766,7 @@ NodeView.prototype.render = function(ctx){
   ctx.lineWidth = 3;
   var opacity = model.opacity || 0;
   if (model.isSelected) ctx.fillStyle = '#777';
+  else if (model.isActive) ctx.fillStyle = '#ddd';
   else ctx.fillStyle = 'rgba(255, 255, 255,'+ opacity +')';
   ctx.strokeStyle = 'rgba(20, 20, 20,'+ opacity +')';
 
@@ -3881,13 +3790,52 @@ NodeView.prototype.render = function(ctx){
     ctx.fillStyle = model.isSelected
       ? 'rgba(255,255,255,'+model.opacity+')'
       : 'rgba(0,0,0,'+model.opacity+')';
-    ctx.fillText(model.attr.title, 0, 0);
+    ctx.fillText(this.string, 0, 0);
   }
 
   ctx.restore();
 
 }
 };
+
+// https://github.com/component/spinner/blob/master/index.js
+NodeView.prototype.loadingAnimation = function(ctx){
+  this.speed = this.speed || 60;
+  this.size = this.size || 30;
+  this.percent = this.percent || 0;
+  this.percent = (this.percent + this.speed / 36) % 100;
+  ctx.save();
+  ctx.translate(-15, -15);
+  var percent = this.percent;
+  var ratio = window.devicePixelRatio || 1;
+  var size = this.size / ratio;
+  var half = size / 2;
+  var x = half;
+  var y = half;
+  var rad = half - 1;
+  var angle = Math.PI * 2 * (percent / 100);
+  var grad = ctx.createLinearGradient(
+    half + Math.sin(Math.PI * 1.5 - angle) * half,
+    half + Math.cos(Math.PI * 1.5 - angle) * half,
+    half + Math.sin(Math.PI * 0.5 - angle) * half,
+    half + Math.cos(Math.PI * 0.5 - angle) * half
+  );
+
+  grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  grad.addColorStop(1, 'rgba(0, 0, 0, 1)');
+
+  ctx.strokeStyle = grad;
+  ctx.beginPath();
+  ctx.arc(x, y, rad, angle - Math.PI, angle, false);
+  ctx.stroke();
+
+  // inner circle
+  ctx.strokeStyle = 'rgba(0, 0, 0, .4)';
+  ctx.beginPath();
+  ctx.arc(x, y, rad - 1, 0, Math.PI * 2, true);
+  ctx.stroke();
+  ctx.restore();
+}
 
 /**
  * Draw an Image to the canvas
@@ -14632,18 +14580,3684 @@ require.register("component-underscore/index.js", function(exports, require, mod
 }).call(this);
 
 });
+require.register("bmcmahen-backbone/index.js", function(exports, require, module){
+module.exports = require('./backbone');
+
+});
+require.register("bmcmahen-backbone/backbone.js", function(exports, require, module){
+//     Backbone.js 1.0.0
+
+//     (c) 2010-2011 Jeremy Ashkenas, DocumentCloud Inc.
+//     (c) 2011-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     Backbone may be freely distributed under the MIT license.
+//     For all details and documentation:
+//     http://backbonejs.org
+
+(function(){
+
+  // Initial Setup
+  // -------------
+
+  // Save a reference to the global object (`window` in the browser, `exports`
+  // on the server).
+  var root = this;
+
+  var _ = require("underscore");
+  // Save the previous value of the `Backbone` variable, so that it can be
+  // restored later on, if `noConflict` is used.
+  var previousBackbone = root.Backbone;
+
+  // Create local references to array methods we'll want to use later.
+  var array = [];
+  var push = array.push;
+  var slice = array.slice;
+  var splice = array.splice;
+
+  // The top-level namespace. All public Backbone classes and modules will
+  // be attached to this. Exported for both the browser and the server.
+  var Backbone;
+  if (typeof exports !== 'undefined') {
+    Backbone = exports;
+  } else {
+    Backbone = root.Backbone = {};
+  }
+
+  // Current version of the library. Keep in sync with `package.json`.
+  Backbone.VERSION = '1.0.0';
+
+  // Require Underscore, if we're on the server, and it's not already present.
+  var _ = root._;
+  if (!_ && (typeof require !== 'undefined')) _ = require('underscore');
+
+  // For Backbone's purposes, jQuery, Zepto, Ender, or My Library (kidding) owns
+  // the `$` variable.
+  Backbone.$ = require('jquery');
+
+  // Runs Backbone.js in *noConflict* mode, returning the `Backbone` variable
+  // to its previous owner. Returns a reference to this Backbone object.
+  Backbone.noConflict = function() {
+    root.Backbone = previousBackbone;
+    return this;
+  };
+
+  // Turn on `emulateHTTP` to support legacy HTTP servers. Setting this option
+  // will fake `"PATCH"`, `"PUT"` and `"DELETE"` requests via the `_method` parameter and
+  // set a `X-Http-Method-Override` header.
+  Backbone.emulateHTTP = false;
+
+  // Turn on `emulateJSON` to support legacy servers that can't deal with direct
+  // `application/json` requests ... will encode the body as
+  // `application/x-www-form-urlencoded` instead and will send the model in a
+  // form param named `model`.
+  Backbone.emulateJSON = false;
+
+  // Backbone.Events
+  // ---------------
+
+  // A module that can be mixed in to *any object* in order to provide it with
+  // custom events. You may bind with `on` or remove with `off` callback
+  // functions to an event; `trigger`-ing an event fires all callbacks in
+  // succession.
+  //
+  //     var object = {};
+  //     _.extend(object, Backbone.Events);
+  //     object.on('expand', function(){ alert('expanded'); });
+  //     object.trigger('expand');
+  //
+  var Events = Backbone.Events = {
+
+    // Bind an event to a `callback` function. Passing `"all"` will bind
+    // the callback to all events fired.
+    on: function(name, callback, context) {
+      if (!eventsApi(this, 'on', name, [callback, context]) || !callback) return this;
+      this._events || (this._events = {});
+      var events = this._events[name] || (this._events[name] = []);
+      events.push({callback: callback, context: context, ctx: context || this});
+      return this;
+    },
+
+    // Bind an event to only be triggered a single time. After the first time
+    // the callback is invoked, it will be removed.
+    once: function(name, callback, context) {
+      if (!eventsApi(this, 'once', name, [callback, context]) || !callback) return this;
+      var self = this;
+      var once = _.once(function() {
+        self.off(name, once);
+        callback.apply(this, arguments);
+      });
+      once._callback = callback;
+      return this.on(name, once, context);
+    },
+
+    // Remove one or many callbacks. If `context` is null, removes all
+    // callbacks with that function. If `callback` is null, removes all
+    // callbacks for the event. If `name` is null, removes all bound
+    // callbacks for all events.
+    off: function(name, callback, context) {
+      var retain, ev, events, names, i, l, j, k;
+      if (!this._events || !eventsApi(this, 'off', name, [callback, context])) return this;
+      if (!name && !callback && !context) {
+        this._events = {};
+        return this;
+      }
+
+      names = name ? [name] : _.keys(this._events);
+      for (i = 0, l = names.length; i < l; i++) {
+        name = names[i];
+        if (events = this._events[name]) {
+          this._events[name] = retain = [];
+          if (callback || context) {
+            for (j = 0, k = events.length; j < k; j++) {
+              ev = events[j];
+              if ((callback && callback !== ev.callback && callback !== ev.callback._callback) ||
+                  (context && context !== ev.context)) {
+                retain.push(ev);
+              }
+            }
+          }
+          if (!retain.length) delete this._events[name];
+        }
+      }
+
+      return this;
+    },
+
+    // Trigger one or many events, firing all bound callbacks. Callbacks are
+    // passed the same arguments as `trigger` is, apart from the event name
+    // (unless you're listening on `"all"`, which will cause your callback to
+    // receive the true name of the event as the first argument).
+    trigger: function(name) {
+      if (!this._events) return this;
+      var args = slice.call(arguments, 1);
+      if (!eventsApi(this, 'trigger', name, args)) return this;
+      var events = this._events[name];
+      var allEvents = this._events.all;
+      if (events) triggerEvents(events, args);
+      if (allEvents) triggerEvents(allEvents, arguments);
+      return this;
+    },
+
+    // Tell this object to stop listening to either specific events ... or
+    // to every object it's currently listening to.
+    stopListening: function(obj, name, callback) {
+      var listeners = this._listeners;
+      if (!listeners) return this;
+      var deleteListener = !name && !callback;
+      if (typeof name === 'object') callback = this;
+      if (obj) (listeners = {})[obj._listenerId] = obj;
+      for (var id in listeners) {
+        listeners[id].off(name, callback, this);
+        if (deleteListener) delete this._listeners[id];
+      }
+      return this;
+    }
+
+  };
+
+  // Regular expression used to split event strings.
+  var eventSplitter = /\s+/;
+
+  // Implement fancy features of the Events API such as multiple event
+  // names `"change blur"` and jQuery-style event maps `{change: action}`
+  // in terms of the existing API.
+  var eventsApi = function(obj, action, name, rest) {
+    if (!name) return true;
+
+    // Handle event maps.
+    if (typeof name === 'object') {
+      for (var key in name) {
+        obj[action].apply(obj, [key, name[key]].concat(rest));
+      }
+      return false;
+    }
+
+    // Handle space separated event names.
+    if (eventSplitter.test(name)) {
+      var names = name.split(eventSplitter);
+      for (var i = 0, l = names.length; i < l; i++) {
+        obj[action].apply(obj, [names[i]].concat(rest));
+      }
+      return false;
+    }
+
+    return true;
+  };
+
+  // A difficult-to-believe, but optimized internal dispatch function for
+  // triggering events. Tries to keep the usual cases speedy (most internal
+  // Backbone events have 3 arguments).
+  var triggerEvents = function(events, args) {
+    var ev, i = -1, l = events.length, a1 = args[0], a2 = args[1], a3 = args[2];
+    switch (args.length) {
+      case 0: while (++i < l) (ev = events[i]).callback.call(ev.ctx); return;
+      case 1: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1); return;
+      case 2: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2); return;
+      case 3: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2, a3); return;
+      default: while (++i < l) (ev = events[i]).callback.apply(ev.ctx, args);
+    }
+  };
+
+  var listenMethods = {listenTo: 'on', listenToOnce: 'once'};
+
+  // Inversion-of-control versions of `on` and `once`. Tell *this* object to
+  // listen to an event in another object ... keeping track of what it's
+  // listening to.
+  _.each(listenMethods, function(implementation, method) {
+    Events[method] = function(obj, name, callback) {
+      var listeners = this._listeners || (this._listeners = {});
+      var id = obj._listenerId || (obj._listenerId = _.uniqueId('l'));
+      listeners[id] = obj;
+      if (typeof name === 'object') callback = this;
+      obj[implementation](name, callback, this);
+      return this;
+    };
+  });
+
+  // Aliases for backwards compatibility.
+  Events.bind   = Events.on;
+  Events.unbind = Events.off;
+
+  // Allow the `Backbone` object to serve as a global event bus, for folks who
+  // want global "pubsub" in a convenient place.
+  _.extend(Backbone, Events);
+
+  // Backbone.Model
+  // --------------
+
+  // Backbone **Models** are the basic data object in the framework --
+  // frequently representing a row in a table in a database on your server.
+  // A discrete chunk of data and a bunch of useful, related methods for
+  // performing computations and transformations on that data.
+
+  // Create a new model with the specified attributes. A client id (`cid`)
+  // is automatically generated and assigned for you.
+  var Model = Backbone.Model = function(attributes, options) {
+    var defaults;
+    var attrs = attributes || {};
+    options || (options = {});
+    this.cid = _.uniqueId('c');
+    this.attributes = {};
+    if (options.collection) this.collection = options.collection;
+    if (options.parse) attrs = this.parse(attrs, options) || {};
+    options._attrs || (options._attrs = attrs);
+    if (defaults = _.result(this, 'defaults')) {
+      attrs = _.defaults({}, attrs, defaults);
+    }
+    this.set(attrs, options);
+    this.changed = {};
+    this.initialize.apply(this, arguments);
+  };
+
+  // Attach all inheritable methods to the Model prototype.
+  _.extend(Model.prototype, Events, {
+
+    // A hash of attributes whose current and previous value differ.
+    changed: null,
+
+    // The value returned during the last failed validation.
+    validationError: null,
+
+    // The default name for the JSON `id` attribute is `"id"`. MongoDB and
+    // CouchDB users may want to set this to `"_id"`.
+    idAttribute: 'id',
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize: function(){},
+
+    // Return a copy of the model's `attributes` object.
+    toJSON: function(options) {
+      return _.clone(this.attributes);
+    },
+
+    // Proxy `Backbone.sync` by default -- but override this if you need
+    // custom syncing semantics for *this* particular model.
+    sync: function() {
+      return Backbone.sync.apply(this, arguments);
+    },
+
+    // Get the value of an attribute.
+    get: function(attr) {
+      return this.attributes[attr];
+    },
+
+    // Get the HTML-escaped value of an attribute.
+    escape: function(attr) {
+      return _.escape(this.get(attr));
+    },
+
+    // Returns `true` if the attribute contains a value that is not null
+    // or undefined.
+    has: function(attr) {
+      return this.get(attr) != null;
+    },
+
+    // Set a hash of model attributes on the object, firing `"change"`. This is
+    // the core primitive operation of a model, updating the data and notifying
+    // anyone who needs to know about the change in state. The heart of the beast.
+    set: function(key, val, options) {
+      var attr, attrs, unset, changes, silent, changing, prev, current;
+      if (key == null) return this;
+
+      // Handle both `"key", value` and `{key: value}` -style arguments.
+      if (typeof key === 'object') {
+        attrs = key;
+        options = val;
+      } else {
+        (attrs = {})[key] = val;
+      }
+
+      options || (options = {});
+
+      // Run validation.
+      if (!this._validate(attrs, options)) return false;
+
+      // Extract attributes and options.
+      unset           = options.unset;
+      silent          = options.silent;
+      changes         = [];
+      changing        = this._changing;
+      this._changing  = true;
+
+      if (!changing) {
+        this._previousAttributes = _.clone(this.attributes);
+        this.changed = {};
+      }
+      current = this.attributes, prev = this._previousAttributes;
+
+      // Check for changes of `id`.
+      if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
+
+      // For each `set` attribute, update or delete the current value.
+      for (attr in attrs) {
+        val = attrs[attr];
+        if (!_.isEqual(current[attr], val)) changes.push(attr);
+        if (!_.isEqual(prev[attr], val)) {
+          this.changed[attr] = val;
+        } else {
+          delete this.changed[attr];
+        }
+        unset ? delete current[attr] : current[attr] = val;
+      }
+
+      // Trigger all relevant attribute changes.
+      if (!silent) {
+        if (changes.length) this._pending = true;
+        for (var i = 0, l = changes.length; i < l; i++) {
+          this.trigger('change:' + changes[i], this, current[changes[i]], options);
+        }
+      }
+
+      // You might be wondering why there's a `while` loop here. Changes can
+      // be recursively nested within `"change"` events.
+      if (changing) return this;
+      if (!silent) {
+        while (this._pending) {
+          this._pending = false;
+          this.trigger('change', this, options);
+        }
+      }
+      this._pending = false;
+      this._changing = false;
+      return this;
+    },
+
+    // Remove an attribute from the model, firing `"change"`. `unset` is a noop
+    // if the attribute doesn't exist.
+    unset: function(attr, options) {
+      return this.set(attr, void 0, _.extend({}, options, {unset: true}));
+    },
+
+    // Clear all attributes on the model, firing `"change"`.
+    clear: function(options) {
+      var attrs = {};
+      for (var key in this.attributes) attrs[key] = void 0;
+      return this.set(attrs, _.extend({}, options, {unset: true}));
+    },
+
+    // Determine if the model has changed since the last `"change"` event.
+    // If you specify an attribute name, determine if that attribute has changed.
+    hasChanged: function(attr) {
+      if (attr == null) return !_.isEmpty(this.changed);
+      return _.has(this.changed, attr);
+    },
+
+    // Return an object containing all the attributes that have changed, or
+    // false if there are no changed attributes. Useful for determining what
+    // parts of a view need to be updated and/or what attributes need to be
+    // persisted to the server. Unset attributes will be set to undefined.
+    // You can also pass an attributes object to diff against the model,
+    // determining if there *would be* a change.
+    changedAttributes: function(diff) {
+      if (!diff) return this.hasChanged() ? _.clone(this.changed) : false;
+      var val, changed = false;
+      var old = this._changing ? this._previousAttributes : this.attributes;
+      for (var attr in diff) {
+        if (_.isEqual(old[attr], (val = diff[attr]))) continue;
+        (changed || (changed = {}))[attr] = val;
+      }
+      return changed;
+    },
+
+    // Get the previous value of an attribute, recorded at the time the last
+    // `"change"` event was fired.
+    previous: function(attr) {
+      if (attr == null || !this._previousAttributes) return null;
+      return this._previousAttributes[attr];
+    },
+
+    // Get all of the attributes of the model at the time of the previous
+    // `"change"` event.
+    previousAttributes: function() {
+      return _.clone(this._previousAttributes);
+    },
+
+    // Fetch the model from the server. If the server's representation of the
+    // model differs from its current attributes, they will be overridden,
+    // triggering a `"change"` event.
+    fetch: function(options) {
+      options = options ? _.clone(options) : {};
+      if (options.parse === void 0) options.parse = true;
+      var model = this;
+      var success = options.success;
+      options.success = function(resp) {
+        if (!model.set(model.parse(resp, options), options)) return false;
+        if (success) success(model, resp, options);
+        model.trigger('sync', model, resp, options);
+      };
+      wrapError(this, options);
+      return this.sync('read', this, options);
+    },
+
+    // Set a hash of model attributes, and sync the model to the server.
+    // If the server returns an attributes hash that differs, the model's
+    // state will be `set` again.
+    save: function(key, val, options) {
+      var attrs, method, xhr, attributes = this.attributes;
+
+      // Handle both `"key", value` and `{key: value}` -style arguments.
+      if (key == null || typeof key === 'object') {
+        attrs = key;
+        options = val;
+      } else {
+        (attrs = {})[key] = val;
+      }
+
+      options = _.extend({validate: true}, options);
+
+      // If we're not waiting and attributes exist, save acts as
+      // `set(attr).save(null, opts)` with validation. Otherwise, check if
+      // the model will be valid when the attributes, if any, are set.
+      if (attrs && !options.wait) {
+        if (!this.set(attrs, options)) return false;
+      } else {
+        if (!this._validate(attrs, options)) return false;
+      }
+
+      // Set temporary attributes if `{wait: true}`.
+      if (attrs && options.wait) {
+        this.attributes = _.extend({}, attributes, attrs);
+      }
+
+      // After a successful server-side save, the client is (optionally)
+      // updated with the server-side state.
+      if (options.parse === void 0) options.parse = true;
+      var model = this;
+      var success = options.success;
+      options.success = function(resp) {
+        // Ensure attributes are restored during synchronous saves.
+        model.attributes = attributes;
+        var serverAttrs = model.parse(resp, options);
+        if (options.wait) serverAttrs = _.extend(attrs || {}, serverAttrs);
+        if (_.isObject(serverAttrs) && !model.set(serverAttrs, options)) {
+          return false;
+        }
+        if (success) success(model, resp, options);
+        model.trigger('sync', model, resp, options);
+      };
+      wrapError(this, options);
+
+      method = this.isNew() ? 'create' : (options.patch ? 'patch' : 'update');
+      if (method === 'patch') options.attrs = attrs;
+      xhr = this.sync(method, this, options);
+
+      // Restore attributes.
+      if (attrs && options.wait) this.attributes = attributes;
+
+      return xhr;
+    },
+
+    // Destroy this model on the server if it was already persisted.
+    // Optimistically removes the model from its collection, if it has one.
+    // If `wait: true` is passed, waits for the server to respond before removal.
+    destroy: function(options) {
+      options = options ? _.clone(options) : {};
+      var model = this;
+      var success = options.success;
+
+      var destroy = function() {
+        model.trigger('destroy', model, model.collection, options);
+      };
+
+      options.success = function(resp) {
+        if (options.wait || model.isNew()) destroy();
+        if (success) success(model, resp, options);
+        if (!model.isNew()) model.trigger('sync', model, resp, options);
+      };
+
+      if (this.isNew()) {
+        options.success();
+        return false;
+      }
+      wrapError(this, options);
+
+      var xhr = this.sync('delete', this, options);
+      if (!options.wait) destroy();
+      return xhr;
+    },
+
+    // Default URL for the model's representation on the server -- if you're
+    // using Backbone's restful methods, override this to change the endpoint
+    // that will be called.
+    url: function() {
+      var base = _.result(this, 'urlRoot') || _.result(this.collection, 'url') || urlError();
+      if (this.isNew()) return base;
+      return base + (base.charAt(base.length - 1) === '/' ? '' : '/') + encodeURIComponent(this.id);
+    },
+
+    // **parse** converts a response into the hash of attributes to be `set` on
+    // the model. The default implementation is just to pass the response along.
+    parse: function(resp, options) {
+      return resp;
+    },
+
+    // Create a new model with identical attributes to this one.
+    clone: function() {
+      return new this.constructor(this.attributes);
+    },
+
+    // A model is new if it has never been saved to the server, and lacks an id.
+    isNew: function() {
+      return this.id == null;
+    },
+
+    // Check if the model is currently in a valid state.
+    isValid: function(options) {
+      return this._validate({}, _.extend(options || {}, { validate: true }));
+    },
+
+    // Run validation against the next complete set of model attributes,
+    // returning `true` if all is well. Otherwise, fire an `"invalid"` event.
+    _validate: function(attrs, options) {
+      if (!options.validate || !this.validate) return true;
+      attrs = _.extend({}, this.attributes, attrs);
+      var error = this.validationError = this.validate(attrs, options) || null;
+      if (!error) return true;
+      this.trigger('invalid', this, error, _.extend(options || {}, {validationError: error}));
+      return false;
+    }
+
+  });
+
+  // Underscore methods that we want to implement on the Model.
+  var modelMethods = ['keys', 'values', 'pairs', 'invert', 'pick', 'omit'];
+
+  // Mix in each Underscore method as a proxy to `Model#attributes`.
+  _.each(modelMethods, function(method) {
+    Model.prototype[method] = function() {
+      var args = slice.call(arguments);
+      args.unshift(this.attributes);
+      return _[method].apply(_, args);
+    };
+  });
+
+  // Backbone.Collection
+  // -------------------
+
+  // If models tend to represent a single row of data, a Backbone Collection is
+  // more analagous to a table full of data ... or a small slice or page of that
+  // table, or a collection of rows that belong together for a particular reason
+  // -- all of the messages in this particular folder, all of the documents
+  // belonging to this particular author, and so on. Collections maintain
+  // indexes of their models, both in order, and for lookup by `id`.
+
+  // Create a new **Collection**, perhaps to contain a specific type of `model`.
+  // If a `comparator` is specified, the Collection will maintain
+  // its models in sort order, as they're added and removed.
+  var Collection = Backbone.Collection = function(models, options) {
+    options || (options = {});
+    if (options.model) this.model = options.model;
+    if (options.comparator !== void 0) this.comparator = options.comparator;
+    this._reset();
+    this.initialize.apply(this, arguments);
+    if (models) this.reset(models, _.extend({silent: true}, options));
+  };
+
+  // Default options for `Collection#set`.
+  var setOptions = {add: true, remove: true, merge: true};
+  var addOptions = {add: true, remove: false};
+
+  // Define the Collection's inheritable methods.
+  _.extend(Collection.prototype, Events, {
+
+    // The default model for a collection is just a **Backbone.Model**.
+    // This should be overridden in most cases.
+    model: Model,
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize: function(){},
+
+    // The JSON representation of a Collection is an array of the
+    // models' attributes.
+    toJSON: function(options) {
+      return this.map(function(model){ return model.toJSON(options); });
+    },
+
+    // Proxy `Backbone.sync` by default.
+    sync: function() {
+      return Backbone.sync.apply(this, arguments);
+    },
+
+    // Add a model, or list of models to the set.
+    add: function(models, options) {
+      return this.set(models, _.extend({merge: false}, options, addOptions));
+    },
+
+    // Remove a model, or a list of models from the set.
+    remove: function(models, options) {
+      models = _.isArray(models) ? models.slice() : [models];
+      options || (options = {});
+      var i, l, index, model;
+      for (i = 0, l = models.length; i < l; i++) {
+        model = this.get(models[i]);
+        if (!model) continue;
+        delete this._byId[model.id];
+        delete this._byId[model.cid];
+        index = this.indexOf(model);
+        this.models.splice(index, 1);
+        this.length--;
+        if (!options.silent) {
+          options.index = index;
+          model.trigger('remove', model, this, options);
+        }
+        this._removeReference(model);
+      }
+      return this;
+    },
+
+    // Update a collection by `set`-ing a new list of models, adding new ones,
+    // removing models that are no longer present, and merging models that
+    // already exist in the collection, as necessary. Similar to **Model#set**,
+    // the core operation for updating the data contained by the collection.
+    set: function(models, options) {
+      options = _.defaults({}, options, setOptions);
+      if (options.parse) models = this.parse(models, options);
+      if (!_.isArray(models)) models = models ? [models] : [];
+      var i, l, model, attrs, existing, sort;
+      var at = options.at;
+      var sortable = this.comparator && (at == null) && options.sort !== false;
+      var sortAttr = _.isString(this.comparator) ? this.comparator : null;
+      var toAdd = [], toRemove = [], modelMap = {};
+      var add = options.add, merge = options.merge, remove = options.remove;
+      var order = !sortable && add && remove ? [] : false;
+
+      // Turn bare objects into model references, and prevent invalid models
+      // from being added.
+      for (i = 0, l = models.length; i < l; i++) {
+        if (!(model = this._prepareModel(attrs = models[i], options))) continue;
+
+        // If a duplicate is found, prevent it from being added and
+        // optionally merge it into the existing model.
+        if (existing = this.get(model)) {
+          if (remove) modelMap[existing.cid] = true;
+          if (merge) {
+            attrs = attrs === model ? model.attributes : options._attrs;
+            existing.set(attrs, options);
+            if (sortable && !sort && existing.hasChanged(sortAttr)) sort = true;
+          }
+
+        // This is a new model, push it to the `toAdd` list.
+        } else if (add) {
+          toAdd.push(model);
+
+          // Listen to added models' events, and index models for lookup by
+          // `id` and by `cid`.
+          model.on('all', this._onModelEvent, this);
+          this._byId[model.cid] = model;
+          if (model.id != null) this._byId[model.id] = model;
+        }
+        if (order) order.push(existing || model);
+        delete options._attrs;
+      }
+
+      // Remove nonexistent models if appropriate.
+      if (remove) {
+        for (i = 0, l = this.length; i < l; ++i) {
+          if (!modelMap[(model = this.models[i]).cid]) toRemove.push(model);
+        }
+        if (toRemove.length) this.remove(toRemove, options);
+      }
+
+      // See if sorting is needed, update `length` and splice in new models.
+      if (toAdd.length || (order && order.length)) {
+        if (sortable) sort = true;
+        this.length += toAdd.length;
+        if (at != null) {
+          splice.apply(this.models, [at, 0].concat(toAdd));
+        } else {
+          if (order) this.models.length = 0;
+          push.apply(this.models, order || toAdd);
+        }
+      }
+
+      // Silently sort the collection if appropriate.
+      if (sort) this.sort({silent: true});
+
+      if (options.silent) return this;
+
+      // Trigger `add` events.
+      for (i = 0, l = toAdd.length; i < l; i++) {
+        (model = toAdd[i]).trigger('add', model, this, options);
+      }
+
+      // Trigger `sort` if the collection was sorted.
+      if (sort || (order && order.length)) this.trigger('sort', this, options);
+      return this;
+    },
+
+    // When you have more items than you want to add or remove individually,
+    // you can reset the entire set with a new list of models, without firing
+    // any granular `add` or `remove` events. Fires `reset` when finished.
+    // Useful for bulk operations and optimizations.
+    reset: function(models, options) {
+      options || (options = {});
+      for (var i = 0, l = this.models.length; i < l; i++) {
+        this._removeReference(this.models[i]);
+      }
+      options.previousModels = this.models;
+      this._reset();
+      this.add(models, _.extend({silent: true}, options));
+      if (!options.silent) this.trigger('reset', this, options);
+      return this;
+    },
+
+    // Add a model to the end of the collection.
+    push: function(model, options) {
+      model = this._prepareModel(model, options);
+      this.add(model, _.extend({at: this.length}, options));
+      return model;
+    },
+
+    // Remove a model from the end of the collection.
+    pop: function(options) {
+      var model = this.at(this.length - 1);
+      this.remove(model, options);
+      return model;
+    },
+
+    // Add a model to the beginning of the collection.
+    unshift: function(model, options) {
+      model = this._prepareModel(model, options);
+      this.add(model, _.extend({at: 0}, options));
+      return model;
+    },
+
+    // Remove a model from the beginning of the collection.
+    shift: function(options) {
+      var model = this.at(0);
+      this.remove(model, options);
+      return model;
+    },
+
+    // Slice out a sub-array of models from the collection.
+    slice: function() {
+      return slice.apply(this.models, arguments);
+    },
+
+    // Get a model from the set by id.
+    get: function(obj) {
+      if (obj == null) return void 0;
+      return this._byId[obj.id != null ? obj.id : obj.cid || obj];
+    },
+
+    // Get the model at the given index.
+    at: function(index) {
+      return this.models[index];
+    },
+
+    // Return models with matching attributes. Useful for simple cases of
+    // `filter`.
+    where: function(attrs, first) {
+      if (_.isEmpty(attrs)) return first ? void 0 : [];
+      return this[first ? 'find' : 'filter'](function(model) {
+        for (var key in attrs) {
+          if (attrs[key] !== model.get(key)) return false;
+        }
+        return true;
+      });
+    },
+
+    // Return the first model with matching attributes. Useful for simple cases
+    // of `find`.
+    findWhere: function(attrs) {
+      return this.where(attrs, true);
+    },
+
+    // Force the collection to re-sort itself. You don't need to call this under
+    // normal circumstances, as the set will maintain sort order as each item
+    // is added.
+    sort: function(options) {
+      if (!this.comparator) throw new Error('Cannot sort a set without a comparator');
+      options || (options = {});
+
+      // Run sort based on type of `comparator`.
+      if (_.isString(this.comparator) || this.comparator.length === 1) {
+        this.models = this.sortBy(this.comparator, this);
+      } else {
+        this.models.sort(_.bind(this.comparator, this));
+      }
+
+      if (!options.silent) this.trigger('sort', this, options);
+      return this;
+    },
+
+    // Figure out the smallest index at which a model should be inserted so as
+    // to maintain order.
+    sortedIndex: function(model, value, context) {
+      value || (value = this.comparator);
+      var iterator = _.isFunction(value) ? value : function(model) {
+        return model.get(value);
+      };
+      return _.sortedIndex(this.models, model, iterator, context);
+    },
+
+    // Pluck an attribute from each model in the collection.
+    pluck: function(attr) {
+      return _.invoke(this.models, 'get', attr);
+    },
+
+    // Fetch the default set of models for this collection, resetting the
+    // collection when they arrive. If `reset: true` is passed, the response
+    // data will be passed through the `reset` method instead of `set`.
+    fetch: function(options) {
+      options = options ? _.clone(options) : {};
+      if (options.parse === void 0) options.parse = true;
+      var success = options.success;
+      var collection = this;
+      options.success = function(resp) {
+        var method = options.reset ? 'reset' : 'set';
+        collection[method](resp, options);
+        if (success) success(collection, resp, options);
+        collection.trigger('sync', collection, resp, options);
+      };
+      wrapError(this, options);
+      return this.sync('read', this, options);
+    },
+
+    // Create a new instance of a model in this collection. Add the model to the
+    // collection immediately, unless `wait: true` is passed, in which case we
+    // wait for the server to agree.
+    create: function(model, options) {
+      options = options ? _.clone(options) : {};
+      if (!(model = this._prepareModel(model, options))) return false;
+      if (!options.wait) this.add(model, options);
+      var collection = this;
+      var success = options.success;
+      options.success = function(resp) {
+        if (options.wait) collection.add(model, options);
+        if (success) success(model, resp, options);
+      };
+      model.save(null, options);
+      return model;
+    },
+
+    // **parse** converts a response into a list of models to be added to the
+    // collection. The default implementation is just to pass it through.
+    parse: function(resp, options) {
+      return resp;
+    },
+
+    // Create a new collection with an identical list of models as this one.
+    clone: function() {
+      return new this.constructor(this.models);
+    },
+
+    // Private method to reset all internal state. Called when the collection
+    // is first initialized or reset.
+    _reset: function() {
+      this.length = 0;
+      this.models = [];
+      this._byId  = {};
+    },
+
+    // Prepare a hash of attributes (or other model) to be added to this
+    // collection.
+    _prepareModel: function(attrs, options) {
+      if (attrs instanceof Model) {
+        if (!attrs.collection) attrs.collection = this;
+        return attrs;
+      }
+      options || (options = {});
+      options.collection = this;
+      var model = new this.model(attrs, options);
+      if (!model._validate(attrs, options)) {
+        this.trigger('invalid', this, attrs, options);
+        return false;
+      }
+      return model;
+    },
+
+    // Internal method to sever a model's ties to a collection.
+    _removeReference: function(model) {
+      if (this === model.collection) delete model.collection;
+      model.off('all', this._onModelEvent, this);
+    },
+
+    // Internal method called every time a model in the set fires an event.
+    // Sets need to update their indexes when models change ids. All other
+    // events simply proxy through. "add" and "remove" events that originate
+    // in other collections are ignored.
+    _onModelEvent: function(event, model, collection, options) {
+      if ((event === 'add' || event === 'remove') && collection !== this) return;
+      if (event === 'destroy') this.remove(model, options);
+      if (model && event === 'change:' + model.idAttribute) {
+        delete this._byId[model.previous(model.idAttribute)];
+        if (model.id != null) this._byId[model.id] = model;
+      }
+      this.trigger.apply(this, arguments);
+    }
+
+  });
+
+  // Underscore methods that we want to implement on the Collection.
+  // 90% of the core usefulness of Backbone Collections is actually implemented
+  // right here:
+  var methods = ['forEach', 'each', 'map', 'collect', 'reduce', 'foldl',
+    'inject', 'reduceRight', 'foldr', 'find', 'detect', 'filter', 'select',
+    'reject', 'every', 'all', 'some', 'any', 'include', 'contains', 'invoke',
+    'max', 'min', 'toArray', 'size', 'first', 'head', 'take', 'initial', 'rest',
+    'tail', 'drop', 'last', 'without', 'indexOf', 'shuffle', 'lastIndexOf',
+    'isEmpty', 'chain'];
+
+  // Mix in each Underscore method as a proxy to `Collection#models`.
+  _.each(methods, function(method) {
+    Collection.prototype[method] = function() {
+      var args = slice.call(arguments);
+      args.unshift(this.models);
+      return _[method].apply(_, args);
+    };
+  });
+
+  // Underscore methods that take a property name as an argument.
+  var attributeMethods = ['groupBy', 'countBy', 'sortBy'];
+
+  // Use attributes instead of properties.
+  _.each(attributeMethods, function(method) {
+    Collection.prototype[method] = function(value, context) {
+      var iterator = _.isFunction(value) ? value : function(model) {
+        return model.get(value);
+      };
+      return _[method](this.models, iterator, context);
+    };
+  });
+
+  // Backbone.View
+  // -------------
+
+  // Backbone Views are almost more convention than they are actual code. A View
+  // is simply a JavaScript object that represents a logical chunk of UI in the
+  // DOM. This might be a single item, an entire list, a sidebar or panel, or
+  // even the surrounding frame which wraps your whole app. Defining a chunk of
+  // UI as a **View** allows you to define your DOM events declaratively, without
+  // having to worry about render order ... and makes it easy for the view to
+  // react to specific changes in the state of your models.
+
+  // Options with special meaning *(e.g. model, collection, id, className)* are
+  // attached directly to the view.  See `viewOptions` for an exhaustive
+  // list.
+
+  // Creating a Backbone.View creates its initial element outside of the DOM,
+  // if an existing element is not provided...
+  var View = Backbone.View = function(options) {
+    this.cid = _.uniqueId('view');
+    options || (options = {});
+    _.extend(this, _.pick(options, viewOptions));
+    this._ensureElement();
+    this.initialize.apply(this, arguments);
+    this.delegateEvents();
+  };
+
+  // Cached regex to split keys for `delegate`.
+  var delegateEventSplitter = /^(\S+)\s*(.*)$/;
+
+  // List of view options to be merged as properties.
+  var viewOptions = ['model', 'collection', 'el', 'id', 'attributes', 'className', 'tagName', 'events'];
+
+  // Set up all inheritable **Backbone.View** properties and methods.
+  _.extend(View.prototype, Events, {
+
+    // The default `tagName` of a View's element is `"div"`.
+    tagName: 'div',
+
+    // jQuery delegate for element lookup, scoped to DOM elements within the
+    // current view. This should be prefered to global lookups where possible.
+    $: function(selector) {
+      return this.$el.find(selector);
+    },
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize: function(){},
+
+    // **render** is the core function that your view should override, in order
+    // to populate its element (`this.el`), with the appropriate HTML. The
+    // convention is for **render** to always return `this`.
+    render: function() {
+      return this;
+    },
+
+    // Remove this view by taking the element out of the DOM, and removing any
+    // applicable Backbone.Events listeners.
+    remove: function() {
+      this.$el.remove();
+      this.stopListening();
+      return this;
+    },
+
+    // Change the view's element (`this.el` property), including event
+    // re-delegation.
+    setElement: function(element, delegate) {
+      if (this.$el) this.undelegateEvents();
+      this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+      this.el = this.$el[0];
+      if (delegate !== false) this.delegateEvents();
+      return this;
+    },
+
+    // Set callbacks, where `this.events` is a hash of
+    //
+    // *{"event selector": "callback"}*
+    //
+    //     {
+    //       'mousedown .title':  'edit',
+    //       'click .button':     'save'
+    //       'click .open':       function(e) { ... }
+    //     }
+    //
+    // pairs. Callbacks will be bound to the view, with `this` set properly.
+    // Uses event delegation for efficiency.
+    // Omitting the selector binds the event to `this.el`.
+    // This only works for delegate-able events: not `focus`, `blur`, and
+    // not `change`, `submit`, and `reset` in Internet Explorer.
+    delegateEvents: function(events) {
+      if (!(events || (events = _.result(this, 'events')))) return this;
+      this.undelegateEvents();
+      for (var key in events) {
+        var method = events[key];
+        if (!_.isFunction(method)) method = this[events[key]];
+        if (!method) continue;
+
+        var match = key.match(delegateEventSplitter);
+        var eventName = match[1], selector = match[2];
+        method = _.bind(method, this);
+        eventName += '.delegateEvents' + this.cid;
+        if (selector === '') {
+          this.$el.on(eventName, method);
+        } else {
+          this.$el.on(eventName, selector, method);
+        }
+      }
+      return this;
+    },
+
+    // Clears all callbacks previously bound to the view with `delegateEvents`.
+    // You usually don't need to use this, but may wish to if you have multiple
+    // Backbone views attached to the same DOM element.
+    undelegateEvents: function() {
+      this.$el.off('.delegateEvents' + this.cid);
+      return this;
+    },
+
+    // Ensure that the View has a DOM element to render into.
+    // If `this.el` is a string, pass it through `$()`, take the first
+    // matching element, and re-assign it to `el`. Otherwise, create
+    // an element from the `id`, `className` and `tagName` properties.
+    _ensureElement: function() {
+      if (!this.el) {
+        var attrs = _.extend({}, _.result(this, 'attributes'));
+        if (this.id) attrs.id = _.result(this, 'id');
+        if (this.className) attrs['class'] = _.result(this, 'className');
+        var $el = Backbone.$('<' + _.result(this, 'tagName') + '>').attr(attrs);
+        this.setElement($el, false);
+      } else {
+        this.setElement(_.result(this, 'el'), false);
+      }
+    }
+
+  });
+
+  // Backbone.sync
+  // -------------
+
+  // Override this function to change the manner in which Backbone persists
+  // models to the server. You will be passed the type of request, and the
+  // model in question. By default, makes a RESTful Ajax request
+  // to the model's `url()`. Some possible customizations could be:
+  //
+  // * Use `setTimeout` to batch rapid-fire updates into a single request.
+  // * Send up the models as XML instead of JSON.
+  // * Persist models via WebSockets instead of Ajax.
+  //
+  // Turn on `Backbone.emulateHTTP` in order to send `PUT` and `DELETE` requests
+  // as `POST`, with a `_method` parameter containing the true HTTP method,
+  // as well as all requests with the body as `application/x-www-form-urlencoded`
+  // instead of `application/json` with the model in a param named `model`.
+  // Useful when interfacing with server-side languages like **PHP** that make
+  // it difficult to read the body of `PUT` requests.
+  Backbone.sync = function(method, model, options) {
+    var type = methodMap[method];
+
+    // Default options, unless specified.
+    _.defaults(options || (options = {}), {
+      emulateHTTP: Backbone.emulateHTTP,
+      emulateJSON: Backbone.emulateJSON
+    });
+
+    // Default JSON-request options.
+    var params = {type: type, dataType: 'json'};
+
+    // Ensure that we have a URL.
+    if (!options.url) {
+      params.url = _.result(model, 'url') || urlError();
+    }
+
+    // Ensure that we have the appropriate request data.
+    if (options.data == null && model && (method === 'create' || method === 'update' || method === 'patch')) {
+      params.contentType = 'application/json';
+      params.data = JSON.stringify(options.attrs || model.toJSON(options));
+    }
+
+    // For older servers, emulate JSON by encoding the request into an HTML-form.
+    if (options.emulateJSON) {
+      params.contentType = 'application/x-www-form-urlencoded';
+      params.data = params.data ? {model: params.data} : {};
+    }
+
+    // For older servers, emulate HTTP by mimicking the HTTP method with `_method`
+    // And an `X-HTTP-Method-Override` header.
+    if (options.emulateHTTP && (type === 'PUT' || type === 'DELETE' || type === 'PATCH')) {
+      params.type = 'POST';
+      if (options.emulateJSON) params.data._method = type;
+      var beforeSend = options.beforeSend;
+      options.beforeSend = function(xhr) {
+        xhr.setRequestHeader('X-HTTP-Method-Override', type);
+        if (beforeSend) return beforeSend.apply(this, arguments);
+      };
+    }
+
+    // Don't process data on a non-GET request.
+    if (params.type !== 'GET' && !options.emulateJSON) {
+      params.processData = false;
+    }
+
+    // If we're sending a `PATCH` request, and we're in an old Internet Explorer
+    // that still has ActiveX enabled by default, override jQuery to use that
+    // for XHR instead. Remove this line when jQuery supports `PATCH` on IE8.
+    if (params.type === 'PATCH' && noXhrPatch) {
+      params.xhr = function() {
+        return new ActiveXObject("Microsoft.XMLHTTP");
+      };
+    }
+
+    // Make the request, allowing the user to override any Ajax options.
+    var xhr = options.xhr = Backbone.ajax(_.extend(params, options));
+    model.trigger('request', model, xhr, options);
+    return xhr;
+  };
+
+  var noXhrPatch = typeof window !== 'undefined' && !!window.ActiveXObject && !(window.XMLHttpRequest && (new XMLHttpRequest).dispatchEvent);
+
+  // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
+  var methodMap = {
+    'create': 'POST',
+    'update': 'PUT',
+    'patch':  'PATCH',
+    'delete': 'DELETE',
+    'read':   'GET'
+  };
+
+  // Set the default implementation of `Backbone.ajax` to proxy through to `$`.
+  // Override this if you'd like to use a different library.
+  Backbone.ajax = function() {
+    return Backbone.$.ajax.apply(Backbone.$, arguments);
+  };
+
+  // Backbone.Router
+  // ---------------
+
+  // Routers map faux-URLs to actions, and fire events when routes are
+  // matched. Creating a new one sets its `routes` hash, if not set statically.
+  var Router = Backbone.Router = function(options) {
+    options || (options = {});
+    if (options.routes) this.routes = options.routes;
+    this._bindRoutes();
+    this.initialize.apply(this, arguments);
+  };
+
+  // Cached regular expressions for matching named param parts and splatted
+  // parts of route strings.
+  var optionalParam = /\((.*?)\)/g;
+  var namedParam    = /(\(\?)?:\w+/g;
+  var splatParam    = /\*\w+/g;
+  var escapeRegExp  = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+
+  // Set up all inheritable **Backbone.Router** properties and methods.
+  _.extend(Router.prototype, Events, {
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize: function(){},
+
+    // Manually bind a single named route to a callback. For example:
+    //
+    //     this.route('search/:query/p:num', 'search', function(query, num) {
+    //       ...
+    //     });
+    //
+    route: function(route, name, callback) {
+      if (!_.isRegExp(route)) route = this._routeToRegExp(route);
+      if (_.isFunction(name)) {
+        callback = name;
+        name = '';
+      }
+      if (!callback) callback = this[name];
+      var router = this;
+      Backbone.history.route(route, function(fragment) {
+        var args = router._extractParameters(route, fragment);
+        callback && callback.apply(router, args);
+        router.trigger.apply(router, ['route:' + name].concat(args));
+        router.trigger('route', name, args);
+        Backbone.history.trigger('route', router, name, args);
+      });
+      return this;
+    },
+
+    // Simple proxy to `Backbone.history` to save a fragment into the history.
+    navigate: function(fragment, options) {
+      Backbone.history.navigate(fragment, options);
+      return this;
+    },
+
+    // Bind all defined routes to `Backbone.history`. We have to reverse the
+    // order of the routes here to support behavior where the most general
+    // routes can be defined at the bottom of the route map.
+    _bindRoutes: function() {
+      if (!this.routes) return;
+      this.routes = _.result(this, 'routes');
+      var route, routes = _.keys(this.routes);
+      while ((route = routes.pop()) != null) {
+        this.route(route, this.routes[route]);
+      }
+    },
+
+    // Convert a route string into a regular expression, suitable for matching
+    // against the current location hash.
+    _routeToRegExp: function(route) {
+      route = route.replace(escapeRegExp, '\\$&')
+                   .replace(optionalParam, '(?:$1)?')
+                   .replace(namedParam, function(match, optional){
+                     return optional ? match : '([^\/]+)';
+                   })
+                   .replace(splatParam, '(.*?)');
+      return new RegExp('^' + route + '$');
+    },
+
+    // Given a route, and a URL fragment that it matches, return the array of
+    // extracted decoded parameters. Empty or unmatched parameters will be
+    // treated as `null` to normalize cross-browser behavior.
+    _extractParameters: function(route, fragment) {
+      var params = route.exec(fragment).slice(1);
+      return _.map(params, function(param) {
+        return param ? decodeURIComponent(param) : null;
+      });
+    }
+
+  });
+
+  // Backbone.History
+  // ----------------
+
+  // Handles cross-browser history management, based on either
+  // [pushState](http://diveintohtml5.info/history.html) and real URLs, or
+  // [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange)
+  // and URL fragments. If the browser supports neither (old IE, natch),
+  // falls back to polling.
+  var History = Backbone.History = function() {
+    this.handlers = [];
+    _.bindAll(this, 'checkUrl');
+
+    // Ensure that `History` can be used outside of the browser.
+    if (typeof window !== 'undefined') {
+      this.location = window.location;
+      this.history = window.history;
+    }
+  };
+
+  // Cached regex for stripping a leading hash/slash and trailing space.
+  var routeStripper = /^[#\/]|\s+$/g;
+
+  // Cached regex for stripping leading and trailing slashes.
+  var rootStripper = /^\/+|\/+$/g;
+
+  // Cached regex for detecting MSIE.
+  var isExplorer = /msie [\w.]+/;
+
+  // Cached regex for removing a trailing slash.
+  var trailingSlash = /\/$/;
+
+  // Has the history handling already been started?
+  History.started = false;
+
+  // Set up all inheritable **Backbone.History** properties and methods.
+  _.extend(History.prototype, Events, {
+
+    // The default interval to poll for hash changes, if necessary, is
+    // twenty times a second.
+    interval: 50,
+
+    // Gets the true hash value. Cannot use location.hash directly due to bug
+    // in Firefox where location.hash will always be decoded.
+    getHash: function(window) {
+      var match = (window || this).location.href.match(/#(.*)$/);
+      return match ? match[1] : '';
+    },
+
+    // Get the cross-browser normalized URL fragment, either from the URL,
+    // the hash, or the override.
+    getFragment: function(fragment, forcePushState) {
+      if (fragment == null) {
+        if (this._hasPushState || !this._wantsHashChange || forcePushState) {
+          fragment = this.location.pathname;
+          var root = this.root.replace(trailingSlash, '');
+          if (!fragment.indexOf(root)) fragment = fragment.substr(root.length);
+        } else {
+          fragment = this.getHash();
+        }
+      }
+      return fragment.replace(routeStripper, '');
+    },
+
+    // Start the hash change handling, returning `true` if the current URL matches
+    // an existing route, and `false` otherwise.
+    start: function(options) {
+      if (History.started) throw new Error("Backbone.history has already been started");
+      History.started = true;
+
+      // Figure out the initial configuration. Do we need an iframe?
+      // Is pushState desired ... is it available?
+      this.options          = _.extend({}, {root: '/'}, this.options, options);
+      this.root             = this.options.root;
+      this._wantsHashChange = this.options.hashChange !== false;
+      this._wantsPushState  = !!this.options.pushState;
+      this._hasPushState    = !!(this.options.pushState && this.history && this.history.pushState);
+      var fragment          = this.getFragment();
+      var docMode           = document.documentMode;
+      var oldIE             = (isExplorer.exec(navigator.userAgent.toLowerCase()) && (!docMode || docMode <= 7));
+
+      // Normalize root to always include a leading and trailing slash.
+      this.root = ('/' + this.root + '/').replace(rootStripper, '/');
+
+      if (oldIE && this._wantsHashChange) {
+        this.iframe = Backbone.$('<iframe src="javascript:0" tabindex="-1" />').hide().appendTo('body')[0].contentWindow;
+        this.navigate(fragment);
+      }
+
+      // Depending on whether we're using pushState or hashes, and whether
+      // 'onhashchange' is supported, determine how we check the URL state.
+      if (this._hasPushState) {
+        Backbone.$(window).on('popstate', this.checkUrl);
+      } else if (this._wantsHashChange && ('onhashchange' in window) && !oldIE) {
+        Backbone.$(window).on('hashchange', this.checkUrl);
+      } else if (this._wantsHashChange) {
+        this._checkUrlInterval = setInterval(this.checkUrl, this.interval);
+      }
+
+      // Determine if we need to change the base url, for a pushState link
+      // opened by a non-pushState browser.
+      this.fragment = fragment;
+      var loc = this.location;
+      var atRoot = loc.pathname.replace(/[^\/]$/, '$&/') === this.root;
+
+      // Transition from hashChange to pushState or vice versa if both are
+      // requested.
+      if (this._wantsHashChange && this._wantsPushState) {
+
+        // If we've started off with a route from a `pushState`-enabled
+        // browser, but we're currently in a browser that doesn't support it...
+        if (!this._hasPushState && !atRoot) {
+          this.fragment = this.getFragment(null, true);
+          this.location.replace(this.root + this.location.search + '#' + this.fragment);
+          // Return immediately as browser will do redirect to new url
+          return true;
+
+        // Or if we've started out with a hash-based route, but we're currently
+        // in a browser where it could be `pushState`-based instead...
+        } else if (this._hasPushState && atRoot && loc.hash) {
+          this.fragment = this.getHash().replace(routeStripper, '');
+          this.history.replaceState({}, document.title, this.root + this.fragment + loc.search);
+        }
+
+      }
+
+      if (!this.options.silent) return this.loadUrl();
+    },
+
+    // Disable Backbone.history, perhaps temporarily. Not useful in a real app,
+    // but possibly useful for unit testing Routers.
+    stop: function() {
+      Backbone.$(window).off('popstate', this.checkUrl).off('hashchange', this.checkUrl);
+      clearInterval(this._checkUrlInterval);
+      History.started = false;
+    },
+
+    // Add a route to be tested when the fragment changes. Routes added later
+    // may override previous routes.
+    route: function(route, callback) {
+      this.handlers.unshift({route: route, callback: callback});
+    },
+
+    // Checks the current URL to see if it has changed, and if it has,
+    // calls `loadUrl`, normalizing across the hidden iframe.
+    checkUrl: function(e) {
+      var current = this.getFragment();
+      if (current === this.fragment && this.iframe) {
+        current = this.getFragment(this.getHash(this.iframe));
+      }
+      if (current === this.fragment) return false;
+      if (this.iframe) this.navigate(current);
+      this.loadUrl();
+    },
+
+    // Attempt to load the current URL fragment. If a route succeeds with a
+    // match, returns `true`. If no defined routes matches the fragment,
+    // returns `false`.
+    loadUrl: function(fragmentOverride) {
+      var fragment = this.fragment = this.getFragment(fragmentOverride);
+      var matched = _.any(this.handlers, function(handler) {
+        if (handler.route.test(fragment)) {
+          handler.callback(fragment);
+          return true;
+        }
+      });
+      return matched;
+    },
+
+    // Save a fragment into the hash history, or replace the URL state if the
+    // 'replace' option is passed. You are responsible for properly URL-encoding
+    // the fragment in advance.
+    //
+    // The options object can contain `trigger: true` if you wish to have the
+    // route callback be fired (not usually desirable), or `replace: true`, if
+    // you wish to modify the current URL without adding an entry to the history.
+    navigate: function(fragment, options) {
+      if (!History.started) return false;
+      if (!options || options === true) options = {trigger: options};
+      fragment = this.getFragment(fragment || '');
+      if (this.fragment === fragment) return;
+      this.fragment = fragment;
+      var url = this.root + fragment;
+
+      // If pushState is available, we use it to set the fragment as a real URL.
+      if (this._hasPushState) {
+        this.history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+
+      // If hash changes haven't been explicitly disabled, update the hash
+      // fragment to store history.
+      } else if (this._wantsHashChange) {
+        this._updateHash(this.location, fragment, options.replace);
+        if (this.iframe && (fragment !== this.getFragment(this.getHash(this.iframe)))) {
+          // Opening and closing the iframe tricks IE7 and earlier to push a
+          // history entry on hash-tag change.  When replace is true, we don't
+          // want this.
+          if(!options.replace) this.iframe.document.open().close();
+          this._updateHash(this.iframe.location, fragment, options.replace);
+        }
+
+      // If you've told us that you explicitly don't want fallback hashchange-
+      // based history, then `navigate` becomes a page refresh.
+      } else {
+        return this.location.assign(url);
+      }
+      if (options.trigger) return this.loadUrl(fragment);
+    },
+
+    // Update the hash location, either replacing the current entry, or adding
+    // a new one to the browser history.
+    _updateHash: function(location, fragment, replace) {
+      if (replace) {
+        var href = location.href.replace(/(javascript:|#).*$/, '');
+        location.replace(href + '#' + fragment);
+      } else {
+        // Some browsers require that `hash` contains a leading #.
+        location.hash = '#' + fragment;
+      }
+    }
+
+  });
+
+  // Create the default Backbone.history.
+  Backbone.history = new History;
+
+  // Helpers
+  // -------
+
+  // Helper function to correctly set up the prototype chain, for subclasses.
+  // Similar to `goog.inherits`, but uses a hash of prototype properties and
+  // class properties to be extended.
+  var extend = function(protoProps, staticProps) {
+    var parent = this;
+    var child;
+
+    // The constructor function for the new subclass is either defined by you
+    // (the "constructor" property in your `extend` definition), or defaulted
+    // by us to simply call the parent's constructor.
+    if (protoProps && _.has(protoProps, 'constructor')) {
+      child = protoProps.constructor;
+    } else {
+      child = function(){ return parent.apply(this, arguments); };
+    }
+
+    // Add static properties to the constructor function, if supplied.
+    _.extend(child, parent, staticProps);
+
+    // Set the prototype chain to inherit from `parent`, without calling
+    // `parent`'s constructor function.
+    var Surrogate = function(){ this.constructor = child; };
+    Surrogate.prototype = parent.prototype;
+    child.prototype = new Surrogate;
+
+    // Add prototype properties (instance properties) to the subclass,
+    // if supplied.
+    if (protoProps) _.extend(child.prototype, protoProps);
+
+    // Set a convenience property in case the parent's prototype is needed
+    // later.
+    child.__super__ = parent.prototype;
+
+    return child;
+  };
+
+  // Set up inheritance for the model, collection, router, view and history.
+  Model.extend = Collection.extend = Router.extend = View.extend = History.extend = extend;
+
+  // Throw an error when a URL is needed, and none is supplied.
+  var urlError = function() {
+    throw new Error('A "url" property or function must be specified');
+  };
+
+  // Wrap an optional error callback with a fallback error event.
+  var wrapError = function(model, options) {
+    var error = options.error;
+    options.error = function(resp) {
+      if (error) error(model, resp, options);
+      model.trigger('error', model, resp, options);
+    };
+  };
+
+}).call(this);
+
+});
+require.register("component-matches-selector/index.js", function(exports, require, module){
+/**
+ * Module dependencies.
+ */
+
+var query = require('query');
+
+/**
+ * Element prototype.
+ */
+
+var proto = Element.prototype;
+
+/**
+ * Vendor function.
+ */
+
+var vendor = proto.matchesSelector
+  || proto.webkitMatchesSelector
+  || proto.mozMatchesSelector
+  || proto.msMatchesSelector
+  || proto.oMatchesSelector;
+
+/**
+ * Expose `match()`.
+ */
+
+module.exports = match;
+
+/**
+ * Match `el` to `selector`.
+ *
+ * @param {Element} el
+ * @param {String} selector
+ * @return {Boolean}
+ * @api public
+ */
+
+function match(el, selector) {
+  if (vendor) return vendor.call(el, selector);
+  var nodes = query.all(selector, el.parentNode);
+  for (var i = 0; i < nodes.length; ++i) {
+    if (nodes[i] == el) return true;
+  }
+  return false;
+}
+
+});
+require.register("yields-traverse/index.js", function(exports, require, module){
+
+/**
+ * dependencies
+ */
+
+var matches = require('matches-selector');
+
+/**
+ * Traverse with the given `el`, `selector` and `len`.
+ *
+ * @param {String} type
+ * @param {Element} el
+ * @param {String} selector
+ * @param {Number} len
+ * @return {Array}
+ * @api public
+ */
+
+module.exports = function(type, el, selector, len){
+  var el = el[type]
+    , n = len || 1
+    , ret = [];
+
+  if (!el) return ret;
+
+  do {
+    if (n == ret.length) break;
+    if (1 != el.nodeType) continue;
+    if (matches(el, selector)) ret.push(el);
+    if (!selector) ret.push(el);
+  } while (el = el[type]);
+
+  return ret;
+}
+
+});
+require.register("ianstormtaylor-previous-sibling/index.js", function(exports, require, module){
+
+var traverse = require('traverse');
+
+
+/**
+ * Expose `previousSibling`.
+ */
+
+module.exports = previousSibling;
+
+
+/**
+ * Get the previous sibling for an `el`.
+ *
+ * @param {Element} el
+ * @param {String} selector (optional)
+ */
+
+function previousSibling (el, selector) {
+  el = traverse('previousSibling', el, selector)[0];
+  return el || null;
+}
+});
+require.register("ianstormtaylor-next-sibling/index.js", function(exports, require, module){
+
+var traverse = require('traverse');
+
+
+/**
+ * Expose `nextSibling`.
+ */
+
+module.exports = nextSibling;
+
+
+/**
+ * Get the next sibling for an `el`.
+ *
+ * @param {Element} el
+ * @param {String} selector (optional)
+ */
+
+function nextSibling (el, selector) {
+  el = traverse('nextSibling', el, selector)[0];
+  return el || null;
+}
+});
+require.register("component-throttle/index.js", function(exports, require, module){
+
+/**
+ * Module exports.
+ */
+
+module.exports = throttle;
+
+/**
+ * Returns a new function that, when invoked, invokes `func` at most one time per
+ * `wait` milliseconds.
+ *
+ * @param {Function} func The `Function` instance to wrap.
+ * @param {Number} wait The minimum number of milliseconds that must elapse in between `func` invokations.
+ * @return {Function} A new function that wraps the `func` function passed in.
+ * @api public
+ */
+
+function throttle (func, wait) {
+  var rtn; // return value
+  var last = 0; // last invokation timestamp
+  return function throttled () {
+    var now = new Date().getTime();
+    var delta = now - last;
+    if (delta >= wait) {
+      rtn = func.apply(this, arguments);
+      last = now;
+    }
+    return rtn;
+  };
+}
+
+});
+require.register("component-set/index.js", function(exports, require, module){
+
+/**
+ * Expose `Set`.
+ */
+
+module.exports = Set;
+
+/**
+ * Initialize a new `Set` with optional `vals`
+ *
+ * @param {Array} vals
+ * @api public
+ */
+
+function Set(vals) {
+  if (!(this instanceof Set)) return new Set(vals);
+  this.vals = [];
+  if (vals) {
+    for (var i = 0; i < vals.length; ++i) {
+      this.add(vals[i]);
+    }
+  }
+}
+
+/**
+ * Add `val`.
+ *
+ * @param {Mixed} val
+ * @api public
+ */
+
+Set.prototype.add = function(val){
+  if (this.has(val)) return;
+  this.vals.push(val);
+};
+
+/**
+ * Check if this set has `val`.
+ *
+ * @param {Mixed} val
+ * @return {Boolean}
+ * @api public
+ */
+
+Set.prototype.has = function(val){
+  return !! ~this.indexOf(val);
+};
+
+/**
+ * Return the indexof `val`.
+ *
+ * @param {Mixed} val
+ * @return {Number}
+ * @api private
+ */
+
+Set.prototype.indexOf = function(val){
+  for (var i = 0, len = this.vals.length; i < len; ++i) {
+    var obj = this.vals[i];
+    if (obj.equals && obj.equals(val)) return i;
+    if (obj == val) return i;
+  }
+  return -1;
+};
+
+/**
+ * Iterate each member and invoke `fn(val)`.
+ *
+ * @param {Function} fn
+ * @return {Set}
+ * @api public
+ */
+
+Set.prototype.each = function(fn){
+  for (var i = 0; i < this.vals.length; ++i) {
+    fn(this.vals[i]);
+  }
+  return this;
+};
+
+/**
+ * Return the values as an array.
+ *
+ * @return {Array}
+ * @api public
+ */
+
+Set.prototype.values =
+Set.prototype.array =
+Set.prototype.members =
+Set.prototype.toJSON = function(){
+  return this.vals;
+};
+
+/**
+ * Return the set size.
+ *
+ * @return {Number}
+ * @api public
+ */
+
+Set.prototype.size = function(){
+  return this.vals.length;
+};
+
+/**
+ * Empty the set and return old values.
+ *
+ * @return {Array}
+ * @api public
+ */
+
+Set.prototype.clear = function(){
+  var old = this.vals;
+  this.vals = [];
+  return old;
+};
+
+/**
+ * Remove `val`, returning __true__ when present, otherwise __false__.
+ *
+ * @param {Mixed} val
+ * @return {Mixed}
+ * @api public
+ */
+
+Set.prototype.remove = function(val){
+  var i = this.indexOf(val);
+  if (~i) this.vals.splice(i, 1);
+  return !! ~i;
+};
+
+/**
+ * Perform a union on `set`.
+ *
+ * @param {Set} set
+ * @return {Set} new set
+ * @api public
+ */
+
+Set.prototype.union = function(set){
+  var ret = new Set;
+  var a = this.vals;
+  var b = set.vals;
+  for (var i = 0; i < a.length; ++i) ret.add(a[i]);
+  for (var i = 0; i < b.length; ++i) ret.add(b[i]);
+  return ret;
+};
+
+/**
+ * Perform an intersection on `set`.
+ *
+ * @param {Set} set
+ * @return {Set} new set
+ * @api public
+ */
+
+Set.prototype.intersect = function(set){
+  var ret = new Set;
+  var a = this.vals;
+  var b = set.vals;
+
+  for (var i = 0; i < a.length; ++i) {
+    if (set.has(a[i])) {
+      ret.add(a[i]);
+    }
+  }
+
+  for (var i = 0; i < b.length; ++i) {
+    if (this.has(b[i])) {
+      ret.add(b[i]);
+    }
+  }
+
+  return ret;
+};
+
+/**
+ * Check if the set is empty.
+ *
+ * @return {Boolean}
+ * @api public
+ */
+
+Set.prototype.isEmpty = function(){
+  return 0 == this.vals.length;
+};
+
+
+});
+require.register("component-pillbox/index.js", function(exports, require, module){
+
+/**
+ * Module dependencies.
+ */
+
+var Emitter = require('emitter')
+  , keyname = require('keyname')
+  , events = require('events')
+  , each = require('each')
+  , Set = require('set');
+
+/**
+ * Expose `Pillbox`.
+ */
+
+module.exports = Pillbox
+
+/**
+ * Initialize a `Pillbox` with the given
+ * `input` element and `options`.
+ *
+ * @param {Element} input
+ * @param {Object} options
+ * @api public
+ */
+
+function Pillbox(input, options) {
+  if (!(this instanceof Pillbox)) return new Pillbox(input, options);
+  var self = this
+  this.options = options || {}
+  this.input = input;
+  this.tags = new Set;
+  this.el = document.createElement('div');
+  this.el.className = 'pillbox';
+  this.el.style = input.style;
+  this.ul = document.createElement('ul');
+  this.el.appendChild(this.ul);
+  input.parentNode.insertBefore(this.el, input);
+  input.parentNode.removeChild(input);
+  this.el.appendChild(input);
+  this.events = events(this.el, this);
+  this.bind();
+}
+
+/**
+ * Mixin emitter.
+ */
+
+Emitter(Pillbox.prototype);
+
+/**
+ * Bind internal events.
+ *
+ * @return {Pillbox}
+ * @api public
+ */
+
+Pillbox.prototype.bind = function(){
+  this.events.bind('click');
+  this.events.bind('keydown');
+  return this;
+};
+
+/**
+ * Unbind internal events.
+ *
+ * @return {Pillbox}
+ * @api public
+ */
+
+Pillbox.prototype.unbind = function(){
+  this.events.unbind();
+  return this;
+};
+
+/**
+ * Handle keyup.
+ *
+ * @api private
+ */
+
+Pillbox.prototype.onkeydown = function(e){
+  switch (keyname(e.which)) {
+    case 'enter':
+      e.preventDefault();
+      this.add(e.target.value);
+      e.target.value = '';
+      break;
+    case 'space':
+      if (!this.options.space) return;
+      e.preventDefault();
+      this.add(e.target.value);
+      e.target.value = '';
+      break;
+    case 'backspace':
+      if ('' == e.target.value) {
+        this.remove(this.last());
+      }
+      break;
+  }
+};
+
+/**
+ * Handle click.
+ *
+ * @api private
+ */
+
+Pillbox.prototype.onclick = function(){
+  this.input.focus();
+};
+
+/**
+ * Set / Get all values.
+ *
+ * @param {Array} vals
+ * @return {Array|Pillbox}
+ * @api public
+ */
+
+Pillbox.prototype.values = function(vals){
+  var self = this;
+
+  if (0 == arguments.length) {
+    return this.tags.values();
+  }
+
+  each(vals, function(value){
+    self.add(value);
+  });
+
+  return this;
+};
+
+/**
+ * Return the last member of the set.
+ *
+ * @return {String}
+ * @api private
+ */
+
+Pillbox.prototype.last = function(){
+  return this.tags.vals[this.tags.vals.length - 1];
+};
+
+/**
+ * Add `tag`.
+ *
+ * @param {String} tag
+ * @return {Pillbox} self
+ * @api public
+ */
+
+Pillbox.prototype.add = function(tag) {
+  var self = this
+  tag = tag.trim();
+
+  // blank
+  if ('' == tag) return;
+
+  // exists
+  if (this.tags.has(tag)) return;
+
+  // lowercase
+  if (this.options.lowercase) tag = tag.toLowerCase();
+
+  // add it
+  this.tags.add(tag);
+
+  // list item
+  var li = document.createElement('li');
+  li.setAttribute('data', tag);
+  li.appendChild(document.createTextNode(tag));
+  li.onclick = function(e) {
+    e.preventDefault();
+    self.input.focus();
+  };
+
+  // delete link
+  var del = document.createElement('a');
+  del.appendChild(document.createTextNode('✕'));
+  del.href = '#';
+  del.onclick = this.remove.bind(this, tag);
+  li.appendChild(del);
+
+  this.ul.appendChild(li);
+  this.emit('add', tag);
+
+  return this;
+}
+
+/**
+ * Remove `tag`.
+ *
+ * @param {String} tag
+ * @return {Pillbox} self
+ * @api public
+ */
+
+Pillbox.prototype.remove = function(tag) {
+  if (!this.tags.has(tag)) return this;
+  this.tags.remove(tag);
+
+  var li;
+  for (var i = 0; i < this.ul.childNodes.length; ++i) {
+    li = this.ul.childNodes[i];
+    if (tag == li.getAttribute('data')) break;
+  }
+
+  this.ul.removeChild(li);
+  this.emit('remove', tag);
+
+  return this;
+}
+
+
+});
+require.register("component-keyname/index.js", function(exports, require, module){
+
+/**
+ * Key name map.
+ */
+
+var map = {
+  8: 'backspace',
+  9: 'tab',
+  13: 'enter',
+  16: 'shift',
+  17: 'ctrl',
+  18: 'alt',
+  20: 'capslock',
+  27: 'esc',
+  32: 'space',
+  33: 'pageup',
+  34: 'pagedown',
+  35: 'end',
+  36: 'home',
+  37: 'left',
+  38: 'up',
+  39: 'right',
+  40: 'down',
+  45: 'ins',
+  46: 'del',
+  91: 'meta',
+  93: 'meta',
+  224: 'meta'
+};
+
+/**
+ * Return key name for `n`.
+ *
+ * @param {Number} n
+ * @return {String}
+ * @api public
+ */
+
+module.exports = function(n){
+  return map[n];
+};
+});
+require.register("component-domify/index.js", function(exports, require, module){
+
+/**
+ * Expose `parse`.
+ */
+
+module.exports = parse;
+
+/**
+ * Wrap map from jquery.
+ */
+
+var map = {
+  option: [1, '<select multiple="multiple">', '</select>'],
+  optgroup: [1, '<select multiple="multiple">', '</select>'],
+  legend: [1, '<fieldset>', '</fieldset>'],
+  thead: [1, '<table>', '</table>'],
+  tbody: [1, '<table>', '</table>'],
+  tfoot: [1, '<table>', '</table>'],
+  colgroup: [1, '<table>', '</table>'],
+  caption: [1, '<table>', '</table>'],
+  tr: [2, '<table><tbody>', '</tbody></table>'],
+  td: [3, '<table><tbody><tr>', '</tr></tbody></table>'],
+  th: [3, '<table><tbody><tr>', '</tr></tbody></table>'],
+  col: [2, '<table><tbody></tbody><colgroup>', '</colgroup></table>'],
+  _default: [0, '', '']
+};
+
+/**
+ * Parse `html` and return the children.
+ *
+ * @param {String} html
+ * @return {Array}
+ * @api private
+ */
+
+function parse(html) {
+  if ('string' != typeof html) throw new TypeError('String expected');
+
+  // tag name
+  var m = /<([\w:]+)/.exec(html);
+  if (!m) throw new Error('No elements were generated.');
+  var tag = m[1];
+
+  // body support
+  if (tag == 'body') {
+    var el = document.createElement('html');
+    el.innerHTML = html;
+    return el.removeChild(el.lastChild);
+  }
+
+  // wrap map
+  var wrap = map[tag] || map._default;
+  var depth = wrap[0];
+  var prefix = wrap[1];
+  var suffix = wrap[2];
+  var el = document.createElement('div');
+  el.innerHTML = prefix + html + suffix;
+  while (depth--) el = el.lastChild;
+
+  var els = el.children;
+  if (1 == els.length) {
+    return el.removeChild(els[0]);
+  }
+
+  var fragment = document.createDocumentFragment();
+  while (els.length) {
+    fragment.appendChild(el.removeChild(els[0]));
+  }
+
+  return fragment;
+}
+
+});
+require.register("component-query/index.js", function(exports, require, module){
+
+function one(selector, el) {
+  return el.querySelector(selector);
+}
+
+exports = module.exports = function(selector, el){
+  el = el || document;
+  return one(selector, el);
+};
+
+exports.all = function(selector, el){
+  el = el || document;
+  return el.querySelectorAll(selector);
+};
+
+exports.engine = function(obj){
+  if (!obj.one) throw new Error('.one callback required');
+  if (!obj.all) throw new Error('.all callback required');
+  one = obj.one;
+  exports.all = obj.all;
+};
+
+});
+require.register("yields-select/index.js", function(exports, require, module){
+
+/**
+ * dependencies
+ */
+
+var previous = require('previous-sibling');
+var template = require('./template');
+var next = require('next-sibling');
+var throttle = require('throttle');
+var Pillbox = require('pillbox');
+var classes = require('classes');
+var Emitter = require('emitter');
+var keyname = require('keyname');
+var events = require('events');
+var domify = require('domify');
+var query = require('query');
+var each = require('each');
+var tpl = domify(template);
+
+/**
+ * Export `Select`
+ */
+
+module.exports = Select;
+
+/**
+ * Initialize `Select`.
+ *
+ * @api public
+ */
+
+function Select(){
+  if (!(this instanceof Select)) return new Select;
+  this.el = tpl.cloneNode(true);
+  this.classes = classes(this.el);
+  this.opts = query('.select-options', this.el);
+  this.dropdown = query('.select-dropdown', this.el);
+  this.events = events(this.el, this);
+  this._selected = [];
+  this.options = {};
+  this.bind();
+}
+
+/**
+ * Mixins.
+ */
+
+Emitter(Select.prototype);
+
+/**
+ * Bind internal events.
+ *
+ * @return {Select}
+ * @api private
+ */
+
+Select.prototype.bind = function(){
+  this.events.bind('click .select-box', 'toggle');
+  this.events.bind('click .select-label', 'toggle');
+  this.events.bind('click .select-option');
+  this.events.bind('keydown');
+  this.events.bind('keyup');
+  this.events.bind('blur');
+  return this;
+};
+
+Select.prototype.selectOption = function(e){
+  console.log('select option')
+}
+
+/**
+ * Set the select label.
+ *
+ * @param {String} label
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.label = function(label){
+  query('.select-label', this.el).textContent = label;
+  this._label = label;
+  return this;
+};
+
+/**
+ * Allow multiple.
+ *
+ * @param {String} label
+ * @param {Object} opts
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.multiple = function(label, opts){
+  if (this._multiple) return;
+  this._multiple = true;
+  var el = this.input = search(this, label);
+  var box = query('.select-box', this.el);
+  box.innerHTML = '';
+  box.appendChild(el);
+  this.box = new Pillbox(el, opts);
+  this.box.events.unbind('keydown');
+  this.box.on('remove', this.deselect.bind(this));
+  el.onfocus = this.show.bind(this);
+  return this;
+};
+
+/**
+ * Make it searchable.
+ *
+ * @param {String} label
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.searchable = function(label){
+  if (this._searchable) return this;
+  this._searchable = true;
+  var el = this.input = search(this, label);
+  this.dropdown.insertBefore(el, this.opts);
+  this.on('show', el.focus.bind(el));
+  return this;
+};
+
+/**
+ * Add an option with `name` and `value`.
+ *
+ * @param {String|Object} name
+ * @param {Mixed} value
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.add = function(name, value){
+  var opt = option.apply(null, arguments);
+  this.opts.appendChild(opt.el);
+  this.options[opt.name] = opt;
+  this.emit('add', opt);
+  return this;
+};
+
+/**
+ * Remove an option with `name`.
+ *
+ * @param {String} name
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.remove = function(name){
+  name = name.toLowerCase();
+  var opt = this.get(name);
+  this.emit('remove', opt);
+  this.opts.removeChild(opt.el);
+
+  // selected
+  if (opt.selected) {
+    var i = this._selected.indexOf(opt);
+    this._selected.splice(i, 1);
+  }
+
+  delete this.options[name];
+
+  return this;
+};
+
+/**
+ * Select `name`.
+ *
+ * @param {String} name
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.select = function(name){
+  var opt = this.get(name);
+
+  // state
+  if (!this.classes.has('selected')) {
+    this.classes.add('selected');
+  }
+
+  // select
+  this.emit('select', opt);
+  opt.selected = true;
+
+  // hide
+  opt.el.setAttribute('hidden', '');
+  classes(opt.el).add('selected');
+
+  // multiple
+  if (this._multiple) {
+    this.box.add(opt.label);
+    this._selected.push(opt);
+    this.box.input.value = '';
+    this.change();
+    this.hide();
+    return this;
+  }
+
+  // single
+  var prev = this._selected[0];
+  if (prev) this.deselect(prev.name);
+  this._selected = [opt];
+  this.label(opt.label);
+  this.hide();
+  this.change();
+  return this;
+};
+
+/**
+ * Deselect `name`.
+ *
+ * @param {String} name
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.deselect = function(name){
+  var opt = this.get(name);
+
+  // deselect
+  this.emit('deselect', opt);
+  opt.selected = false;
+
+  // show
+  opt.el.removeAttribute('hidden');
+  classes(opt.el).remove('selected');
+
+  // multiple
+  if (this._multiple) {
+    this.box.remove(name);
+    var i = this._selected.indexOf(opt);
+    if (!~i) return this;
+    this._selected.splice(i, 1);
+    this.change();
+    return this;
+  }
+
+  // single
+  this.label(this._label);
+  this._selected = [];
+  this.change();
+  return this;
+};
+
+/**
+ * Get an option `name` or dropdown.
+ *
+ * @param {String} name
+ * @return {Element}
+ * @api public
+ */
+
+Select.prototype.get = function(name){
+  if ('string' == typeof name) {
+    name = name.toLowerCase();
+    var opt = this.options[name];
+    if (!opt) throw new Error('option "' + name + '" does not exist');
+    return opt;
+  }
+
+  return { el: this.dropdown };
+};
+
+/**
+ * Show options or `name`
+ *
+ * @param {String} name
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.show = function(name){
+  var opt = this.get(name);
+
+  // show
+  opt.el.removeAttribute('hidden');
+
+  // focus
+  if (!this._multiple && !this._searchable) {
+    this.el.focus();
+  }
+
+  // option
+  if ('string' == typeof name) return this;
+
+  // show
+  this.emit('show');
+  this.classes.add('opened');
+
+  // highlight first.
+  var el = query(':not([disabled]):not(.selected)', this.opts);
+  if (el) this.highlight(el);
+
+  return this;
+};
+
+/**
+ * Hide options or `name`.
+ *
+ * @param {String} name
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.hide = function(name){
+  var opt = this.get(name);
+  opt.el.setAttribute('hidden', '');
+  if (name) return this;
+  this.emit('hide');
+  this.classes.remove('opened');
+  return this;
+};
+
+/**
+ * Check if options or `name` is visible.
+ *
+ * @param {String} name
+ * @return {Boolean}
+ * @api public
+ */
+
+Select.prototype.visible = function(name){
+  return ! this.get(name).el.hasAttribute('hidden');
+};
+
+/**
+ * Toggle show / hide with optional `name`.
+ *
+ * @param {String} name
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.toggle = function(name){
+  console.log('toggle');
+  if ('string' != typeof name) name = null;
+
+  return this.visible(name)
+    ? this.hide(name)
+    : this.show(name);
+};
+
+/**
+ * Disable `name`.
+ *
+ * @param {String} name
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.disable = function(name){
+  var opt = this.get(name);
+  opt.el.setAttribute('disabled', true);
+  opt.disabled = true;
+  return this;
+};
+
+/**
+ * Enable `name`.
+ *
+ * @param {String} name
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.enable = function(name){
+  var opt = this.get(name);
+  opt.el.removeAttribute('disabled');
+  opt.disabled = false;
+  return this;
+};
+
+/**
+ * Set / get the selected options.
+ *
+ * @param {Array} opts
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.selected = function(arr){
+  if (1 == arguments.length) {
+    arr.forEach(this.select, this);
+    return this;
+  }
+
+  return this._selected;
+};
+
+/**
+ * Get the values.
+ *
+ * @return {Array}
+ * @api public
+ */
+
+Select.prototype.values = function(){
+  return this._selected.map(function(opt){
+    return opt.value;
+  });
+};
+
+/**
+ * Search `term`.
+ *
+ * @param {String} term
+ * @return {Search}
+ * @api public
+ */
+
+Select.prototype.search = function(term){
+  var expr = term.toLowerCase()
+    , opts = this.options
+    , self = this
+    , found = 0;
+
+  // custom search
+  this.emit('search', term, opts);
+
+  // abort
+  if (this.hasListeners('search')) return this;
+
+  // search
+  each(opts, function(name, opt){
+    if (opt.disabled) return;
+    if (opt.selected) return;
+
+    if (~name.indexOf(expr)) {
+      self.show(name);
+      if (1 == ++found) self.highlight(opt.el);
+    } else {
+      self.hide(opt.name);
+    }
+  });
+
+  // all done
+  return this.emit('found', found);
+};
+
+/**
+ * Highlight the given `name`.
+ *
+ * @param {String|Element} el
+ * @return {Select}
+ * @api private
+ */
+
+Select.prototype.highlight = function(el){
+  if ('string' == typeof el) el = this.get(el).el;
+  this.dehighlight();
+  classes(el).add('highlight');
+  this.active = el;
+  return this;
+};
+
+/**
+ * De-highlight.
+ *
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.dehighlight = function(){
+  if (!this.active) return this;
+  classes(this.active).remove('highlight');
+  this.active = null;
+  return this;
+};
+
+/**
+ * Highlight next element.
+ *
+ * @api private
+ */
+
+Select.prototype.next = function(){
+  var el = next(this.active, ':not([hidden]):not(.selected)');
+  el = el || query(':not([hidden]):not(.selected)', this.opts);
+  this.highlight(el);
+};
+
+/**
+ * Highlight previous element.
+ *
+ * @api private
+ */
+
+Select.prototype.previous = function(){
+  var el = previous(this.active, ':not([hidden]):not(.selected)');
+  el = el || query(':not([hidden]):not(.selected):last-child', this.opts);
+  this.highlight(el);
+};
+
+/**
+ * on-click.
+ *
+ * @param {Event} e
+ * @api private
+ */
+
+Select.prototype.onclick = function(e){
+  this.select(e.target.textContent);
+};
+
+/**
+ * on-input
+ *
+ * @param {Event} e
+ * @api private
+ */
+
+Select.prototype.onsearch = function(e){
+  this.search(e.target.value);
+};
+
+/**
+ * on-keydown.
+ *
+ * @param {Event} e
+ * @api private
+ */
+
+Select.prototype.onkeydown = function(e){
+  if (!this.visible()) this.show();
+
+  if (!this.active || 13 != e.which) {
+    if (this.box) this.box.onkeydown(e);
+    return;
+  }
+
+  e.preventDefault();
+  this.select(this.active.getAttribute('data-name'));
+};
+
+/**
+ * on-blur.
+ *
+ * @param {Event} e
+ * @api private
+ */
+
+Select.prototype.onblur = function(e){
+  if (this.input) return;
+  this.hide();
+};
+
+/**
+ * on-keyup.
+ *
+ * @param {Event} e
+ * @api private
+ */
+
+Select.prototype.onkeyup = function(e){
+  switch (keyname(e.which)) {
+    case 'esc': return this.hide();
+    case 'down': return this.next();
+    case 'up': return this.previous();
+  }
+};
+
+/**
+ * Emit change.
+ *
+ * @api private
+ */
+
+Select.prototype.change = function(){
+  this.emit('change', this);
+};
+
+/**
+ * Create an option.
+ *
+ * @param {String|Object} obj
+ * @param {Mixed} value
+ * @param {Element} el
+ * @return {Object}
+ * @api private
+ */
+
+function option(obj, value, el){
+  if ('string' == typeof obj) {
+    return option({
+      value: value,
+      name: obj,
+      el: el
+    });
+  }
+
+  // option
+  obj.label = obj.name;
+  obj.name = obj.name.toLowerCase();
+  obj.value = obj.value || obj.name;
+
+  // element
+  if (!obj.el) {
+    obj.el = document.createElement('li');
+    obj.el.textContent = obj.label;
+  }
+
+  // domify
+  if ('string' == typeof obj.el) {
+    obj.el = domify(obj.el);
+  }
+
+  // setup element
+  obj.el.setAttribute('data-name', obj.name);
+  classes(obj.el).add('select-option');
+  classes(obj.el).add('show');
+
+  // opt
+  return obj;
+}
+
+/**
+ * Get a search input.
+ *
+ * @param {Select} select
+ * @param {String} label
+ * @return {Element}
+ * @api private
+ */
+
+function search(select, label){
+  var el = document.createElement('input');
+  label = label || select._label;
+  el.type = 'text';
+  el.placeholder = label;
+
+  // blur
+  el.onblur = function(){
+    setTimeout(function(){
+      el.value = '';
+      select.hide();
+    }, 150);
+  };
+
+  // search
+  el.oninput = throttle(function(){
+    select.search(el.value);
+  }, 300);
+
+  // hide
+  select.on('hide', function(){
+    el.value = '';
+    var els = query.all('[hidden]:not(.selected)', select.opts);
+    for (var i = 0; i < els.length; ++i) {
+      els[i].removeAttribute('hidden');
+    }
+  });
+
+  return el;
+}
+
+});
+require.register("yields-select/template.js", function(exports, require, module){
+module.exports = '<div class=\'select\' tabindex=\'-1\'>\n  <div class=\'select-box\'>\n    <span class=\'select-label\'></span>\n  </div>\n  <div class=\'select-dropdown\' hidden>\n    <ul class=\'select-options\'></ul>\n  </div>\n</div>\n';
+});
+require.register("anthonyshort-map/index.js", function(exports, require, module){
+var SimpleMap = function(values){
+  this._keys = [];
+  this._values = [];
+  if(values) {
+    values.forEach(function(data){
+      this.set.apply(this, data);
+    });
+  }
+};
+
+SimpleMap.prototype.set = function(key, value) {
+  var index = this._keys.indexOf(key);
+  if (index === -1) {
+    index = this._keys.length;
+  }
+  this._values[index] = value;
+  this._keys[index] = key;
+};
+
+SimpleMap.prototype.get = function(key) {
+  if ( this.has(key) === false ) return undefined;
+  var index = this._keys.indexOf(key);
+  return this._values[index];
+};
+
+SimpleMap.prototype.size = function() {
+  return this._keys.length;
+};
+
+SimpleMap.prototype.remove = function(key) {
+  if ( this.has(key) === false ) return true;
+  var index = this._keys.indexOf(key);
+  this._keys.splice(index, 1);
+  this._values.splice(index, 1);
+  return true;
+};
+
+SimpleMap.prototype.values = function() {
+  return this._values;
+};
+
+SimpleMap.prototype.keys = function() {
+  return this._keys;
+};
+
+SimpleMap.prototype.forEach = function(callback, context) {
+  var i;
+  for(i = 0; i < this._keys.length; i++) {
+    callback.call(context || this._values[i], this._values[i], this._keys[i]);
+  }
+};
+
+SimpleMap.prototype.has = function(key) {
+  return this._keys.indexOf(key) > -1;
+};
+
+module.exports = SimpleMap;
+});
+require.register("anthonyshort-emitter-manager/index.js", function(exports, require, module){
+var HashMap = require('map');
+
+function mixin(obj) {
+  obj._eventManager = new Manager();
+  obj.listenTo = function(emitter, type, fn){
+    this._eventManager.on(emitter, type, fn, this);
+  };
+  obj.stopListening = function(emitter, type, fn){
+    this._eventManager.off(emitter, type, fn);
+  };
+}
+
+function Manager(obj) {
+  if(obj) return mixin(obj);
+  this._events = new HashMap();
+}
+
+Manager.prototype.on = function(obj, type, fn, context) {
+  var data = this._events.get(obj) || {};
+  var fns = data[type] || (data[type] = []);
+  var bound = fn.bind(context);
+  obj.on(type, bound);
+  fns.push({ original: fn, bound: bound });
+  this._events.set(obj, data);
+};
+
+Manager.prototype.off = function(obj, name, fn) {
+  var events = this._events;
+  if(typeof name === 'function') {
+    fn = name;
+  }
+  if(typeof obj === 'string') {
+    name = obj;
+    obj = null;
+  }
+  var objs = obj ? [obj] : this._events.keys();
+  objs.forEach(function(emitter){
+    var data = events.get(emitter);
+    for (var eventName in data) {
+      data[eventName] = data[eventName].filter(function(callback){
+        if(fn && callback.original !== fn) return true;
+        emitter.off(name || eventName, callback.bound);
+        return false;
+      });
+    }
+  });
+};
+
+module.exports = Manager;
+});
+require.register("component-event/index.js", function(exports, require, module){
+
+/**
+ * Bind `el` event `type` to `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.bind = function(el, type, fn, capture){
+  if (el.addEventListener) {
+    el.addEventListener(type, fn, capture || false);
+  } else {
+    el.attachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+/**
+ * Unbind `el` event `type`'s callback `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.unbind = function(el, type, fn, capture){
+  if (el.removeEventListener) {
+    el.removeEventListener(type, fn, capture || false);
+  } else {
+    el.detachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+});
+require.register("component-delegate/index.js", function(exports, require, module){
+
+/**
+ * Module dependencies.
+ */
+
+var matches = require('matches-selector')
+  , event = require('event');
+
+/**
+ * Delegate event `type` to `selector`
+ * and invoke `fn(e)`. A callback function
+ * is returned which may be passed to `.unbind()`.
+ *
+ * @param {Element} el
+ * @param {String} selector
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.bind = function(el, selector, type, fn, capture){
+  return event.bind(el, type, function(e){
+    if (matches(e.target, selector)) fn(e);
+  }, capture);
+  return callback;
+};
+
+/**
+ * Unbind event `type`'s callback `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @api public
+ */
+
+exports.unbind = function(el, type, fn, capture){
+  event.unbind(el, type, fn, capture);
+};
+
+});
+require.register("component-events/index.js", function(exports, require, module){
+
+/**
+ * Module dependencies.
+ */
+
+var events = require('event');
+var delegate = require('delegate');
+
+/**
+ * Expose `Events`.
+ */
+
+module.exports = Events;
+
+/**
+ * Initialize an `Events` with the given
+ * `el` object which events will be bound to,
+ * and the `obj` which will receive method calls.
+ *
+ * @param {Object} el
+ * @param {Object} obj
+ * @api public
+ */
+
+function Events(el, obj) {
+  if (!(this instanceof Events)) return new Events(el, obj);
+  if (!el) throw new Error('element required');
+  if (!obj) throw new Error('object required');
+  this.el = el;
+  this.obj = obj;
+  this._events = {};
+}
+
+/**
+ * Subscription helper.
+ */
+
+Events.prototype.sub = function(event, method, cb){
+  this._events[event] = this._events[event] || {};
+  this._events[event][method] = cb;
+};
+
+/**
+ * Bind to `event` with optional `method` name.
+ * When `method` is undefined it becomes `event`
+ * with the "on" prefix.
+ *
+ * Examples:
+ *
+ *  Direct event handling:
+ *
+ *    events.bind('click') // implies "onclick"
+ *    events.bind('click', 'remove')
+ *    events.bind('click', 'sort', 'asc')
+ *
+ *  Delegated event handling:
+ *
+ *    events.bind('click li > a')
+ *    events.bind('click li > a', 'remove')
+ *    events.bind('click a.sort-ascending', 'sort', 'asc')
+ *    events.bind('click a.sort-descending', 'sort', 'desc')
+ *
+ * @param {String} event
+ * @param {String|function} [method]
+ * @return {Function} callback
+ * @api public
+ */
+
+Events.prototype.bind = function(event, method){
+  var e = parse(event);
+  var el = this.el;
+  var obj = this.obj;
+  var name = e.name;
+  var method = method || 'on' + name;
+  var args = [].slice.call(arguments, 2);
+
+  // callback
+  function cb(){
+    var a = [].slice.call(arguments).concat(args);
+    obj[method].apply(obj, a);
+  }
+
+  // bind
+  if (e.selector) {
+    cb = delegate.bind(el, e.selector, name, cb);
+  } else {
+    events.bind(el, name, cb);
+  }
+
+  // subscription for unbinding
+  this.sub(name, method, cb);
+
+  return cb;
+};
+
+/**
+ * Unbind a single binding, all bindings for `event`,
+ * or all bindings within the manager.
+ *
+ * Examples:
+ *
+ *  Unbind direct handlers:
+ *
+ *     events.unbind('click', 'remove')
+ *     events.unbind('click')
+ *     events.unbind()
+ *
+ * Unbind delegate handlers:
+ *
+ *     events.unbind('click', 'remove')
+ *     events.unbind('click')
+ *     events.unbind()
+ *
+ * @param {String|Function} [event]
+ * @param {String|Function} [method]
+ * @api public
+ */
+
+Events.prototype.unbind = function(event, method){
+  if (0 == arguments.length) return this.unbindAll();
+  if (1 == arguments.length) return this.unbindAllOf(event);
+
+  // no bindings for this event
+  var bindings = this._events[event];
+  if (!bindings) return;
+
+  // no bindings for this method
+  var cb = bindings[method];
+  if (!cb) return;
+
+  events.unbind(this.el, event, cb);
+};
+
+/**
+ * Unbind all events.
+ *
+ * @api private
+ */
+
+Events.prototype.unbindAll = function(){
+  for (var event in this._events) {
+    this.unbindAllOf(event);
+  }
+};
+
+/**
+ * Unbind all events for `event`.
+ *
+ * @param {String} event
+ * @api private
+ */
+
+Events.prototype.unbindAllOf = function(event){
+  var bindings = this._events[event];
+  if (!bindings) return;
+
+  for (var method in bindings) {
+    this.unbind(event, method);
+  }
+};
+
+/**
+ * Parse `event`.
+ *
+ * @param {String} event
+ * @return {Object}
+ * @api private
+ */
+
+function parse(event) {
+  var parts = event.split(/ +/);
+  return {
+    name: parts.shift(),
+    selector: parts.join(' ')
+  }
+}
+
+});
 require.register("eugenics-mindmap/index.js", function(exports, require, module){
+require('./controller');
+
+// var MindMap = require('mindmap');
+// var Fullscreen = require('fullscreen');
+// var $ = require('jquery');
+// var _ = require('underscore');
+// var Backbone = require('backbone');
+// var select = require('select');
+
+
+// // // on search we need to clear our options,
+// // // we should also do a debounced search.
+
+// // function search(term){
+// //   _.each(searchBox.options, function(opt){
+// //     searchBox.remove(opt.name);
+// //   });
+// //   var re = new RegExp(term, 'i');
+// //   var filtered = _.filter(eugenicsMap.docs, function(doc){
+// //    return re.test(doc.title);
+// //   });
+// //   _.each(filtered, function(res){
+// //     searchBox.add(res.title, res);
+// //   });
+// //   if (filtered[0]){
+// //     searchBox.highlight(filtered[0].title);
+// //   }
+// // }
+
+// // var searchBox = select()
+// //   .label('Search the Mindmap')
+// //   .searchable()
+// //   .on('search', search)
+// //   .on('change', function(select){
+// //     var val = select.values()[0];
+// //     eugenicsMap.selectNode(val._id);
+// //     var toDeselect = eugenicsMap.selectedNode._id;
+// //     initialBuild();
+// //     if (toDeselect) {
+// //       console.log('deselect!', toDeselect);
+// //       mymap.deselectNode(toDeselect);
+// //     }
+// //     router.navigate('discover/mindmap/'+ val._id);
+
+// //   });
+
+// // $('#query').append(searchBox.el);
+
+
+
+// var getUnique = function(arr){
+//   var u = {}, a = [];
+//   for(var i = 0, l = arr.length; i < l; ++i){
+//     if(u.hasOwnProperty(arr[i]._id)) {
+//        continue;
+//     }
+//     a.push(arr[i]);
+//     u[arr[i]._id] = 1;
+//  }
+//  return a;
+// }
+
+// var el = document.getElementById('mindmap');
+// var mymap = new MindMap(el);
+
+// var EugenicsMap = function(docs){
+//   this.docs = docs;
+// };
+
+// EugenicsMap.prototype.bind = function(){
+//   mymap.on('nodeSelected', _.bind(this.onNodeSelected, this));
+//   $('#fullscreenmode').on('click', function(e){
+//     e.preventDefault();
+//     Fullscreen(document.getElementById('app'));
+//   });
+
+//   Fullscreen.on('change', function(full){
+//     if (full){
+//       setTimeout(function(){
+//         mymap.width($('#mindmap').width());
+//       }, 200);
+//       mymap.height($(window).height());
+//       mymap.determineOffset();
+//       mymap.animate();
+//     } else {
+//       mymap.width($(el).width());
+//       mymap.height(600);
+//       mymap.determineOffset();
+//       mymap.animate();
+//     }
+//   });
+// };
+
+// EugenicsMap.prototype.selectRandom = function(){
+//   var random = this.docs[Math.floor(Math.random()*this.docs.length)];
+//   this.selectedNode = random;
+//   this.currentSideview = new SideView(random).render();
+//   // mymap.selectNode(random._id);
+// };
+
+// EugenicsMap.prototype.selectNode = function(id){
+//   var node = _.find(this.docs, function(doc){
+//     return doc._id === id;
+//   });
+//   this.selectedNode = node;
+//   this.currentSideview = new SideView(node).render();
+// };
+
+// EugenicsMap.prototype.onNodeSelected = function(node){
+//   router.navigate('discover/mindmap/'+ node.attr._id);
+//   if (this.selectedNode && this.selectedNode != node) {
+//     mymap.deselectNode(this.selectedNode._id);
+//   }
+//   this.currentSideview = new SideView(node.attr).render();
+//   this.selectedNode = node.attr;
+//   this.determineNodes().determineLinks();
+//   this.draw();
+// };
+
+// EugenicsMap.prototype.determineNodes = function(){
+//   var links = this.selectedNode.connections;
+//   var self = this;
+//   this.connectedNodes = _.map(links, function(link){
+//     var _id = (link.from._id !== self.selectedNode._id)
+//       ? link.from._id
+//       : link.to._id;
+//     return self.get(_id);
+//   });
+
+//   this.connectedNodes = _.compact(this.connectedNodes);
+
+//   return this;
+// };
+
+// // xxx this is pretty insane. there's a better way.
+// EugenicsMap.prototype.determineLinks = function(){
+//   this.links = _.clone(this.selectedNode.connections || []);
+//   var self = this;
+//   _.each(this.links, function(l){
+//     delete l.opacity;
+//   });
+
+//   var connections = _.chain(this.connectedNodes)
+//     .pluck('connections')
+//     .flatten()
+//     .uniq()
+//     .value();
+
+//   _.each(connections, function(link){
+//     var from = false;
+//     var to = false;
+//     _.each(self.connectedNodes, function(n){
+//       if (n._id === link.from._id) from = true;
+//       if (n._id === link.to._id) to = true;
+//     });
+//     if (from && to) {
+//       var contains = _.some(self.links, function(l){
+//         return l._id === link._id;
+//       });
+//       if (!contains){
+//         link.opacity = 0.1;
+//         self.links.push(link);
+//       }
+//     }
+//   });
+
+//   return this;
+// };
+
+// EugenicsMap.prototype.get = function(_id){
+//   return _.find(this.docs, function(doc){
+//     return doc._id === _id;
+//   });
+// };
+
+// EugenicsMap.prototype.draw = function(){
+//   this.connectedNodes.push(this.selectedNode);
+//   mymap.nodes.data(this.connectedNodes, function(attr){
+//     return attr._id;
+//   });
+
+//   mymap.links.data(this.links, function(attr){
+//     return attr._id;
+//   });
+
+//   return this;
+// };
+
+// var eugenicsMap;
+
+// function boot(fn){
+//   $.get('/api/prods/mindmap', function(docs){
+//     docs = _.map(docs, function(doc){
+//       if (doc.image && doc.image.url) {
+//         doc.image.url = doc.image.url + '/convert?w=100&h=100&fit=crop&align=faces';
+//       }
+//       return doc;
+//     });
+//     eugenicsMap = new EugenicsMap(docs);
+//     mymap.width($('#mindmap').width());
+//     fn();
+//   });
+// }
+
+
+
+// ////////////
+// // Search //
+// ////////////
+
+// // var lazySearch = _.debounce(search, 350);
+
+// // function search(e){
+// //   var val = $(e.currentTarget).val();
+// //   var re = new RegExp(val, 'i');
+// //   var filtered = _.filter(eugenicsMap.docs, function(doc){
+// //    return re.test(doc.title);
+// //   });
+// //   if (filtered.length < 1) return;
+// //   if (filtered[0] == eugenicsMap.selectedNode) return;
+// //   eugenicsMap.selectNode(filtered[0]._id);
+// //   initialBuild();
+// // }
+
+// // $('#query').on('input', lazySearch);
+
+
+
+// //////////////////////////////////////
+// // Sideview to display node content //
+// //////////////////////////////////////
+
+// var linearConversion = require('linear-conversion');
+
+// var SideView = function(model){
+//   this.model = model;
+//   this.$el = $('#data');
+//   this.conversion = linearConversion([0, 10], [10, 30]);
+//   this.template = require('./template');
+// };
+
+// SideView.prototype.render = function(){
+//   var model = _.clone(this.model);
+//   model.links = this.getConnectedNodes();
+//   this.$el.html(this.template(model));
+//   this.$el.find('a.link').bind('click', _.bind(this.selectNode, this));
+//   return this;
+// };
+
+// SideView.prototype.selectNode = function(e){
+//   e.preventDefault();
+//   var _id = $(e.currentTarget).data('id');
+//   mymap.selectNode(_id);
+// };
+
+// SideView.prototype.getConnectedNodes = function(){
+//   var self = this;
+//   return _.chain(self.model.connections)
+//     .map(function(conn){
+//       var obj = {};
+//       if (conn.from._id === self.model._id) _.extend(obj, conn.to);
+//       else _.extend(obj, conn.from);
+//       obj.size = self.conversion(conn.strength);
+//       return obj;
+//     })
+//     .sortBy(function(conn){
+//       return -conn.size;
+//     })
+//     .value();
+// }
+
+
+// function initialBuild(options){
+//   options = options || {};
+//   if (options.random) eugenicsMap.selectRandom();
+
+//   eugenicsMap
+//     .determineNodes()
+//     .determineLinks()
+//     .draw();
+
+//   mymap.selectNode(eugenicsMap.selectedNode._id, true);
+
+//   mymap.animate();
+//   eugenicsMap.bind();
+// }
+
+// var Router = Backbone.Router.extend({
+//   routes: {
+//     'discover/mindmap' : 'random',
+//     'discover/mindmap/' : 'random',
+//     'discover/mindmap/:id' : 'select'
+//   },
+//   random: function(){
+//     if (!eugenicsMap){
+//       boot(function(){ initialBuild({ random: true }); });
+//     }
+//     else {
+//       eugenicsMap.selectRandom();
+//     }
+//   },
+//   select: function(id){
+//     console.log('select', id);
+//     if (!eugenicsMap) {
+//       boot(function(){
+//         eugenicsMap.selectNode(id);
+//         initialBuild();
+//         mymap.selectNode(id, true);
+//       });
+//     }
+//   }
+// });
+
+// var router = new Router();
+// Backbone.history.start({ pushState: true });
+
+
+
+});
+require.register("eugenics-mindmap/controller.js", function(exports, require, module){
 var MindMap = require('mindmap');
 var Fullscreen = require('fullscreen');
 var $ = require('jquery');
 var _ = require('underscore');
+var Backbone = require('backbone');
+var EmitterManager = require('emitter-manager');
 
-// xxx note that jquery and underscore aren't being used
-// as components, but as system-wide requirements. We assume
-// that they are already loaded with their global vars
-// exposed. Probably not the best idea, really.
+var myMap = new MindMap(document.getElementById('mindmap'));
+var CurrentSideView = require('./side-view');
 
-var getUnique = function(arr){
+exports.myMap = myMap;
+
+
+function getUnique(arr){
   var u = {}, a = [];
   for(var i = 0, l = arr.length; i < l; ++i){
     if(u.hasOwnProperty(arr[i]._id)) {
@@ -14655,15 +18269,19 @@ var getUnique = function(arr){
  return a;
 }
 
-var el = document.getElementById('mindmap');
-var mymap = new MindMap(el);
+var noop = function(){};
 
-var EugenicsMap = function(docs){
-  this.docs = docs;
+var EugenicsMap = function(){
+  this.ready = false;
+  this.callbacks = [];
+  this.docs = [];
+  this.bind();
 };
 
+EmitterManager(EugenicsMap.prototype);
+
 EugenicsMap.prototype.bind = function(){
-  mymap.on('nodeSelected', _.bind(this.onNodeSelected, this));
+  this.listenTo(myMap, 'nodeSelected', this.onnodeselected);
   $('#fullscreenmode').on('click', function(e){
     e.preventDefault();
     Fullscreen(document.getElementById('app'));
@@ -14672,61 +18290,129 @@ EugenicsMap.prototype.bind = function(){
   Fullscreen.on('change', function(full){
     if (full){
       setTimeout(function(){
-        mymap.width($('#mindmap').width());
-      }, 200);
-      mymap.height($(window).height());
-      mymap.determineOffset();
-      mymap.animate();
+        myMap.width($('#mindmap').width());
+        myMap.height($(window).height());
+        myMap.determineOffset();
+        myMap.animate();
+      }, 500);
     } else {
-      mymap.width($(el).width());
-      mymap.height(600);
-      mymap.determineOffset();
-      mymap.animate();
+      setTimeout(function(){
+        myMap.width($(el).width());
+        myMap.height(600);
+        myMap.determineOffset();
+        myMap.animate();
+      }, 500);
     }
+  });
+
+};
+
+EugenicsMap.prototype.findById = function(id){
+  console.log('this docs!', this.docs);
+  return _.find(this.docs, function(doc){
+    return doc._id == id;
   });
 };
 
-EugenicsMap.prototype.selectRandom = function(){
-  var random = this.docs[Math.floor(Math.random()*this.docs.length)];
-  this.selectedNode = random;
-  this.currentSideview = new SideView(random).render();
-  // mymap.selectNode(random._id);
+EugenicsMap.prototype.selectNode = function(id, silent){
+  console.log('select node!', id);
+  if (this.selectedNode) {
+    myMap.deselectNode(this.selectedNode._id);
+    console.log('deselecting', this.selectedNode._id);
+  }
+  this.selectedNode = this.findById(id);
+  this.redraw();
 };
 
-EugenicsMap.prototype.onNodeSelected = function(node){
-  console.log('node selected');
-  if (this.selectedNode) mymap.unselectNode(this.selectedNode._id);
-  this.currentSideview = new SideView(node.attr).render();
+EugenicsMap.prototype.selectRandom = function(){
+  var random = this.docs[Math.floor(Math.random() * this.docs.length )];
+  this.selectNode(random._id, true);
+};
+
+// If we want to programatically select a node, we should select
+EugenicsMap.prototype.onnodeselected = function(node){
+  console.log('nodeselected');
+  router.navigate('discover/mindmap/'+ node.attr._id);
+  if (this.selectedNode) myMap.deselectNode(this.selectedNode._id);
   this.selectedNode = node.attr;
-  this.determineNodes().determineLinks();
-  this.draw();
+  this.redraw();
+};
+
+
+EugenicsMap.prototype.redraw = function(){
+  console.log('redrawing', this.selectedNode);
+  var node = this.selectedNode;
+  if (this.currentSideView) this.currentSideView.close();
+  this.currentSideView = new CurrentSideView(node).render();
+  this
+    .determineNodes()
+    .determineLinks();
+
+  this.connectedNodes.push(node);
+  myMap.nodes.data(this.connectedNodes, function(attr){
+    return attr._id;
+  });
+  myMap.links.data(this.links, function(attr){
+    return attr._id;
+  });
+  myMap.selectNode(node._id, true);
+  return this;
+};
+
+EugenicsMap.prototype.fetch = function(fn){
+  fn = fn || noop;
+  if (this.ready) return fn();
+  this.callbacks.push(fn);
+  if (this.fetching) return;
+  this.fetching = true;
+  var self = this;
+  $.get('/api/prods/mindmap', function(docs){
+    // format our image url
+    self.docs = _.map(docs, function(doc){
+      if (doc.image && doc.image.url) {
+        doc.image.url += '/convert?w=100&h=100&fit=crop&align=faces';
+      }
+      return doc;
+    });
+
+    self.ready = true;
+    self.fetching = false;
+
+    console.log(self.callbacks);
+
+    // call everyone back to say that we are ready
+    _.each(self.callbacks, function(tocall){
+      console.log('calling back!');
+      tocall();
+    });
+  });
 };
 
 EugenicsMap.prototype.determineNodes = function(){
   var links = this.selectedNode.connections;
-  var self = this;
-  this.connectedNodes = _.map(links, function(link){
-    var _id = (link.from._id !== self.selectedNode._id)
+  this.connectedNodes = [];
+  _.each(links, function(link){
+    var _id = (link.from._id !== this.selectedNode._id)
       ? link.from._id
       : link.to._id;
-    return self.get(_id);
-  });
+    var node = this.findById(_id);
+    if (node) this.connectedNodes.push(node);
+  }, this);
   return this;
 };
 
-// xxx this is pretty insane. there's a better way.
+
 EugenicsMap.prototype.determineLinks = function(){
   this.links = _.clone(this.selectedNode.connections || []);
-  var self = this;
-  _.each(this.links, function(l){
-    delete l.opacity;
-  });
+    _.each(this.links, function(l){ delete l.opacity; });
 
   var connections = _.chain(this.connectedNodes)
     .pluck('connections')
     .flatten()
     .uniq()
     .value();
+
+  var self = this;
 
   _.each(connections, function(link){
     var from = false;
@@ -14747,69 +18433,125 @@ EugenicsMap.prototype.determineLinks = function(){
   });
 
   return this;
-};
-
-EugenicsMap.prototype.get = function(_id){
-  return _.find(this.docs, function(doc){
-    return doc._id === _id;
-  });
-};
-
-EugenicsMap.prototype.draw = function(){
-  this.connectedNodes.push(this.selectedNode);
-  mymap.nodes.data(this.connectedNodes, function(attr){
-    return attr._id;
-  });
-
-  mymap.links.data(this.links, function(attr){
-    return attr._id;
-  });
-
-  return this;
-};
-
-var eugenicsMap;
-
-$.get('/api/prods/mindmap', function(docs){
-  eugenicsMap = new EugenicsMap(docs);
-    mymap.width($('#mindmap').width());
-
-  eugenicsMap.selectRandom();
-  eugenicsMap
-    .determineNodes()
-    .determineLinks()
-    .draw();
-
-  mymap.selectNode(eugenicsMap.selectedNode._id, true);
-
-  mymap.animate();
-  eugenicsMap.bind();
-});
-
-
-
-var lazySearch = _.debounce(search, 350);
-
-function search(e){
-  var val = $(e.currentTarget).val();
-  var re = new RegExp(val, 'i');
-  var filtered = _.filter(eugenicsMap.docs, function(doc){
-   return re.test(doc.title);
-  });
-  if (filtered.length < 1) return;
-  if (filtered[0] == eugenicsMap.selectedNode) return;
-  mymap.selectNode(filtered[0]._id);
 }
 
-$('#query').on('input', lazySearch);
+function boot(options, fn){
+  options = options || {};
+  myMap.width($('#mindmap').width());
+  booted = true;
+  eugenicsMap.fetch(function(){
+    console.log('fetch complete');
+    if (options.random) eugenicsMap.selectRandom();
+    myMap.animate();
+    if (fn) fn();
+  });
+}
 
+var eugenicsMap = new EugenicsMap();
+exports.controller = eugenicsMap;
+var booted = false;
+var Router = Backbone.Router.extend({
+  routes: {
+    'discover/mindmap' : 'random',
+    'discover/mindmap/' : 'random',
+    'discover/mindmap/:id' : 'select'
+  },
+  random: function(){
+    if (!booted) boot({ random: true });
+    else eugenicsMap.selectRandom();
+  },
+  select: function(id){
+    if (!booted) {
+      boot({}, function(){
+        console.log('select id');
+        eugenicsMap.selectNode(id, true);
+      });
+    }
+  }
+});
+
+var Search = require('./search');
+
+var router = new Router();
+Backbone.history.start({ pushState: true });
+});
+require.register("eugenics-mindmap/search.js", function(exports, require, module){
+// Search Box
+
+var SelectBox = require('select');
+var $ = require('jquery');
+var _ = require('underscore');
+
+var eugenicsMap = require('./controller').controller;
+
+/**
+ * Instantiate a new searchbox and
+ * append it to the DOM.
+ */
+
+var search = SelectBox()
+  .label('Search')
+  .searchable()
+  .on('search', search)
+  .on('change', onchange);
+
+$('#query').append(search.el);
+
+/**
+ * When a search term is entered, update our
+ * list of options.
+ * @param  {String} term
+ */
+
+function search(term){
+  eugenicsMap.fetch(function(){
+
+    // remove our previous options
+    _.each(search.options, function(option){
+      search.remove(option.name);
+    });
+
+    // Filter our documents
+    var re = new RegExp(term, 'i');
+    var filtered = [];
+    var docs = eugenicsMap.docs;
+
+    _.each(docs, function(doc){
+      if (re.test(doc.title)) {
+        filtered.push(doc);
+        search.add(doc.title, doc);
+      }
+    });
+
+    if (filtered[0]) {
+      search.highlight(filtered[0].title);
+    }
+  });
+}
+
+/**
+ * When our search result changes, update our
+ * map.
+ */
+
+function onchange(){
+  var selected = search.values()[0];
+  if (!selected) return;
+  eugenicsMap.selectNode(selected._id);
+}
+});
+require.register("eugenics-mindmap/side-view.js", function(exports, require, module){
+var linearConversion = require('linear-conversion');
+var $ = require('jquery');
+var events = require('events');
+var _ = require('underscore');
+
+var myMap = require('./controller').myMap;
 
 
 //////////////////////////////////////
 // Sideview to display node content //
 //////////////////////////////////////
-
-var linearConversion = require('linear-conversion');
 
 var SideView = function(model){
   this.model = model;
@@ -14818,18 +18560,25 @@ var SideView = function(model){
   this.template = require('./template');
 };
 
+module.exports = SideView;
+
 SideView.prototype.render = function(){
   var model = _.clone(this.model);
   model.links = this.getConnectedNodes();
   this.$el.html(this.template(model));
-  this.$el.find('a.link').bind('click', _.bind(this.selectNode, this));
+  this.events = events(this.$el.get(0), this);
+  this.events.bind('click .link', 'selectNode');
   return this;
+};
+
+SideView.prototype.close = function(){
+  this.events.unbind();
 };
 
 SideView.prototype.selectNode = function(e){
   e.preventDefault();
-  var _id = $(e.currentTarget).data('id');
-  mymap.selectNode(_id);
+  var controller = require('./controller').controller;
+  controller.selectNode($(e.target).data('id'));
 };
 
 SideView.prototype.getConnectedNodes = function(){
@@ -14847,8 +18596,6 @@ SideView.prototype.getConnectedNodes = function(){
     })
     .value();
 }
-
-
 
 });
 require.register("eugenics-mindmap/jade-runtime.js", function(exports, require, module){
@@ -15036,7 +18783,7 @@ require.register("eugenics-mindmap/template.js", function(exports, require, modu
 module.exports = function anonymous(locals) {
 var buf = [];
 with (locals || {}) {
-buf.push("<h2>" + (jade.escape(null == (jade.interp = title) ? "" : jade.interp)) + "</h2><p>" + (jade.escape(null == (jade.interp = fullDescription) ? "" : jade.interp)) + "</p>");
+buf.push("<h2>" + (jade.escape(null == (jade.interp = title) ? "" : jade.interp)) + "</h2><p>" + (((jade.interp = fullDescription) == null ? '' : jade.interp)) + "</p>");
 if ( locals.resources)
 {
 // iterate resources
@@ -15047,7 +18794,7 @@ if ( locals.resources)
     for (var $index = 0, $$l = $$obj.length; $index < $$l; $index++) {
       var resource = $$obj[$index];
 
-buf.push("<p class=\"small\">" + (jade.escape(null == (jade.interp = resource) ? "" : jade.interp)) + "</p>");
+buf.push("<p class=\"small\">" + (((jade.interp = resource.resource) == null ? '' : jade.interp)) + "</p>");
     }
 
   } else {
@@ -15055,7 +18802,7 @@ buf.push("<p class=\"small\">" + (jade.escape(null == (jade.interp = resource) ?
     for (var $index in $$obj) {
       $$l++;      if ($$obj.hasOwnProperty($index)){      var resource = $$obj[$index];
 
-buf.push("<p class=\"small\">" + (jade.escape(null == (jade.interp = resource) ? "" : jade.interp)) + "</p>");
+buf.push("<p class=\"small\">" + (((jade.interp = resource.resource) == null ? '' : jade.interp)) + "</p>");
       }
 
     }
@@ -15064,9 +18811,9 @@ buf.push("<p class=\"small\">" + (jade.escape(null == (jade.interp = resource) ?
 }).call(this);
 
 }
-buf.push("<h5>Related Nodes</h5>");
-if ( locals.links)
+if ( locals.links.length)
 {
+buf.push("<h5>Related Nodes</h5>");
 // iterate links
 ;(function(){
   var $$obj = links;
@@ -15094,35 +18841,11 @@ buf.push("<div><a" + (jade.attrs({ 'href':('#'), 'data-id':(link._id), 'style':(
 }
 if ( locals.image)
 {
-buf.push("<div class=\"images\"><img" + (jade.attrs({ 'src':(image.url) }, {"src":true})) + "/></div>");
+buf.push("<div class=\"images\"><img" + (jade.attrs({ 'src':(image.url + '/convert?w=125&h=100') }, {"src":true})) + "/></div>");
 }
 }
 return buf.join("");
 }
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-require.register("eugenics-mindmap/template.jade", function(exports, require, module){
-module.exports = 'h2=title\np=fullDescription\nif locals.resources\n	for resource in resources\n		p.small=resource\nh5 Related Nodes\nif locals.links\n	for link in links\n		div\n			a.link(href=\'#\', data-id=link._id, style=\'font-size:\'+link.size+\'px;\')=link.title\nif locals.image\n	.images\n		img(src=image.url)';
 });
 require.alias("component-fullscreen/index.js", "eugenics-mindmap/deps/fullscreen/index.js");
 require.alias("component-fullscreen/index.js", "fullscreen/index.js");
@@ -15166,9 +18889,11 @@ require.alias("component-bind/index.js", "eugenicsarchivesca-mind-map/deps/bind/
 require.alias("bmcmahen-linear-conversion/index.js", "eugenicsarchivesca-mind-map/deps/linear-conversion/index.js");
 require.alias("bmcmahen-linear-conversion/index.js", "eugenicsarchivesca-mind-map/deps/linear-conversion/index.js");
 require.alias("bmcmahen-linear-conversion/index.js", "bmcmahen-linear-conversion/index.js");
+
 require.alias("bmcmahen-canvas-string-ellipsis/index.js", "eugenicsarchivesca-mind-map/deps/canvas-string-ellipsis/index.js");
 require.alias("bmcmahen-canvas-string-ellipsis/index.js", "eugenicsarchivesca-mind-map/deps/canvas-string-ellipsis/index.js");
 require.alias("bmcmahen-canvas-string-ellipsis/index.js", "bmcmahen-canvas-string-ellipsis/index.js");
+
 require.alias("component-tween/index.js", "eugenicsarchivesca-mind-map/deps/tween/index.js");
 require.alias("component-emitter/index.js", "component-tween/deps/emitter/index.js");
 
@@ -15193,16 +18918,127 @@ require.alias("anthonyshort-map/index.js", "anthonyshort-emitter-manager/deps/ma
 
 require.alias("component-autoscale-canvas/index.js", "eugenicsarchivesca-mind-map/deps/autoscale-canvas/index.js");
 
+require.alias("component-pinch/index.js", "eugenicsarchivesca-mind-map/deps/pinch/index.js");
+require.alias("component-pinch/e.js", "eugenicsarchivesca-mind-map/deps/pinch/e.js");
+require.alias("component-pinch/index.js", "eugenicsarchivesca-mind-map/deps/pinch/index.js");
+require.alias("component-events/index.js", "component-pinch/deps/events/index.js");
+require.alias("component-event/index.js", "component-events/deps/event/index.js");
+
+require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
+require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
+
+require.alias("component-pinch/index.js", "component-pinch/index.js");
+
+require.alias("stagas-mouseleave/index.js", "eugenicsarchivesca-mind-map/deps/mouseleave/index.js");
+require.alias("stagas-within/index.js", "stagas-mouseleave/deps/within/index.js");
+
 require.alias("eugenicsarchivesca-mind-map/index.js", "eugenicsarchivesca-mind-map/index.js");
+
 require.alias("bmcmahen-linear-conversion/index.js", "eugenics-mindmap/deps/linear-conversion/index.js");
 require.alias("bmcmahen-linear-conversion/index.js", "eugenics-mindmap/deps/linear-conversion/index.js");
 require.alias("bmcmahen-linear-conversion/index.js", "linear-conversion/index.js");
 require.alias("bmcmahen-linear-conversion/index.js", "bmcmahen-linear-conversion/index.js");
+
 require.alias("component-jquery/index.js", "eugenics-mindmap/deps/jquery/index.js");
 require.alias("component-jquery/index.js", "jquery/index.js");
 
 require.alias("component-underscore/index.js", "eugenics-mindmap/deps/underscore/index.js");
 require.alias("component-underscore/index.js", "underscore/index.js");
 
+require.alias("bmcmahen-backbone/index.js", "eugenics-mindmap/deps/backbone/index.js");
+require.alias("bmcmahen-backbone/backbone.js", "eugenics-mindmap/deps/backbone/backbone.js");
+require.alias("bmcmahen-backbone/index.js", "backbone/index.js");
+require.alias("component-underscore/index.js", "bmcmahen-backbone/deps/underscore/index.js");
+
+require.alias("component-jquery/index.js", "bmcmahen-backbone/deps/jquery/index.js");
+
+require.alias("yields-select/index.js", "eugenics-mindmap/deps/select/index.js");
+require.alias("yields-select/template.js", "eugenics-mindmap/deps/select/template.js");
+require.alias("yields-select/index.js", "eugenics-mindmap/deps/select/index.js");
+require.alias("yields-select/index.js", "select/index.js");
+require.alias("ianstormtaylor-previous-sibling/index.js", "yields-select/deps/previous-sibling/index.js");
+require.alias("yields-traverse/index.js", "ianstormtaylor-previous-sibling/deps/traverse/index.js");
+require.alias("yields-traverse/index.js", "ianstormtaylor-previous-sibling/deps/traverse/index.js");
+require.alias("component-matches-selector/index.js", "yields-traverse/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("yields-traverse/index.js", "yields-traverse/index.js");
+
+require.alias("ianstormtaylor-next-sibling/index.js", "yields-select/deps/next-sibling/index.js");
+require.alias("yields-traverse/index.js", "ianstormtaylor-next-sibling/deps/traverse/index.js");
+require.alias("yields-traverse/index.js", "ianstormtaylor-next-sibling/deps/traverse/index.js");
+require.alias("component-matches-selector/index.js", "yields-traverse/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("yields-traverse/index.js", "yields-traverse/index.js");
+
+require.alias("component-throttle/index.js", "yields-select/deps/throttle/index.js");
+
+require.alias("component-pillbox/index.js", "yields-select/deps/pillbox/index.js");
+require.alias("component-events/index.js", "component-pillbox/deps/events/index.js");
+require.alias("component-event/index.js", "component-events/deps/event/index.js");
+
+require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
+require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
+
+require.alias("component-keyname/index.js", "component-pillbox/deps/keyname/index.js");
+
+require.alias("component-emitter/index.js", "component-pillbox/deps/emitter/index.js");
+
+require.alias("component-each/index.js", "component-pillbox/deps/each/index.js");
+require.alias("component-to-function/index.js", "component-each/deps/to-function/index.js");
+
+require.alias("component-type/index.js", "component-each/deps/type/index.js");
+
+require.alias("component-set/index.js", "component-pillbox/deps/set/index.js");
+
+require.alias("component-emitter/index.js", "yields-select/deps/emitter/index.js");
+
+require.alias("component-keyname/index.js", "yields-select/deps/keyname/index.js");
+
+require.alias("component-classes/index.js", "yields-select/deps/classes/index.js");
+require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
+
+require.alias("component-events/index.js", "yields-select/deps/events/index.js");
+require.alias("component-event/index.js", "component-events/deps/event/index.js");
+
+require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
+require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
+
+require.alias("component-domify/index.js", "yields-select/deps/domify/index.js");
+
+require.alias("component-query/index.js", "yields-select/deps/query/index.js");
+
+require.alias("component-each/index.js", "yields-select/deps/each/index.js");
+require.alias("component-to-function/index.js", "component-each/deps/to-function/index.js");
+
+require.alias("component-type/index.js", "component-each/deps/type/index.js");
+
+require.alias("yields-select/index.js", "yields-select/index.js");
+
+require.alias("anthonyshort-emitter-manager/index.js", "eugenics-mindmap/deps/emitter-manager/index.js");
+require.alias("anthonyshort-emitter-manager/index.js", "emitter-manager/index.js");
+require.alias("anthonyshort-map/index.js", "anthonyshort-emitter-manager/deps/map/index.js");
+
+require.alias("component-events/index.js", "eugenics-mindmap/deps/events/index.js");
+require.alias("component-events/index.js", "events/index.js");
+require.alias("component-event/index.js", "component-events/deps/event/index.js");
+
+require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
+require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
+
 require.alias("eugenics-mindmap/index.js", "eugenics-mindmap/index.js");
+
 require("eugenics-mindmap/jade-runtime");

@@ -1,3 +1,100 @@
+.pillbox {
+  display: inline-block;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.pillbox input, 
+.pillbox input:focus {
+  border: none;
+  outline: none;
+}
+
+.pillbox ul {
+  list-style: none;
+  padding: 0px;
+  margin: 0px;
+  display: inline;
+}
+
+.pillbox ul li {
+  display: inline-block;
+}
+
+
+
+
+
+.select {
+  position: relative;
+  display: inline-block;
+  -webkit-user-select: none;
+  user-select: none;
+  min-width: 150px;
+}
+
+.select.selected .select-label {
+  font-weight: bold;
+  color: #333;
+}
+
+.select .select-option[disabled] {
+  opacity: .6;
+  pointer-events: none;
+}
+
+.select .select-box {
+  width: 100%;
+  border: 1px solid #ddd;
+  padding: 4px 0;
+}
+
+.select .select-box {
+  cursor: pointer;
+}
+
+.select .select-label {
+  padding: 0 8px;
+  color: #aaa;
+}
+
+.select .select-option {
+  cursor: pointer;
+  display: block;
+  padding: 3px 4px;
+}
+
+.select .select-options {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.select:focus {
+  outline: 0;
+}
+
+.select .select-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  background: #fff;
+  z-index: 1;
+  border: 1px solid #ddd;
+}
+
+.select .selected {
+  display: none;
+}
+
+
+
+
+
 /* line 1 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/node_modules/component-stylus-plugin/node_modules/stylus/lib/functions/index.styl */
 
 /* line 3 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/variables.styl */
@@ -44,19 +141,88 @@ a.link {
   width: 30%;
   bottom: 0;
   position: absolute;
+  background: #fff;
   top: 0;
   padding: 10px 15px;
   box-sizing: border-box;
   overflow: auto;
+  overflow-x: hidden;
   right: 0;
   border-left: 2px dashed #eee;
   border-radius: 3px;
 }
 
-/* line 45 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 47 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #data h2 {
   line-height: 32px;
   margin-top: 15px;
   padding-bottom: 10px;
   color: #049cdb;
+}
+
+/* line 54 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+#query {
+  position: absolute;
+  top: 8px;
+  background: none;
+  left: 40px;
+}
+
+/* line 61 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+p.small {
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* line 66 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+#query .select {
+  width: 200px;
+}
+
+/* line 70 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+#query .select .select-dropdown {
+  overflow: hidden;
+  max-height: 350px;
+}
+
+/* line 75 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+#query .select .select-box {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* line 84 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+#query .select .select-label {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  width: 100%;
+}
+
+/* line 92 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+#query .select .select-options {
+  max-height: 320px;
+  overflow: hidden;
+}
+
+/* line 97 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+#query .select .select-option {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* line 103 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+.select-option.highlight {
+  border-radius: 0;
+}
+
+/* line 107 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+#query input {
+  width: 100%;
+  box-sizing: border-box;
 }

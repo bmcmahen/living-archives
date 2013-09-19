@@ -1,7 +1,7 @@
 extends ../../prods/layout
 
 block append styles
-  link(href='/styles/mindmap.css', rel='stylesheet')
+  link(href='/javascripts/mindmap.css', rel='stylesheet')
 
 block append components
   script(src="/javascripts/mindmap.js")
@@ -18,7 +18,7 @@ block content
     .prod-heading
       a#fullscreenmode(href='#')
         i.icon-fullscreen.icon-large
-      input#query(placeholder='Search')
+      #query
     #mindmap
     #data
       h2#map-heading

@@ -27,11 +27,9 @@ function require(path, parent, orig) {
   // by invoking the module's
   // registered function
   if (!module.exports) {
-    var mod = {};
-    mod.exports = {};
-    mod.client = mod.component = true;
-    module.call(this, mod.exports, require.relative(resolved), mod);
-    module.exports = mod.exports;
+    module.exports = {};
+    module.client = module.component = true;
+    module.call(this, module.exports, require.relative(resolved), module);
   }
 
   return module.exports;
@@ -19306,9 +19304,6 @@ exports.rethrow = function rethrow(err, filename, lineno){
 
 })({});
 });
-
-
-
 require.alias("component-fullscreen/index.js", "exploring-archives/deps/fullscreen/index.js");
 require.alias("component-fullscreen/index.js", "fullscreen/index.js");
 require.alias("component-emitter/index.js", "component-fullscreen/deps/emitter/index.js");
@@ -19319,8 +19314,10 @@ require.alias("mbostock-d3/index-browserify.js", "exploring-archives/deps/d3/ind
 require.alias("mbostock-d3/index-browserify.js", "exploring-archives/deps/d3/index.js");
 require.alias("mbostock-d3/index-browserify.js", "d3/index.js");
 require.alias("mbostock-d3/index-browserify.js", "mbostock-d3/index.js");
+
 require.alias("component-jquery/index.js", "exploring-archives/deps/jquery/index.js");
 require.alias("component-jquery/index.js", "jquery/index.js");
 
 require.alias("exploring-archives/index.js", "exploring-archives/index.js");
+
 require("exploring-archives/jade-runtime");

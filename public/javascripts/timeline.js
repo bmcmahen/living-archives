@@ -27,11 +27,9 @@ function require(path, parent, orig) {
   // by invoking the module's
   // registered function
   if (!module.exports) {
-    var mod = {};
-    mod.exports = {};
-    mod.client = mod.component = true;
-    module.call(this, mod.exports, require.relative(resolved), mod);
-    module.exports = mod.exports;
+    module.exports = {};
+    module.client = module.component = true;
+    module.call(this, module.exports, require.relative(resolved), module);
   }
 
   return module.exports;
@@ -21829,24 +21827,6 @@ buf.push("<a href=\"#\" class=\"close\"></a></div>");
 return buf.join("");
 }
 });
-
-
-
-
-
-
-
-
-
-require.register("timeline/templates/text.jade", function(exports, require, module){
-module.exports = 'a(href=\'#\', title=\'Click to display addition information in Popu-up.\', name=locals.name)\n	span.name\n		strong\n			if locals.startDate\n				#{startDate}\n			else\n				#{date}\n			#{locals.title}\n\n';
-});
-require.register("timeline/templates/image.jade", function(exports, require, module){
-module.exports = 'a.highslide(href=\'#\', id=locals._id, title=\'Click to display additional information in a pop-up.\')\n	img.timeline-image(src=locals.image.url + \'/convert?w=150&h=150&fit=crop&align=faces\', alt=title, style=\'height: 150px; width: 150px\')\n	span.caption\n		if locals.startDate\n			#{startDate} : !{title}\n		else\n			#{date} : !{title}\n';
-});
-require.register("timeline/templates/modal.jade", function(exports, require, module){
-module.exports = '.modal.animated.hide(id=locals._id)\n	if locals.image\n		img(width=\'200px\', src=image.url+ \'/convert?w=200&h=400\')\n	strong !{title}\n	p(title=\'Press escape to return to timeline\') !{locals.fullDescription}\n	if locals.resources\n		for resource in resources\n			p !{resource.resource}\n	a.close(href=\'#\')';
-});
 require.alias("component-moment/index.js", "timeline/deps/moment/index.js");
 require.alias("component-moment/index.js", "moment/index.js");
 
@@ -21886,5 +21866,7 @@ require.alias("component-once/index.js", "bmcmahen-animate-css/deps/once/index.j
 require.alias("eugenicsarchivesca-has-css-animations/index.js", "bmcmahen-animate-css/deps/has-css-animations/index.js");
 require.alias("eugenicsarchivesca-has-css-animations/index.js", "bmcmahen-animate-css/deps/has-css-animations/index.js");
 require.alias("eugenicsarchivesca-has-css-animations/index.js", "eugenicsarchivesca-has-css-animations/index.js");
+
 require.alias("timeline/index.js", "timeline/index.js");
+
 require("timeline/jade-runtime");

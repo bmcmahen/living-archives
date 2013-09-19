@@ -27,11 +27,9 @@ function require(path, parent, orig) {
   // by invoking the module's
   // registered function
   if (!module.exports) {
-    var mod = {};
-    mod.exports = {};
-    mod.client = mod.component = true;
-    module.call(this, mod.exports, require.relative(resolved), mod);
-    module.exports = mod.exports;
+    module.exports = {};
+    module.client = module.component = true;
+    module.call(this, module.exports, require.relative(resolved), module);
   }
 
   return module.exports;
@@ -9212,10 +9210,8 @@ var typeToParam = {
   'publication' : 'publications'
 };
 
-
-module.exports = function(controller){
-
-var Connection = require('./Connections')(controller);
+var Connection = require('./Connections');
+var controller = require('./Controller');
 
 // Our Controller should now control the creation of new documents
 // or the retrieval of existing documents. Both will share the 'editDocument'
@@ -9275,12 +9271,9 @@ FormGenerator.prototype.saveModel = function(json){
   // for edge cases.
 
   controller.collection.emit('change');
-  console.log('Saving Model.', this.model);
   Spinner.show();
   this.model.save(function(err, res){
-    console.log('model saved');
     Spinner.hide();
-    console.log('fetching...');
     controller.collection.fetch(function(){
       controller.viewDocuments();
     }, _this.model);
@@ -10018,8 +10011,6 @@ FormsetView.prototype.remove = function(formModel){
   });
   this.views = newViews;
 };
-
-}
 });
 require.register("eugenicsdatabase/lib/Controller.js", function(exports, require, module){
 // MODULES
@@ -10199,7 +10190,7 @@ var controller = new Controller();
 module.exports = controller;
 var DocumentList = require('./Document-list')(controller);
 var DocumentSummary = require('./Document-summary')(controller);
-var DocumentForms = require('./Document-forms')(controller);
+var DocumentForms = require('./Document-forms');
 
 
 
@@ -10337,8 +10328,7 @@ var Modal = require('modal')
 
 // Import
 var LinkModel = require('./Model').LinkModel;
-
-module.exports = function(controller){
+var controller = require('./Controller');
 
 // Create our Modal
 var modal = Modal(document.getElementById('connections'), {
@@ -10610,7 +10600,7 @@ PotentialNode.prototype.close = function(){
 	this.$el.remove();
 };
 
-}
+
 
 
 });
@@ -11220,77 +11210,6 @@ buf.push("<span class=\"document-name\">" + (jade.escape(null == (jade.interp = 
 return buf.join("");
 }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-require.register("eugenicsdatabase/templates/cast-item.jade", function(exports, require, module){
-module.exports = 'if locals.image\n	img(width=\'40px\', height=\'40px\', src=image.url+\'/convert?w=40&h=40&fit=crop&align=faces\')\nelse\n	.image-placeholder\na.title(href=\'#\') !{title}\nif locals.currentUser\n	a.edit-btn.btn.btn-small(href=\'#\') Edit\nif locals.date\n	span.date=date\nif locals.startDate\n	span.date #{startDate} - #{endDate}';
-});
-require.register("eugenicsdatabase/templates/document-summary.jade", function(exports, require, module){
-module.exports = 'mixin field(label, value)\n  dt #{label}\n  dd !{value}\n\ndiv\n  h4 !{title}\ndl\n  mixin field(\'Type\', type)\n  - if (locals.prods && locals.prods.length > 0){\n      dt Prods\n      dd\n        each prod in locals.prods\n          p.prod-listing=prod\n  - }\n  if locals.alternativeNames\n    mixin field(\'Alternative Names\', alternativeNames)\n  if locals.location\n    mixin field(\'Location\', location)\n  if locals.latitude\n    mixin field(\'Latitude\', latitude)\n  if locals.longitude\n    mixin field(\'Longitude\', longitude)\n  if locals.date\n    mixin field(\'Date\', date)\n  if locals.dateOfBirth\n    mixin field(\'Date of Birth\', dateOfBirth)\n  if locals.dateOfDeath\n    mixin field(\'Date of Death\', dateOfDeath)\n  if locals.startDate\n    mixin field(\'Start Date\', startDate)\n  if locals.endDate\n    mixin field(\'End Date\', endDate)\n\n  mixin field(\'Full Description\', fullDescription)\n\n  if locals.resources\n    dt Citations\n    for resource in resources\n      dd\n        if resource.resource !== \'\'\n          p !{resource.resource}\n        else\n          p Citation Missing\n\n  if locals.image\n    dt Image\n    dd\n      img.document-summary-image.img-polaroid(src=image.url + \'/convert?w=300&h=200&fit=max\')\n\n  if locals.heroQuote\n    mixin field(\'Hero Quote\', heroQuote)\n    if locals.heroQuoteSource\n      dd heroQuoteSource\n\n  if locals.villainQuote\n    mixin field(\'Villain Quote\', villainQuote)\n    if locals.villainQuoteSource\n      dd villainQuoteSource\n\n  if locals.ambiQuote\n    mixin field(\'Ambiguous Quote\', ambiQuote)\n    if locals.ambiQuoteSource\n      dd ambiQuoteSource\n\n  if locals.currentUser\n    div\n      a.btn.btn-primary#edit-document Edit Document\n\n';
-});
-require.register("eugenicsdatabase/templates/button.jade", function(exports, require, module){
-module.exports = 'label=object.label\n	if object.required\n		span *\n	span.target-link\n	div\n		button.btn.btn-success(name=object.name) Edit Connections\nif object.error\n	p.error-text=object.error\nif object.helpText\n	span.help-block=object.helpText\n';
-});
-require.register("eugenicsdatabase/templates/checkbox.jade", function(exports, require, module){
-module.exports = 'h5 Select PRODs:\n.well\n	each field in object.fields\n		each f in field\n			label.prod\n				input(type=\'checkbox\', name=f.name, checked=f.value)\n				| #{f.label}\n	span.help-block Selecting a PROD from the list above will include this document on that PROD. It will also append fields to this form that are required for that PROD.\n';
-});
-require.register("eugenicsdatabase/templates/image.jade", function(exports, require, module){
-module.exports = 'if object.loading\n	img(src=\'/img/loading.gif\')\nif object.value\n	img.document-image(src=object.value.url + \'/convert?w=250&h=250\')\ninput#filepicker(data-fp-maxSize=\'10485760\', data-fp-button-class=\'btn btn-small btn-success filepicker\', data-fp-button-text=\'Select an Image\')\nif object.value\n	button#remove-image.btn.btn-small.btn-warning(href=\'#\') Remove Image\nif object.helpText\n	span.help-block=object.helpText';
-});
-require.register("eugenicsdatabase/templates/select.jade", function(exports, require, module){
-module.exports = 'label(class=object.name)=object.label\n	select\n		each option in object.options\n			option(value=option.name, selected= option.name == object.value)= option.label';
-});
-require.register("eugenicsdatabase/templates/text.jade", function(exports, require, module){
-module.exports = 'label #{object.label}\n	if object.required\n		span *\n	input(id=object.name, type=\'text\', name=object.name, class=object.className, value=object.value)\nif object.error\n	p.error-text=object.error\nif object.helpText\n	span.help-block=object.helpText\n';
-});
-require.register("eugenicsdatabase/templates/textarea.jade", function(exports, require, module){
-module.exports = 'label=object.label\n	if object.required\n		span *\n	textarea(name=object.name, class=object.name)=object.value\nif object.error\n	p.error-text=object.error\nif object.helpText\n	span.help-block=object.helpText\n';
-});
-require.register("eugenicsdatabase/templates/connection-select.jade", function(exports, require, module){
-module.exports = 'span.document-name=title\nbutton.btn.btn-small.btn-warning.remove Remove\nselect.strength\n	option(value=\'1\', selected=(strength === 1)) 1\n	option(value=\'2\', selected=(strength === 2)) 2\n	option(value=\'3\', selected=(strength === 3)) 3\n	option(value=\'4\', selected=(strength === 4)) 4\n	option(value=\'5\', selected=(strength === 5)) 5\n	option(value=\'6\', selected=(strength === 6)) 6\n	option(value=\'7\', selected=(strength === 7)) 7\n	option(value=\'8\', selected=(strength === 8)) 8\n	option(value=\'9\', selected=(strength === 9)) 9\n	option(value=\'10\', selected=(strength === 10)) 10';
-});
 require.alias("component-moment/index.js", "eugenicsdatabase/deps/moment/index.js");
 require.alias("component-moment/index.js", "moment/index.js");
 
@@ -11324,6 +11243,7 @@ require.alias("component-once/index.js", "bmcmahen-animate-css/deps/once/index.j
 require.alias("eugenicsarchivesca-has-css-animations/index.js", "bmcmahen-animate-css/deps/has-css-animations/index.js");
 require.alias("eugenicsarchivesca-has-css-animations/index.js", "bmcmahen-animate-css/deps/has-css-animations/index.js");
 require.alias("eugenicsarchivesca-has-css-animations/index.js", "eugenicsarchivesca-has-css-animations/index.js");
+
 require.alias("component-bind/index.js", "eugenicsdatabase/deps/bind/index.js");
 require.alias("component-bind/index.js", "bind/index.js");
 
@@ -11359,6 +11279,7 @@ require.alias("component-transform-property/index.js", "component-has-translate3
 require.alias("component-transform-property/index.js", "component-translate/deps/transform-property/index.js");
 
 require.alias("component-translate/index.js", "component-translate/index.js");
+
 require.alias("component-emitter/index.js", "eugenicsdatabase/deps/emitter/index.js");
 require.alias("component-emitter/index.js", "emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
@@ -11410,7 +11331,9 @@ require.alias("component-indexof/index.js", "component-emitter/deps/indexof/inde
 require.alias("RedVentures-reduce/index.js", "visionmedia-superagent/deps/reduce/index.js");
 
 require.alias("visionmedia-superagent/lib/client.js", "visionmedia-superagent/index.js");
+
 require.alias("component-model/lib/index.js", "component-model/index.js");
+
 require.alias("component-collection/index.js", "eugenicsdatabase/deps/collection/index.js");
 require.alias("component-collection/index.js", "collection/index.js");
 require.alias("component-enumerable/index.js", "component-collection/deps/enumerable/index.js");
@@ -11425,6 +11348,7 @@ require.alias("component-indexof/index.js", "component-emitter/deps/indexof/inde
 require.alias("RedVentures-reduce/index.js", "visionmedia-superagent/deps/reduce/index.js");
 
 require.alias("visionmedia-superagent/lib/client.js", "visionmedia-superagent/index.js");
+
 require.alias("component-map/index.js", "eugenicsdatabase/deps/map/index.js");
 require.alias("component-map/index.js", "map/index.js");
 require.alias("component-to-function/index.js", "component-map/deps/to-function/index.js");
@@ -11457,6 +11381,7 @@ require.alias("component-value/index.js", "component-dom/deps/value/index.js");
 require.alias("component-type/index.js", "component-value/deps/type/index.js");
 
 require.alias("component-value/index.js", "component-value/index.js");
+
 require.alias("component-query/index.js", "component-dom/deps/query/index.js");
 
 require.alias("component-event/index.js", "eugenicsdatabase/deps/event/index.js");
@@ -11553,6 +11478,7 @@ require.alias("component-inherit/index.js", "eugenicsarchivesca-popover/deps/inh
 require.alias("yields-empty/index.js", "eugenicsarchivesca-popover/deps/empty/index.js");
 require.alias("yields-empty/index.js", "eugenicsarchivesca-popover/deps/empty/index.js");
 require.alias("yields-empty/index.js", "yields-empty/index.js");
+
 require.alias("component-domify/index.js", "eugenicsarchivesca-popover/deps/domify/index.js");
 
 require.alias("component-classes/index.js", "eugenicsarchivesca-popover/deps/classes/index.js");
@@ -11565,10 +11491,13 @@ require.alias("bmcmahen-html/index.js", "eugenicsarchivesca-popover/deps/html/in
 require.alias("bmcmahen-append/index.js", "bmcmahen-html/deps/append/index.js");
 require.alias("bmcmahen-append/index.js", "bmcmahen-html/deps/append/index.js");
 require.alias("bmcmahen-append/index.js", "bmcmahen-append/index.js");
+
 require.alias("yields-empty/index.js", "bmcmahen-html/deps/empty/index.js");
 require.alias("yields-empty/index.js", "bmcmahen-html/deps/empty/index.js");
 require.alias("yields-empty/index.js", "yields-empty/index.js");
+
 require.alias("bmcmahen-html/index.js", "bmcmahen-html/index.js");
+
 require.alias("component-domify/index.js", "eugenicsarchivesca-confirmation-popover/deps/domify/index.js");
 
 require.alias("component-query/index.js", "eugenicsarchivesca-confirmation-popover/deps/query/index.js");
@@ -11582,10 +11511,13 @@ require.alias("bmcmahen-html/index.js", "eugenicsarchivesca-confirmation-popover
 require.alias("bmcmahen-append/index.js", "bmcmahen-html/deps/append/index.js");
 require.alias("bmcmahen-append/index.js", "bmcmahen-html/deps/append/index.js");
 require.alias("bmcmahen-append/index.js", "bmcmahen-append/index.js");
+
 require.alias("yields-empty/index.js", "bmcmahen-html/deps/empty/index.js");
 require.alias("yields-empty/index.js", "bmcmahen-html/deps/empty/index.js");
 require.alias("yields-empty/index.js", "yields-empty/index.js");
+
 require.alias("bmcmahen-html/index.js", "bmcmahen-html/index.js");
+
 require.alias("eugenicsarchivesca-popover/index.js", "eugenicsdatabase/deps/popover/index.js");
 require.alias("eugenicsarchivesca-popover/template.js", "eugenicsdatabase/deps/popover/template.js");
 require.alias("eugenicsarchivesca-popover/index.js", "popover/index.js");
@@ -11619,6 +11551,7 @@ require.alias("component-inherit/index.js", "eugenicsarchivesca-popover/deps/inh
 require.alias("yields-empty/index.js", "eugenicsarchivesca-popover/deps/empty/index.js");
 require.alias("yields-empty/index.js", "eugenicsarchivesca-popover/deps/empty/index.js");
 require.alias("yields-empty/index.js", "yields-empty/index.js");
+
 require.alias("component-domify/index.js", "eugenicsarchivesca-popover/deps/domify/index.js");
 
 require.alias("component-classes/index.js", "eugenicsarchivesca-popover/deps/classes/index.js");
@@ -11631,10 +11564,13 @@ require.alias("bmcmahen-html/index.js", "eugenicsarchivesca-popover/deps/html/in
 require.alias("bmcmahen-append/index.js", "bmcmahen-html/deps/append/index.js");
 require.alias("bmcmahen-append/index.js", "bmcmahen-html/deps/append/index.js");
 require.alias("bmcmahen-append/index.js", "bmcmahen-append/index.js");
+
 require.alias("yields-empty/index.js", "bmcmahen-html/deps/empty/index.js");
 require.alias("yields-empty/index.js", "bmcmahen-html/deps/empty/index.js");
 require.alias("yields-empty/index.js", "yields-empty/index.js");
+
 require.alias("bmcmahen-html/index.js", "bmcmahen-html/index.js");
+
 
 require.alias("component-events/index.js", "eugenicsdatabase/deps/events/index.js");
 require.alias("component-events/index.js", "events/index.js");
@@ -11657,4 +11593,5 @@ require.alias("anthonyshort-emitter-manager/index.js", "emitter-manager/index.js
 require.alias("anthonyshort-map/index.js", "anthonyshort-emitter-manager/deps/map/index.js");
 
 require.alias("eugenicsdatabase/index.js", "eugenicsdatabase/index.js");
+
 require("eugenicsdatabase/jade-runtime");

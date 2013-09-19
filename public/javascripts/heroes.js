@@ -27,11 +27,9 @@ function require(path, parent, orig) {
   // by invoking the module's
   // registered function
   if (!module.exports) {
-    var mod = {};
-    mod.exports = {};
-    mod.client = mod.component = true;
-    module.call(this, mod.exports, require.relative(resolved), mod);
-    module.exports = mod.exports;
+    module.exports = {};
+    module.client = module.component = true;
+    module.call(this, module.exports, require.relative(resolved), module);
   }
 
   return module.exports;
@@ -11692,25 +11690,6 @@ buf.push("</em></div><a class=\"personInfo\">More Info</a></div>");
 return buf.join("");
 }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-require.register("heroes-and-villains/templates/modal-dialogue.jade", function(exports, require, module){
-module.exports = '.modal.animated.hide\n  img(width=\'250px\', src=locals.image.url+ \'/convert?w=250&h=400\', alt=\'A picture of\' + locals.title)\n  strong=locals.title\n  em\n    if locals.heroQuote\n      p.quote\n        em= heroQuote\n    if locals.villainQuote\n      p.quote\n        em= villainQuote\n    if locals.ambiQuote\n      p.quote\n        em= ambiQuote\n  p(title=\'Press escape to return to heroes and villains\', aria-labelledby=locals._id)=locals.fullDescription\n  p\n    if locals.resources\n      for resource in resources\n        p=resource.resource\n  a.close Close\n';
-});
-require.register("heroes-and-villains/templates/card-view.jade", function(exports, require, module){
-module.exports = '.front(tabindex=\'0\')\n  img(src=locals.image.url+ \'/convert?w=170&h=250&fit=crop&align=faces\')\n  .caption\n    p.name\n      strong= locals.title\n    p.blurb= locals.shortDescription\n.back\n  .quotes\n    em\n      if locals.heroQuote\n        p=heroQuote\n        if locals.heroQuoteSource\n          a.tooltip-trigger(href=\'#\', title=heroQuoteSource) Source\n      if locals.villainQuote\n        p=villainQuote\n        if locals.villainQuoteSource\n          a.tooltip-trigger(href=\'#\', title=villainQuoteSource) Source\n      if locals.ambiQuote\n        p=ambiQuote\n        if locals.ambiQuoteSource\n          a.tooltip-trigger(href=\'#\', title=ambiQuoteSource) Source\n  a.personInfo More Info';
-});
 require.alias("component-fullscreen/index.js", "heroes-and-villains/deps/fullscreen/index.js");
 require.alias("component-fullscreen/index.js", "fullscreen/index.js");
 require.alias("component-emitter/index.js", "component-fullscreen/deps/emitter/index.js");
@@ -11744,6 +11723,7 @@ require.alias("component-transform-property/index.js", "component-has-translate3
 require.alias("component-transform-property/index.js", "component-translate/deps/transform-property/index.js");
 
 require.alias("component-translate/index.js", "component-translate/index.js");
+
 require.alias("bmcmahen-modal/index.js", "heroes-and-villains/deps/modal/index.js");
 require.alias("bmcmahen-modal/index.js", "modal/index.js");
 require.alias("component-emitter/index.js", "bmcmahen-modal/deps/emitter/index.js");
@@ -11774,8 +11754,10 @@ require.alias("component-once/index.js", "bmcmahen-animate-css/deps/once/index.j
 require.alias("eugenicsarchivesca-has-css-animations/index.js", "bmcmahen-animate-css/deps/has-css-animations/index.js");
 require.alias("eugenicsarchivesca-has-css-animations/index.js", "bmcmahen-animate-css/deps/has-css-animations/index.js");
 require.alias("eugenicsarchivesca-has-css-animations/index.js", "eugenicsarchivesca-has-css-animations/index.js");
+
 require.alias("component-jquery/index.js", "heroes-and-villains/deps/jquery/index.js");
 require.alias("component-jquery/index.js", "jquery/index.js");
 
 require.alias("heroes-and-villains/index.js", "heroes-and-villains/index.js");
+
 require("heroes-and-villains/jade-runtime");

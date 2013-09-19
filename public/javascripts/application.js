@@ -27,11 +27,9 @@ function require(path, parent, orig) {
   // by invoking the module's
   // registered function
   if (!module.exports) {
-    var mod = {};
-    mod.exports = {};
-    mod.client = mod.component = true;
-    module.call(this, mod.exports, require.relative(resolved), mod);
-    module.exports = mod.exports;
+    module.exports = {};
+    module.client = module.component = true;
+    module.call(this, module.exports, require.relative(resolved), module);
   }
 
   return module.exports;
@@ -1147,14 +1145,13 @@ exports.rethrow = function rethrow(err, filename, lineno){
 
 })({});
 });
-
-
-
 require.alias("ftlabs-fastclick/lib/fastclick.js", "application/deps/fastclick/lib/fastclick.js");
 require.alias("ftlabs-fastclick/lib/fastclick.js", "application/deps/fastclick/index.js");
 require.alias("ftlabs-fastclick/lib/fastclick.js", "fastclick/index.js");
 require.alias("ftlabs-fastclick/lib/fastclick.js", "ftlabs-fastclick/index.js");
 
 
+
 require.alias("application/index.js", "application/index.js");
+
 require("application/jade-runtime");

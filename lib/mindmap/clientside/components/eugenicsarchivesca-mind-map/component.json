@@ -2,7 +2,7 @@
   "name": "mindmap",
   "repo": "eugenicsarchiveca/mindmap",
   "description": "create an interactive network / mindmap",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "keywords": [
     "network",
     "mindmap",
@@ -24,7 +24,9 @@
     "timoxley/offset": "*",
     "yields/scrolltop": "*",
     "anthonyshort/emitter-manager": "*",
-    "component/autoscale-canvas": "*"
+    "component/autoscale-canvas": "*",
+    "component/pinch": "*",
+    "stagas/mouseleave": "*"
   },
   "development": {},
   "license": "MIT",

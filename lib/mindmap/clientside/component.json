@@ -2,11 +2,15 @@
   "name": "eugenics-mindmap",
   "description": "the eugenics mindmap",
   "dependencies": {
-  	"component/fullscreen" : "*",
-  	"eugenicsarchivesca/mind-map" : "*",
-  	"bmcmahen/linear-conversion" : "*",
+    "component/fullscreen": "*",
+    "eugenicsarchivesca/mind-map": "*",
+    "bmcmahen/linear-conversion": "*",
     "component/jquery": "*",
-    "component/underscore": "*"
+    "component/underscore": "*",
+    "bmcmahen/backbone": "*",
+    "yields/select": "*",
+    "anthonyshort/emitter-manager": "*",
+    "component/events": "*"
   },
   "development": {},
   "main": "index.js",
@@ -14,7 +18,13 @@
     "styles/mindmap.styl"
   ],
   "scripts": [
-    "index.js"
+    "index.js",
+    "controller.js",
+    "search.js",
+    "side-view.js"
   ],
-  "templates": ["template.jade"]
+  "templates": [
+    "template.jade"
+  ],
+  "remotes": []
 }

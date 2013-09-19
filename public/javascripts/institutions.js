@@ -27,11 +27,9 @@ function require(path, parent, orig) {
   // by invoking the module's
   // registered function
   if (!module.exports) {
-    var mod = {};
-    mod.exports = {};
-    mod.client = mod.component = true;
-    module.call(this, mod.exports, require.relative(resolved), mod);
-    module.exports = mod.exports;
+    module.exports = {};
+    module.client = module.component = true;
+    module.call(this, module.exports, require.relative(resolved), module);
   }
 
   return module.exports;
@@ -13309,24 +13307,6 @@ buf.push("<li><a href=\"#\" class=\"switch-item\">" + (jade.escape(null == (jade
 return buf.join("");
 }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-require.register("institutions/templates/institution.jade", function(exports, require, module){
-module.exports = '.swipe-content.white.top.right.one-thirds.animated\n	h3=locals.title\n	p.subhead=locals.location\n	p !{locals.fullDescription}\n	if locals.resources\n		for resource in resources\n			p.small !{resource.resource}\n	if locals.image\n		.images\n';
-});
-require.register("institutions/templates/button.jade", function(exports, require, module){
-module.exports = 'li\n	a.switch-item(href=\'#\')= locals.index\n';
-});
 require.alias("eugenicsarchivesca-horizontal-accordion/index.js", "institutions/deps/horizontal-accordion/index.js");
 require.alias("eugenicsarchivesca-horizontal-accordion/index.js", "horizontal-accordion/index.js");
 require.alias("component-emitter/index.js", "eugenicsarchivesca-horizontal-accordion/deps/emitter/index.js");
@@ -13394,10 +13374,12 @@ require.alias("component-transform-property/index.js", "component-swipe/deps/tra
 require.alias("component-transitionend-property/index.js", "component-swipe/deps/transitionend-property/index.js");
 require.alias("component-transitionend-property/index.js", "component-swipe/deps/transitionend-property/index.js");
 require.alias("component-transitionend-property/index.js", "component-transitionend-property/index.js");
+
 require.alias("jkroso-computed-style/index.js", "component-swipe/deps/computed-style/index.js");
 
 require.alias("component-underscore/index.js", "institutions/deps/underscore/index.js");
 require.alias("component-underscore/index.js", "underscore/index.js");
 
 require.alias("institutions/index.js", "institutions/index.js");
+
 require("institutions/jade-runtime");
