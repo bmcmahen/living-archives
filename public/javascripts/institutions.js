@@ -14541,6 +14541,7 @@ module.exports = function(){
     if (e) e.preventDefault();
     if (this.subViews && this.currentlySelected != this.subViews[0]) {
       this.subViews[0].show();
+      router.navigate('/discover/institutions/map/');
     }
   };
 
