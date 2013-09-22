@@ -1,110 +1,156 @@
 .hover-node {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 h5 {
-	font-size: 15px;
+  font-size: 15px;
 margin: 10px 0;
 }
 
 #app {
-	position: relative;
-	width: 100%;
-	box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 a.link {
-	line-height: 23px;
+  line-height: 23px;
 }
 
 #fullscreenmode {
-	position: absolute;
-	top: 0;
-	left: 15px;
-	float: none;
+  position: absolute;
+  top: 0;
+  left: 15px;
+  float: none;
+}
+
+#fullscreenmode:hover {
+  text-decoration: none;
+  color: #555;
 }
 
 #mindmap {
-	width: 70%;
-	display: inline-block;
+  width: 70%;
+  display: inline-block;
 }
 
 #data {
-	width: 30%;
-	bottom: 0;
-	position: absolute;
-	background: white;
-	top: 0;
-	padding: 10px 15px;
-	box-sizing: border-box;
-	overflow: auto;
-	overflow-x: hidden;
-	right: 0;
-	border-left: 2px dashed #eee;
-	border-radius: 3px;
+  width: 30%;
+  bottom: 0;
+  position: absolute;
+  background: white;
+  top: 0;
+  padding: 10px 15px;
+  box-sizing: border-box;
+  overflow: auto;
+  overflow-x: hidden;
+  right: 0;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  border-left: 2px dashed #eee;
+  -webkit-overflow-scrolling: touch;
+}
+
+#app {
+  padding: 0;
 }
 
 #data h2 {
-	line-height: 32px;
-	margin-top: 15px;
-	padding-bottom: 10px;
-	color: #049cdb;
+  line-height: 32px;
+  margin-top: 15px;
+  padding-bottom: 10px;
+  color: #049cdb;
 }
 
 #query {
-	position: absolute;
-	top: 8px;
-	background: none;
-	left: 40px;
+  position: absolute;
+  top: 8px;
+  background: none;
+  left: 80px;
+}
+
+#help:hover {
+  text-decoration: none;
+  color: #555;
+}
+
+#help {
+  position: absolute;
+  top: 12px;
+  color: #999;
+  left: 50px;
 }
 
 p.small {
-	font-size: 13px;
-	line-height: 18px;
+  font-size: 13px;
+  line-height: 18px;
 }
 
 #query .select {
-	width: 200px;
+  width: 200px;
 }
 
 #query .select .select-dropdown {
-	overflow: hidden;
-	max-height: 350px;
+  overflow: hidden;
+  max-height: 390px;
 }
 
 #query .select .select-box {
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border: none;
+  background: white;
+  padding: 0;
+  background: rgba(240, 240, 240, 0.80);
 }
 
 
 #query .select .select-label {
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  font-size: 14px;
+  font-weight: normal;
+  width: 100%;
+}
+
+#query .select .select-dropdown {
+  background: rgba(255, 255, 255, 0.95);
+  box-sizing: border-box;
 }
 
 #query .select .select-options {
-	max-height: 320px;
-	overflow: hidden;
+  max-height: 360px;
+  overflow: hidden;
 }
 
 #query .select .select-option {
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 13px;
+padding: 4px 10px;
+}
+
+.select-option:hover {
+  background: #eee;
 }
 
 .select-option.highlight {
-	border-radius: 0;
+  border-radius: 0;
+}
+
+.select-option.highlight:hover {
+  background: #007d7f;
 }
 
 #query input {
-	width: 100%;
-	box-sizing: border-box;
+  width: 100%;
+  box-sizing: border-box;
+  background: #eee;
 }
+

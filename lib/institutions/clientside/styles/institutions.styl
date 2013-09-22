@@ -164,12 +164,8 @@ a.controls
     transition opacity .5s
 
 a.exit
-  position fixed
-  top 15px
-  right 10px
   color white
   padding 5px 10px
-  border 2px solid
   z-index 1500
 
 
@@ -251,6 +247,16 @@ a.exit
   button:hover
     background: #fff;
 
+.grid a i
+  color: #707070
+
+.grid a.active i
+  color white
+
+.grid a i:hover
+  text-decoration none
+  color #ddd
+
 #overlay
   background black
   background rgba(0,0,0,0.85)
@@ -277,9 +283,9 @@ a.exit
   left 0
   right 0
   display block
-  height 67px
   z-index 1250
   text-align center
+  background rgba(49, 49, 49, 0.95)
 
 a.previous.hidden, a.learn-more.hidden
   opacity 0
@@ -327,13 +333,14 @@ a.previous.hidden, a.learn-more.hidden
 
 #map-wrapper
   position relative
+  height 100%
+  box-sizing border-box
 
 ul.switch
   box-sizing border-box
-  min-height 50px
-  margin-top 2px
+  margin 0
 
-  & li
+  & li.circle
     cursor pointer
     height 50px
     line-height 50px
@@ -431,3 +438,17 @@ p.subhead
   position relative
   height 100%
   width 100%
+
+ul#switch li.map
+  float left
+  padding 10px
+
+#numbers
+  color: #707070
+  font-size: 15px
+
+#numbers span.divider
+  padding 7px
+
+#numbers span.active
+  color #fff

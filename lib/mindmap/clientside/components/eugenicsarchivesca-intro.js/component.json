@@ -1,0 +1,15 @@
+{
+  "name": "intro.js",
+  "description": "A better way for new feature introduction and step-by-step users guide for your website and project.",
+  "dependencies": {},
+  "development": {},
+  "main": "intro.js",
+  "styles": [
+    "introjs.css"
+  ],
+  "scripts": [
+    "intro.js"
+  ],
+  "remotes": [],
+  "repo": "https://raw.github.com/eugenicsarchivesca/intro.js"
+}

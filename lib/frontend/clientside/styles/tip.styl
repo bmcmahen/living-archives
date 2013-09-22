@@ -1,0 +1,27 @@
+.tip {
+  position: absolute;
+  margin-top: -10px;
+  background: #007d7f;
+  padding: 5px 10px;
+  border-radius: 2px;
+  z-index: 5000 !important;
+  color: white;
+}
+
+.tip:after {
+  top: 100%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.tip:after {
+  border-color: rgba(0, 125, 127, 0);
+  border-top-color: #007d7f;
+  border-width: 10px;
+  left: 50%;
+  margin-left: -10px;
+}

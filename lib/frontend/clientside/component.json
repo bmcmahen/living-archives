@@ -16,7 +16,8 @@
   "styles": [
     "styles/base.styl",
     "styles/buttons.styl",
-    "styles/navigation.styl"
+    "styles/navigation.styl",
+    "styles/tip.styl"
   ],
   "templates": []
 }

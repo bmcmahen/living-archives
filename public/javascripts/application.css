@@ -1088,32 +1088,35 @@ legend {
 #sub-header a {
   display: block;
   margin: 30px 0 23px 0;
+  height: 115px;
 }
 
-/* line 101 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
+/* line 102 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
 #sub-header div.prod {
   text-align: center;
   box-sizing: border-box;
+  height: 115px;
 }
 
-/* line 105 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
+/* line 107 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
 #sub-header div.prod:hover span.label {
   color: #000;
 }
 
-/* line 108 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
+/* line 110 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
 #sub-header div.prod.active span.label {
   pointer-events: none;
   border-bottom: 2px solid;
 }
 
-/* line 112 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
+/* line 114 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
 #sub-header div.prod img {
   background: #fff;
   border-radius: 4px;
+  height: 91px;
 }
 
-/* line 116 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
+/* line 119 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
 #sub-header div.prod span.label {
   font: 700 11px/18px arial, sans-serif;
   text-transform: uppercase;
@@ -1124,25 +1127,66 @@ legend {
   padding: 0 5px;
 }
 
-/* line 130 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
+/* line 133 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
 #header .container {
   width: 940px;
 }
 
-/* line 133 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
+/* line 136 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
 #app h2 {
   font-weight: 800;
   color: #394f50;
 }
 
-/* line 137 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
+/* line 140 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
 #fullscreenmode {
   color: #999;
   margin-top: 12px;
   float: right;
 }
 
-/* line 142 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
+/* line 145 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
 * {
   text-size-adjust: none;
+}
+
+/* line 148 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navigation.styl */
+.introjs-helperNumberLayer {
+  display: none;
+}
+
+
+/* line 1 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/node_modules/component-stylus-plugin/node_modules/stylus/lib/functions/index.styl */
+
+/* line 3 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/variables.styl */
+
+/* line 1 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/tip.styl */
+.tip {
+  position: absolute;
+  margin-top: -10px;
+  background: #007d7f;
+  padding: 5px 10px;
+  border-radius: 2px;
+  z-index: 5000 !important;
+  color: #fff;
+}
+
+/* line 11 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/tip.styl */
+.tip:after {
+  top: 100%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* line 21 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/tip.styl */
+.tip:after {
+  border-color: rgba(0,125,127,0);
+  border-top-color: #007d7f;
+  border-width: 10px;
+  left: 50%;
+  margin-left: -10px;
 }

@@ -2072,29 +2072,6 @@ module.exports = function(){
 };
 
 });
-require.register("component-autoscale-canvas/index.js", function(exports, require, module){
-
-/**
- * Retina-enable the given `canvas`.
- *
- * @param {Canvas} canvas
- * @return {Canvas}
- * @api public
- */
-
-module.exports = function(canvas){
-  var ctx = canvas.getContext('2d');
-  var ratio = window.devicePixelRatio || 1;
-  if (1 != ratio) {
-    canvas.style.width = canvas.width + 'px';
-    canvas.style.height = canvas.height + 'px';
-    canvas.width *= ratio;
-    canvas.height *= ratio;
-    ctx.scale(ratio, ratio);
-  }
-  return canvas;
-};
-});
 require.register("component-pinch/index.js", function(exports, require, module){
 /*
  * Module dependencies
@@ -2403,6 +2380,11 @@ MindMap.prototype.createView = function(){
   return this;
 };
 
+MindMap.prototype.isLoading = function(state){
+  this.loading = state;
+  this.emit('loading', state);
+};
+
 /**
  * Bind our view events to provide a layer of abstraction.
  * Our view is responsible for emitting mouseDown, mouseMove
@@ -2460,8 +2442,8 @@ MindMap.prototype.onMouseLeave = function(){
  */
 
 MindMap.prototype.onMouseDown = function(x, y){
-  x = this.xToCanvas(this.xMousePosition(x));
-  y = this.yToCanvas(this.yMousePosition(y));
+  x = this.xToCanvas(x);
+  y = this.yToCanvas(y);
 
   var clickedNode = this.nodes.getOverlappingNode(x, y);
 
@@ -2484,9 +2466,8 @@ MindMap.prototype.onMouseDown = function(x, y){
 
 MindMap.prototype.onMouseMove = function(x, y){
   if (x && y){
-
-    x = this.xToCanvas(this.xMousePosition(x));
-    y = this.yToCanvas(this.yMousePosition(y));
+    x = this.xToCanvas(x);
+    y = this.yToCanvas(y);
 
     if (this.activeNode && this.dragging){
       this.clickFlag = false;
@@ -2535,9 +2516,6 @@ MindMap.prototype.onZoom = function(x, y, delta, pinch){
   if (newScale < 0.01) newScale = 0.01;
   if (newScale > 10) newScale = 10;
 
-  x = this.xMousePosition(x);
-  y = this.yMousePosition(y);
-
   var translation = this.translation
     , scaleFrac = newScale / oldScale
     , tx = (1 - scaleFrac) * x + translation.x * scaleFrac
@@ -2552,9 +2530,6 @@ MindMap.prototype.onPinch = function(x, y, scale){
   this.animate();
   var scaleFrac = scale / this.scale;
   this.scale = scale;
-
-  x = this.xMousePosition(x);
-  y = this.yMousePosition(y);
 
   var tx = (1 - scaleFrac) * x + this.translation.x * scaleFrac;
   var ty = (1 - scaleFrac) * y + this.translation.y * scaleFrac;
@@ -2622,14 +2597,13 @@ MindMap.prototype.animate = function(){
     // and if they aren't (over a certain velocity) then stop
     // running our animation.
     var determineIfMoving = function(){
-      if (!_this.nodes.areMoving() && !_this.nodes.areLoading()){
+      if (!_this.nodes.areMoving() && !_this.nodes.areLoading() && !_this.loading){
         _this.isMoving = false;
         clearInterval(timeoutId);
       }
     };
 
     var timeoutId = setInterval(determineIfMoving, 1000);
-
 
     _this.isMoving = true;
     runAnimation();
@@ -2676,7 +2650,7 @@ MindMap.prototype.deselectNode = function(nodeId, silent){
     this.animate();
     node.unselect();
     delete this.selectedNode;
-    if (!silent) this.emit('nodeDeselected', node);
+    if (!silent) this.emit('nodeUnselected', node);
   }
 };
 
@@ -2689,7 +2663,6 @@ MindMap.prototype.deselectNode = function(nodeId, silent){
  */
 
 MindMap.prototype.selectNode = function(nodeId, silent){
-  console.log('silent?', silent);
   var node = this.nodes.get(nodeId);
   if (node){
     this.animate();
@@ -2699,41 +2672,6 @@ MindMap.prototype.selectNode = function(nodeId, silent){
   }
 };
 
-/**
- * Our mouse position needs to be relative to dom node
- * offset position. So calculate the offset of our view.
- */
-
-MindMap.prototype.determineOffset = function(){
-  var pos = this.view.getOffset();
-  this.top = pos.top - scrollTop();
-  this.left = pos.left;
-  return this;
-};
-
-/**
- * Supply our mouse x position taking into account
- * the offset of our DOM position.
- * @param  {x mouse coordinate, number} x
- * @return {number}
- */
-
-MindMap.prototype.xMousePosition = function(x){
-  if (!this.left) this.determineOffset();
-  return x - this.left;
-};
-
-/**
- * Supply our mouse y position taking into account
- * the offset of our DOM position.
- * @param  {y mouse coordinate, number} y
- * @return {number}
- */
-
-MindMap.prototype.yMousePosition = function(y){
-  if (!this.top) this.determineOffset();
-  return y - this.top;
-};
 
 
 /**
@@ -2967,11 +2905,11 @@ NodeCollection.prototype.areLoading = function(){
   var loading = false;
   this.forEach(function(node){
     if (node.loading) {
-      loaded = true;
+      loading = true;
       return;
     }
   });
-  return loaded;
+  return loading;
 };
 
 
@@ -3020,7 +2958,7 @@ var NodeModel = function(attr, context){
   this.view = new NodeView(this);
   this.fadeIn = true;
   this.fadeOut = false;
-  this.scale = 1;
+  this.scale = 1.05;
   this.createFadeInTween();
 };
 
@@ -3046,13 +2984,13 @@ NodeModel.prototype.select = function(){
 
 NodeModel.prototype.unselect = function(){
   this.isSelected = false;
-  this.createScaleTween(1.3, 1, 100, 'hoverOut');
+   this.mouseOut = true;
 };
 
 NodeModel.prototype.createFadeInTween = function(source, target){
   var _this = this;
   source = source || { scale: 0.3, opacity: 0.001 };
-  target = target || { scale: 1.0, opacity: 1.0 };
+  target = target || { scale: 1.05, opacity: 1.0 };
 
   this.fadeInTween = new Tween(source)
     .ease('in-out-cube')
@@ -3090,8 +3028,8 @@ NodeModel.prototype.createFadeOutTween = function(){
 
 NodeModel.prototype.createHoverTween = function(hoverIn){
   var _this = this
-    , from = hoverIn ? 1 : this.scale
-    , to = hoverIn ? 1.3 : 1;
+    , from = hoverIn ? 1.05 : this.scale
+    , to = hoverIn ? 1.3 : 1.05;
 
   this.hoverTween = new Tween({ scale: from })
     .to({ scale: to })
@@ -3105,7 +3043,7 @@ NodeModel.prototype.createHoverTween = function(hoverIn){
     if (!hoverIn){
       _this.mouseOut = false;
       _this.triggeredHoverOut = false;
-      _this.scale = 1;
+      _this.scale = 1.05;
     }
   });
 };
@@ -3126,7 +3064,7 @@ NodeModel.prototype.createScaleTween = function(from, to, duration, type){
     if (type === 'hoverOut') {
       _this.mouseOut = false;
       _this.triggeredHoverOut = false;
-      _this.scale = 1;
+      _this.scale = 1.05;
     }
   });
 };
@@ -3191,7 +3129,7 @@ NodeModel.prototype.discreteStep = function(dt){
     if (this.mouseOut) {
       if (!this.triggeredHoverOut) {
         this.triggeredHoverOut = true;
-        this.createScaleTween(1.3, 1, 100, 'hoverOut');
+        this.createScaleTween(1.3, 1.05, 100, 'hoverOut');
       }
       this.scaleTween.update();
     }
@@ -3453,15 +3391,15 @@ var events = require('events')
   , EmitterManager = require('emitter-manager')
   , stringEllipsis = require('canvas-string-ellipsis')
   , roundedRect = require('rounded-rect')
-  , bind = require('bind')
   , classes = require('classes')
   , offset = require('offset')
-  , autoscale = require('autoscale-canvas')
   , pinch = require('pinch')
-  , mouseleave = require('mouseleave');
+  , mouseleave = require('mouseleave')
+  , scrollTop = require('scrolltop');
 
 // Imports
 var constants = require('./constants');
+var loading = require('./loading');
 
 
 // XXX If performance ever becomes an issue, consider
@@ -3481,7 +3419,6 @@ var CanvasView = exports.CanvasView = function(wrapper, context){
   var canvas = this.canvas = document.createElement('canvas');
   canvas.width = constants.CONTAINER_WIDTH;
   canvas.height = constants.CONTAINER_HEIGHT;
-  autoscale(canvas);
   wrapper.appendChild(canvas);
 
   // If Canvas isn't supported, let it be known...
@@ -3505,7 +3442,7 @@ var CanvasView = exports.CanvasView = function(wrapper, context){
   this.events.bind('mousewheel');
   var self = this;
   window.onscroll = function(e){
-    self.context.determineOffset();
+    self.getOffset();
   }
 
   pinch(canvas, function(e){
@@ -3516,17 +3453,17 @@ var CanvasView = exports.CanvasView = function(wrapper, context){
     self.emit('mouseleave');
   });
 
-
   this.listenTo(this.context, 'hoverNode', this.onHover);
   this.listenTo(this.context, 'hoverOutNode', this.onHover);
   this.listenTo(this.context, 'containerWidth', function(w){
     canvas.width = w;
-    autoscale(canvas);
     self.setContextConstants();
+  });
+  this.listenTo(this.context, 'loading', function(state){
+    self.loadingState = state;
   });
   this.listenTo(this.context, 'containerHeight', function(h){
     canvas.height = h;
-    autoscale(canvas);
     self.setContextConstants();
   });
   this.setContextConstants();
@@ -3542,6 +3479,7 @@ EmitterManager(CanvasView.prototype);
 CanvasView.prototype.onHover = function(node){
   classes(this.canvas).toggle('hover-node');
 };
+
 
 /**
  * Set constant context attributes only once
@@ -3576,10 +3514,15 @@ CanvasView.prototype.redraw = function(){
   ctx.translate(m.translation.x, m.translation.y);
   ctx.scale(m.scale, m.scale);
 
+  if (this.loadingState){
+    loading(ctx);
+  } else {
+
   // ideally, our view shouldn't know about our collections.
   this.context
     .drawEntity('links', ctx)
     .drawEntity('nodes', ctx);
+  }
 
   ctx.restore();
 };
@@ -3591,7 +3534,7 @@ CanvasView.prototype.redraw = function(){
 
 CanvasView.prototype.getOffset = function(){
   var position = offset(this.canvas);
-  this.top = position.top;
+  this.top = position.top - scrollTop();
   this.left = position.left;
   return position;
 };
@@ -3601,20 +3544,38 @@ CanvasView.prototype.bindDragging = function(e){
   this.events.bind('touchend', 'onmouseup');
 };
 
-CanvasView.prototype.onmousedown = function(e){
+CanvasView.prototype.xPosition = function(x){
+  if (!this.left) this.getOffset();
+  return x - this.left;
+};
+
+CanvasView.prototype.yPosition = function(y){
+  if (!this.top) this.getOffset();
+  return y - this.top;
+};
+
+CanvasView.prototype.mousePoints = function(e){
   e.preventDefault();
   var touches = e.changedTouches;
-  if (!touches) return this.emit('mouseDown', e.clientX, e.clientY);
-  touches = touches[0];
-  this.emit('mouseDown', touches.pageX, touches.pageY);
+  if (e.touches && e.touches.length > 1) {
+    return false;
+  }
+  var point = touches ? touches[0] : e;
+  return {
+    x: this.xPosition(point.clientX),
+    y: this.yPosition(point.clientY)
+  };
+}
+
+CanvasView.prototype.onmousedown = function(e){
+  var points = this.mousePoints(e);
+  if (!points) return;
+  this.emit('mouseDown', points.x, points.y);
 };
 
 CanvasView.prototype.onmousemove = function(e){
-  e.preventDefault();
-  var touches = e.changedTouches;
-  if (!touches) return this.emit('mouseMove', e.clientX, e.clientY);
-  touches = touches[0];
-  this.emit('mouseMove', touches.pageX, touches.pageY);
+  var points = this.mousePoints(e);
+  this.emit('mouseMove', points.x, points.y);
 };
 
 CanvasView.prototype.onmouseup = function(e){
@@ -3628,17 +3589,15 @@ CanvasView.prototype.onmouseup = function(e){
 CanvasView.prototype.onmousewheel = function(e){
   e = event || window.event;
   e.preventDefault();
-  var ctx = this.canvas.getContext('2d')
+  var ctx = this.canvas.getContext('2d');
+  if (!this.left) this.getOffset();
 
-  var mouseX = e.clientX
-    , mouseY = e.clientY;
+  var mouseX = this.xPosition(e.clientX);
+  var mouseY = this.yPosition(e.clientY);
 
   var delta = 0;
-  if (e.wheelDelta){
-    delta = e.wheelDelta / 120;
-  } else if (e.detail) {
-    delta = -e.detail/3;
-  }
+  if (e.wheelDelta) delta = e.wheelDelta / 120;
+  else if (e.detail) delta = -e.detail/3;
 
   this.emit('mouseWheel', mouseX, mouseY, delta);
 };
@@ -3729,6 +3688,7 @@ NodeView.prototype.render = function(ctx){
     ctx.beginPath();
     ctx.arc(0, 0, 40, 0, Math.PI*2, true);
     ctx.lineWidth = 5;
+    ctx.globalAlpha = model.opacity || 0;
     if (model.isSelected){
       ctx.strokeStyle = '#00a10f';
     }
@@ -3799,6 +3759,7 @@ NodeView.prototype.render = function(ctx){
 };
 
 // https://github.com/component/spinner/blob/master/index.js
+// xxx use loading.js instead.
 NodeView.prototype.loadingAnimation = function(ctx){
   this.speed = this.speed || 60;
   this.size = this.size || 30;
@@ -3858,6 +3819,51 @@ NodeView.prototype.drawImage = function(ctx, img){
   ctx.restore();
 }
 
+});
+require.register("eugenicsarchivesca-mind-map/lib/loading.js", function(exports, require, module){
+var constants = require('./constants');
+
+module.exports = function(ctx, speed, size, small){
+  this.speed = speed || 60;
+  this.size = size || 60;
+  this.percent = this.percent || 0;
+  this.percent = (this.percent + this.speed / 36) % 100;
+  ctx.save();
+  var tx = small ? -15 : -15 + (constants.CONTAINER_WIDTH / 2);
+  var ty = small ? -15 : -15 + (constants.CONTAINER_HEIGHT / 2);
+  ctx.translate(tx, ty);
+  var percent = this.percent;
+  var ratio = window.devicePixelRatio || 1;
+  var size = this.size / ratio;
+  var half = size / 2;
+  var x = half;
+  var y = half;
+  var rad = half - 1;
+  var angle = Math.PI * 2 * (percent / 100);
+  var grad = ctx.createLinearGradient(
+    half + Math.sin(Math.PI * 1.5 - angle) * half,
+    half + Math.cos(Math.PI * 1.5 - angle) * half,
+    half + Math.sin(Math.PI * 0.5 - angle) * half,
+    half + Math.cos(Math.PI * 0.5 - angle) * half
+  );
+
+  grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  grad.addColorStop(1, 'rgba(0, 0, 0, 1)');
+
+  ctx.lineWidth = 7;
+
+  ctx.strokeStyle = grad;
+  ctx.beginPath();
+  ctx.arc(x, y, rad, angle - Math.PI, angle, false);
+  ctx.stroke();
+
+  // inner circle
+  ctx.strokeStyle = 'rgba(0, 0, 0, .4)';
+  ctx.beginPath();
+  ctx.arc(x, y, rad - 1, 0, Math.PI * 2, true);
+  ctx.stroke();
+  ctx.restore();
+}
 });
 require.register("bmcmahen-linear-conversion/index.js", function(exports, require, module){
 module.exports = function linearConversion(a, b){
@@ -16922,6 +16928,8 @@ function Select(){
   this.classes = classes(this.el);
   this.opts = query('.select-options', this.el);
   this.dropdown = query('.select-dropdown', this.el);
+  this.input = query('.select-input', this.el);
+  this.inputEvents = events(this.input, this);
   this.events = events(this.el, this);
   this._selected = [];
   this.options = {};
@@ -16942,18 +16950,16 @@ Emitter(Select.prototype);
  */
 
 Select.prototype.bind = function(){
-  this.events.bind('click .select-box', 'toggle');
-  this.events.bind('click .select-label', 'toggle');
-  this.events.bind('click .select-option');
+  this.events.bind('click .select-box', 'focus');
+  this.events.bind('mousedown .select-option');
+  var onsearch = this.onsearch.bind(this);
+  this.input.oninput = throttle(onsearch, 300);
+  this.inputEvents.bind('focus', 'show');
+  this.inputEvents.bind('blur');
   this.events.bind('keydown');
   this.events.bind('keyup');
-  this.events.bind('blur');
   return this;
 };
-
-Select.prototype.selectOption = function(e){
-  console.log('select option')
-}
 
 /**
  * Set the select label.
@@ -16964,8 +16970,8 @@ Select.prototype.selectOption = function(e){
  */
 
 Select.prototype.label = function(label){
-  query('.select-label', this.el).textContent = label;
   this._label = label;
+  this.input.placeholder = label;
   return this;
 };
 
@@ -16981,31 +16987,10 @@ Select.prototype.label = function(label){
 Select.prototype.multiple = function(label, opts){
   if (this._multiple) return;
   this._multiple = true;
-  var el = this.input = search(this, label);
-  var box = query('.select-box', this.el);
-  box.innerHTML = '';
-  box.appendChild(el);
-  this.box = new Pillbox(el, opts);
+  this.classes.remove('select-single');
+  this.box = new Pillbox(this.input, opts);
   this.box.events.unbind('keydown');
   this.box.on('remove', this.deselect.bind(this));
-  el.onfocus = this.show.bind(this);
-  return this;
-};
-
-/**
- * Make it searchable.
- *
- * @param {String} label
- * @return {Select}
- * @api public
- */
-
-Select.prototype.searchable = function(label){
-  if (this._searchable) return this;
-  this._searchable = true;
-  var el = this.input = search(this, label);
-  this.dropdown.insertBefore(el, this.opts);
-  this.on('show', el.focus.bind(el));
   return this;
 };
 
@@ -17079,7 +17064,7 @@ Select.prototype.select = function(name){
   if (this._multiple) {
     this.box.add(opt.label);
     this._selected.push(opt);
-    this.box.input.value = '';
+    this.input.value = '';
     this.change();
     this.hide();
     return this;
@@ -17089,7 +17074,7 @@ Select.prototype.select = function(name){
   var prev = this._selected[0];
   if (prev) this.deselect(prev.name);
   this._selected = [opt];
-  this.label(opt.label);
+  this.input.value = opt.label;
   this.hide();
   this.change();
   return this;
@@ -17123,6 +17108,9 @@ Select.prototype.deselect = function(name){
     this.change();
     return this;
   }
+
+  // deselect
+  this.classes.remove('selected');
 
   // single
   this.label(this._label);
@@ -17174,10 +17162,10 @@ Select.prototype.show = function(name){
 
   // show
   this.emit('show');
-  this.classes.add('opened');
+  this.classes.add('open');
 
   // highlight first.
-  var el = query(':not([disabled]):not(.selected)', this.opts);
+  var el = query('.select-option:not([hidden]):not(.selected)', this.opts);
   if (el) this.highlight(el);
 
   return this;
@@ -17194,9 +17182,10 @@ Select.prototype.show = function(name){
 Select.prototype.hide = function(name){
   var opt = this.get(name);
   opt.el.setAttribute('hidden', '');
-  if (name) return this;
+  if ('string' == typeof name) return this;
   this.emit('hide');
-  this.classes.remove('opened');
+  this.classes.remove('open');
+  this.showAll();
   return this;
 };
 
@@ -17221,7 +17210,6 @@ Select.prototype.visible = function(name){
  */
 
 Select.prototype.toggle = function(name){
-  console.log('toggle');
   if ('string' != typeof name) name = null;
 
   return this.visible(name)
@@ -17357,6 +17345,18 @@ Select.prototype.dehighlight = function(){
 };
 
 /**
+ * Focus input.
+ *
+ * @return {Select}
+ * @api public
+ */
+
+Select.prototype.focus = function(){
+  this.input.focus();
+  return this;
+};
+
+/**
  * Highlight next element.
  *
  * @api private
@@ -17364,7 +17364,7 @@ Select.prototype.dehighlight = function(){
 
 Select.prototype.next = function(){
   var el = next(this.active, ':not([hidden]):not(.selected)');
-  el = el || query(':not([hidden]):not(.selected)', this.opts);
+  el = el || query('.select-option:not([hidden])', this.opts);
   this.highlight(el);
 };
 
@@ -17376,19 +17376,9 @@ Select.prototype.next = function(){
 
 Select.prototype.previous = function(){
   var el = previous(this.active, ':not([hidden]):not(.selected)');
-  el = el || query(':not([hidden]):not(.selected):last-child', this.opts);
+  el = el || query.all('.select-option:not([hidden])', this.el);
+  if (el.length) el = el[el.length - 1];
   this.highlight(el);
-};
-
-/**
- * on-click.
- *
- * @param {Event} e
- * @api private
- */
-
-Select.prototype.onclick = function(e){
-  this.select(e.target.textContent);
 };
 
 /**
@@ -17399,7 +17389,11 @@ Select.prototype.onclick = function(e){
  */
 
 Select.prototype.onsearch = function(e){
-  this.search(e.target.value);
+  if (e.target.value) {
+    this.search(e.target.value);
+  } else {
+    this.showAll();
+  }
 };
 
 /**
@@ -17410,27 +17404,26 @@ Select.prototype.onsearch = function(e){
  */
 
 Select.prototype.onkeydown = function(e){
-  if (!this.visible()) this.show();
-
   if (!this.active || 13 != e.which) {
     if (this.box) this.box.onkeydown(e);
     return;
   }
 
+  var name = this.active.getAttribute('data-name');
   e.preventDefault();
-  this.select(this.active.getAttribute('data-name'));
+  this.select(name);
 };
 
 /**
- * on-blur.
+ * on-mousedown.
  *
  * @param {Event} e
  * @api private
  */
 
-Select.prototype.onblur = function(e){
-  if (this.input) return;
-  this.hide();
+Select.prototype.onmousedown = function(e){
+  var name = e.target.getAttribute('data-name');
+  this.select(name);
 };
 
 /**
@@ -17442,9 +17435,25 @@ Select.prototype.onblur = function(e){
 
 Select.prototype.onkeyup = function(e){
   switch (keyname(e.which)) {
-    case 'esc': return this.hide();
-    case 'down': return this.next();
-    case 'up': return this.previous();
+    case 'down':
+      this.next();
+      break;
+    case 'up':
+      this.previous();
+      break;
+    case 'esc':
+      this.hide();
+      this.input.value = '';
+      break;
+    case 'enter':
+      break;
+    case 'backspace':
+      if (this._multiple) return;
+      if (!this._selected.length) return;
+      this.deselect(this._selected[0].name);
+      break;
+    default:
+      this.show();
   }
 };
 
@@ -17456,6 +17465,38 @@ Select.prototype.onkeyup = function(e){
 
 Select.prototype.change = function(){
   this.emit('change', this);
+};
+
+/**
+ * on-blur.
+ *
+ * @param {Event} e
+ * @api public
+ */
+
+Select.prototype.onblur = function(e){
+  this.showAll();
+  this.hide();
+  if (this._multiple) {
+    this.input.value = '';
+  }
+};
+
+/**
+ * Show all options.
+ *
+ * @return {Select}
+ * @api private
+ */
+
+Select.prototype.showAll = function(){
+  var els = query.all('[hidden]:not(.selected)', this.opts);
+
+  for (var i = 0; i < els.length; ++i) {
+    els[i].removeAttribute('hidden');
+  }
+
+  return this;
 };
 
 /**
@@ -17502,49 +17543,9 @@ function option(obj, value, el){
   return obj;
 }
 
-/**
- * Get a search input.
- *
- * @param {Select} select
- * @param {String} label
- * @return {Element}
- * @api private
- */
-
-function search(select, label){
-  var el = document.createElement('input');
-  label = label || select._label;
-  el.type = 'text';
-  el.placeholder = label;
-
-  // blur
-  el.onblur = function(){
-    setTimeout(function(){
-      el.value = '';
-      select.hide();
-    }, 150);
-  };
-
-  // search
-  el.oninput = throttle(function(){
-    select.search(el.value);
-  }, 300);
-
-  // hide
-  select.on('hide', function(){
-    el.value = '';
-    var els = query.all('[hidden]:not(.selected)', select.opts);
-    for (var i = 0; i < els.length; ++i) {
-      els[i].removeAttribute('hidden');
-    }
-  });
-
-  return el;
-}
-
 });
 require.register("yields-select/template.js", function(exports, require, module){
-module.exports = '<div class=\'select\' tabindex=\'-1\'>\n  <div class=\'select-box\'>\n    <span class=\'select-label\'></span>\n  </div>\n  <div class=\'select-dropdown\' hidden>\n    <ul class=\'select-options\'></ul>\n  </div>\n</div>\n';
+module.exports = '<div class=\'select select-single\'>\n  <div class=\'select-box\'>\n    <input type=\'text\' class=\'select-input\'>\n  </div>\n  <div class=\'select-dropdown\' hidden>\n    <ul class=\'select-options\'></ul>\n  </div>\n</div>\n';
 });
 require.register("anthonyshort-map/index.js", function(exports, require, module){
 var SimpleMap = function(values){
@@ -17671,7 +17672,7 @@ require.register("component-event/index.js", function(exports, require, module){
 
 exports.bind = function(el, type, fn, capture){
   if (el.addEventListener) {
-    el.addEventListener(type, fn, capture || false);
+    el.addEventListener(type, fn, capture);
   } else {
     el.attachEvent('on' + type, fn);
   }
@@ -17691,7 +17692,7 @@ exports.bind = function(el, type, fn, capture){
 
 exports.unbind = function(el, type, fn, capture){
   if (el.removeEventListener) {
-    el.removeEventListener(type, fn, capture || false);
+    el.removeEventListener(type, fn, capture);
   } else {
     el.detachEvent('on' + type, fn);
   }
@@ -17923,325 +17924,1324 @@ function parse(event) {
 }
 
 });
+require.register("component-tip/index.js", function(exports, require, module){
+
+/**
+ * Module dependencies.
+ */
+
+var Emitter = require('emitter');
+var o = require('jquery');
+
+/**
+ * Expose `Tip`.
+ */
+
+module.exports = Tip;
+
+/**
+ * Apply the average use-case of simply
+ * showing a tool-tip on `el` hover.
+ *
+ * Options:
+ *
+ *  - `delay` hide delay in milliseconds [0]
+ *  - `value` defaulting to the element's title attribute
+ *
+ * @param {Mixed} el
+ * @param {Object|String} options or value
+ * @api public
+ */
+
+function tip(el, options) {
+  if ('string' == typeof options) options = { value : options };
+  options = options || {};
+  var delay = options.delay;
+
+  o(el).each(function(i, el){
+    el = o(el);
+    var val = options.value || el.attr('title');
+    var tip = new Tip(val);
+    el.attr('title', '');
+    tip.cancelHideOnHover(delay);
+    tip.attach(el, delay);
+  });
+}
+
+/**
+ * Initialize a `Tip` with the given `content`.
+ *
+ * @param {Mixed} content
+ * @api public
+ */
+
+function Tip(content, options) {
+  if (!(this instanceof Tip)) return tip(content, options);
+  Emitter.call(this);
+  this.classname = '';
+  this.el = o(require('./template'));
+  this.inner = this.el.find('.tip-inner');
+  Tip.prototype.message.call(this, content);
+  this.position('south');
+  if (Tip.effect) this.effect(Tip.effect);
+}
+
+/**
+ * Mixin emitter.
+ */
+
+Emitter(Tip.prototype);
+
+/**
+ * Set tip `content`.
+ *
+ * @param {String|jQuery|Element} content
+ * @return {Tip} self
+ * @api public
+ */
+
+Tip.prototype.message = function(content){
+  this.inner.empty().append(content);
+  return this;
+};
+
+/**
+ * Attach to the given `el` with optional hide `delay`.
+ *
+ * @param {Element} el
+ * @param {Number} delay
+ * @return {Tip}
+ * @api public
+ */
+
+Tip.prototype.attach = function(el, delay){
+  var self = this;
+  o(el).hover(function(){
+    self.show(el);
+    self.cancelHide();
+  }, function(){
+    self.hide(delay);
+  });
+  return this;
+};
+
+/**
+ * Cancel hide on hover, hide with the given `delay`.
+ *
+ * @param {Number} delay
+ * @return {Tip}
+ * @api public
+ */
+
+Tip.prototype.cancelHideOnHover = function(delay){
+  this.el.hover(
+    this.cancelHide.bind(this),
+    this.hide.bind(this, delay));
+  return this;
+};
+
+/**
+ * Set the effect to `type`.
+ *
+ * @param {String} type
+ * @return {Tip}
+ * @api public
+ */
+
+Tip.prototype.effect = function(type){
+  this._effect = type;
+  this.el.addClass(type);
+  return this;
+};
+
+/**
+ * Set position:
+ *
+ *  - `north`
+ *  - `north east`
+ *  - `north west`
+ *  - `south`
+ *  - `south east`
+ *  - `south west`
+ *  - `east`
+ *  - `west`
+ *
+ * @param {String} pos
+ * @param {Object} options
+ * @return {Tip}
+ * @api public
+ */
+
+Tip.prototype.position = function(pos, options){
+  options = options || {};
+  this._position = pos;
+  this._auto = false != options.auto;
+  this.replaceClass(pos);
+  return this;
+};
+
+/**
+ * Show the tip attached to `el`.
+ *
+ * Emits "show" (el) event.
+ *
+ * @param {jQuery|Element} el or x
+ * @param {Number} [y]
+ * @return {Tip}
+ * @api public
+ */
+
+Tip.prototype.show = function(el){
+  // show it
+  this.target = o(el);
+  this.el.appendTo('body');
+  this.el.addClass('tip-' + this._position);
+  this.el.removeClass('tip-hide');
+
+  // x,y
+  if ('number' == typeof el) {
+    var x = arguments[0];
+    var y = arguments[1];
+    this.emit('show');
+    this.el.css({ top: y, left: x });
+    return this;
+  }
+
+  // el
+  this.target = o(el);
+  this.reposition();
+  this.emit('show', this.target);
+  this._reposition = this.reposition.bind(this);
+  o(window).bind('resize', this._reposition);
+  o(window).bind('scroll', this._reposition);
+
+  return this;
+};
+
+/**
+ * Reposition the tip if necessary.
+ *
+ * @api private
+ */
+
+Tip.prototype.reposition = function(){
+  var pos = this._position;
+  var off = this.offset(pos);
+  var newpos = this._auto && this.suggested(pos, off);
+  if (newpos) off = this.offset(pos = newpos);
+  this.replaceClass(pos);
+  this.el.css(off);
+};
+
+/**
+ * Compute the "suggested" position favouring `pos`.
+ * Returns undefined if no suggestion is made.
+ *
+ * @param {String} pos
+ * @param {Object} offset
+ * @return {String}
+ * @api private
+ */
+
+Tip.prototype.suggested = function(pos, off){
+  var el = this.el;
+
+  var ew = el.outerWidth();
+  var eh = el.outerHeight();
+
+  var win = o(window);
+  var top = win.scrollTop();
+  var left = win.scrollLeft();
+  var w = win.width();
+  var h = win.height();
+
+  // too high
+  if (off.top < top) return 'north';
+
+  // too low
+  if (off.top + eh > top + h) return 'south';
+
+  // too far to the right
+  if (off.left + ew > left + w) return 'east';
+
+  // too far to the left
+  if (off.left < left) return 'west';
+};
+
+/**
+ * Replace position class `name`.
+ *
+ * @param {String} name
+ * @api private
+ */
+
+Tip.prototype.replaceClass = function(name){
+  name = name.split(' ').join('-');
+  this.el.attr('class', this.classname + ' tip tip-' + name + ' ' + this._effect);
+};
+
+/**
+ * Compute the offset for `.target`
+ * based on the given `pos`.
+ *
+ * @param {String} pos
+ * @return {Object}
+ * @api private
+ */
+
+Tip.prototype.offset = function(pos){
+  var pad = 15;
+  var el = this.el;
+  var target = this.target;
+
+  var ew = el.outerWidth();
+  var eh = el.outerHeight();
+
+  var to = target.offset();
+  var tw = target.outerWidth();
+  var th = target.outerHeight();
+
+  switch (pos) {
+    case 'south':
+      return {
+        top: to.top - eh,
+        left: to.left + tw / 2 - ew / 2
+      }
+    case 'north west':
+      return {
+        top: to.top + th,
+        left: to.left + tw / 2 - pad
+      }
+    case 'north east':
+      return {
+        top: to.top + th,
+        left: to.left + tw / 2 - ew + pad
+      }
+    case 'north':
+      return {
+        top: to.top + th,
+        left: to.left + tw / 2 - ew / 2
+      }
+    case 'south west':
+      return {
+        top: to.top - eh,
+        left: to.left + tw / 2 - pad
+      }
+    case 'south east':
+      return {
+        top: to.top - eh,
+        left: to.left + tw / 2 - ew + pad
+      }
+    case 'west':
+      return {
+        top: to.top + th / 2 - eh / 2,
+        left: to.left + tw
+      }
+    case 'east':
+      return {
+        top: to.top + th / 2 - eh / 2,
+        left: to.left - ew
+      }
+    default:
+      throw new Error('invalid position "' + pos + '"');
+  }
+};
+
+/**
+ * Cancel the `.hide()` timeout.
+ *
+ * @api private
+ */
+
+Tip.prototype.cancelHide = function(){
+  clearTimeout(this._hide);
+};
+
+/**
+ * Hide the tip with optional `ms` delay.
+ *
+ * Emits "hide" event.
+ *
+ * @param {Number} ms
+ * @return {Tip}
+ * @api public
+ */
+
+Tip.prototype.hide = function(ms){
+  var self = this;
+
+  // duration
+  if (ms) {
+    this._hide = setTimeout(this.hide.bind(this), ms);
+    return this;
+  }
+
+  // hide
+  this.el.addClass('tip-hide');
+  if (this._effect) {
+    setTimeout(this.remove.bind(this), 300);
+  } else {
+    self.remove();
+  }
+
+  return this;
+};
+
+/**
+ * Hide the tip without potential animation.
+ *
+ * @return {Tip}
+ * @api
+ */
+
+Tip.prototype.remove = function(){
+  o(window).unbind('resize', this._reposition);
+  o(window).unbind('scroll', this._reposition);
+  this.emit('hide');
+  this.el.detach();
+  return this;
+};
+
+});
+require.register("component-tip/template.js", function(exports, require, module){
+module.exports = '<div class="tip tip-hide">\n  <div class="tip-arrow"></div>\n  <div class="tip-inner"></div>\n</div>';
+});
+require.register("component-cookie/index.js", function(exports, require, module){
+/**
+ * Encode.
+ */
+
+var encode = encodeURIComponent;
+
+/**
+ * Decode.
+ */
+
+var decode = decodeURIComponent;
+
+/**
+ * Set or get cookie `name` with `value` and `options` object.
+ *
+ * @param {String} name
+ * @param {String} value
+ * @param {Object} options
+ * @return {Mixed}
+ * @api public
+ */
+
+module.exports = function(name, value, options){
+  switch (arguments.length) {
+    case 3:
+    case 2:
+      return set(name, value, options);
+    case 1:
+      return get(name);
+    default:
+      return all();
+  }
+};
+
+/**
+ * Set cookie `name` to `value`.
+ *
+ * @param {String} name
+ * @param {String} value
+ * @param {Object} options
+ * @api private
+ */
+
+function set(name, value, options) {
+  options = options || {};
+  var str = encode(name) + '=' + encode(value);
+
+  if (null == value) options.maxage = -1;
+
+  if (options.maxage) {
+    options.expires = new Date(+new Date + options.maxage);
+  }
+
+  if (options.path) str += '; path=' + options.path;
+  if (options.domain) str += '; domain=' + options.domain;
+  if (options.expires) str += '; expires=' + options.expires.toUTCString();
+  if (options.secure) str += '; secure';
+
+  document.cookie = str;
+}
+
+/**
+ * Return all cookies.
+ *
+ * @return {Object}
+ * @api private
+ */
+
+function all() {
+  return parse(document.cookie);
+}
+
+/**
+ * Get cookie `name`.
+ *
+ * @param {String} name
+ * @return {String}
+ * @api private
+ */
+
+function get(name) {
+  return all()[name];
+}
+
+/**
+ * Parse cookie `str`.
+ *
+ * @param {String} str
+ * @return {Object}
+ * @api private
+ */
+
+function parse(str) {
+  var obj = {};
+  var pairs = str.split(/ *; */);
+  var pair;
+  if ('' == pairs[0]) return obj;
+  for (var i = 0; i < pairs.length; ++i) {
+    pair = pairs[i].split('=');
+    obj[decode(pair[0])] = decode(pair[1]);
+  }
+  return obj;
+}
+
+});
+require.register("eugenicsarchivesca-intro.js/intro.js", function(exports, require, module){
+/**
+ * Intro.js v0.5.0
+ * https://github.com/usablica/intro.js
+ * MIT licensed
+ *
+ * Copyright (C) 2013 usabli.ca - A weekend project by Afshin Mehrabani (@afshinmeh)
+ */
+
+(function (root, factory) {
+  if (typeof exports === 'object') {
+    // CommonJS
+    factory(exports);
+  } else if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(['exports'], factory);
+  } else {
+    // Browser globals
+    factory(root);
+  }
+} (this, function (exports) {
+  //Default config/variables
+  var VERSION = '0.5.0';
+
+  /**
+   * IntroJs main class
+   *
+   * @class IntroJs
+   */
+  function IntroJs(obj) {
+    this._targetElement = obj;
+
+    this._options = {
+      /* Next button label in tooltip box */
+      nextLabel: 'Next &rarr;',
+      /* Previous button label in tooltip box */
+      prevLabel: '&larr; Back',
+      /* Skip button label in tooltip box */
+      skipLabel: 'Skip',
+      /* Done button label in tooltip box */
+      doneLabel: 'Done',
+      /* Default tooltip box position */
+      tooltipPosition: 'bottom',
+      /* Next CSS class for tooltip boxes */
+      tooltipClass: '',
+      /* Close introduction when pressing Escape button? */
+      exitOnEsc: true,
+      /* Close introduction when clicking on overlay layer? */
+      exitOnOverlayClick: true,
+      /* Show step numbers in introduction? */
+      showStepNumbers: true
+    };
+  }
+
+  /**
+   * Initiate a new introduction/guide from an element in the page
+   *
+   * @api private
+   * @method _introForElement
+   * @param {Object} targetElm
+   * @returns {Boolean} Success or not?
+   */
+  function _introForElement(targetElm) {
+    var introItems = [],
+        self = this;
+
+    if (this._options.steps) {
+      //use steps passed programmatically
+      var allIntroSteps = [];
+
+      for (var i = 0, stepsLength = this._options.steps.length; i < stepsLength; i++) {
+        var currentItem = this._options.steps[i];
+        //set the step
+        currentItem.step = i + 1;
+        //use querySelector function only when developer used CSS selector
+        if (typeof(currentItem.element) === 'string') {
+          //grab the element with given selector from the page
+          currentItem.element = document.querySelector(currentItem.element);
+        }
+        introItems.push(currentItem);
+      }
+
+    } else {
+      //use steps from data-* annotations
+
+      var allIntroSteps = targetElm.querySelectorAll('*[data-intro]');
+      //if there's no element to intro
+      if (allIntroSteps.length < 1) {
+        return false;
+      }
+
+      for (var i = 0, elmsLength = allIntroSteps.length; i < elmsLength; i++) {
+        var currentElement = allIntroSteps[i];
+        introItems.push({
+          element: currentElement,
+          intro: currentElement.getAttribute('data-intro'),
+          step: parseInt(currentElement.getAttribute('data-step'), 10),
+	  tooltipClass: currentElement.getAttribute('data-tooltipClass'),
+          position: currentElement.getAttribute('data-position') || this._options.tooltipPosition
+        });
+      }
+    }
+
+    //Ok, sort all items with given steps
+    introItems.sort(function (a, b) {
+      return a.step - b.step;
+    });
+
+    //set it to the introJs object
+    self._introItems = introItems;
+
+    //add overlay layer to the page
+    if(_addOverlayLayer.call(self, targetElm)) {
+      //then, start the show
+      _nextStep.call(self);
+
+      var skipButton = targetElm.querySelector('.introjs-skipbutton'),
+          nextStepButton = targetElm.querySelector('.introjs-nextbutton');
+
+      self._onKeyDown = function(e) {
+        if (e.keyCode === 27 && self._options.exitOnEsc == true) {
+          //escape key pressed, exit the intro
+          _exitIntro.call(self, targetElm);
+          //check if any callback is defined
+          if (self._introExitCallback != undefined) {
+            self._introExitCallback.call(self);
+          }
+        } else if(e.keyCode === 37) {
+          //left arrow
+          _previousStep.call(self);
+        } else if (e.keyCode === 39 || e.keyCode === 13) {
+          //right arrow or enter
+          _nextStep.call(self);
+          //prevent default behaviour on hitting Enter, to prevent steps being skipped in some browsers
+          if(e.preventDefault) {
+            e.preventDefault();
+          } else {
+            e.returnValue = false;
+          }
+        }
+      };
+
+      self._onResize = function(e) {
+        _setHelperLayerPosition.call(self, document.querySelector('.introjs-helperLayer'));
+      };
+
+      if (window.addEventListener) {
+        window.addEventListener('keydown', self._onKeyDown, true);
+        //for window resize
+        window.addEventListener("resize", self._onResize, true);
+      } else if (document.attachEvent) { //IE
+        document.attachEvent('onkeydown', self._onKeyDown);
+        //for window resize
+        document.attachEvent("onresize", self._onResize);
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Go to specific step of introduction
+   *
+   * @api private
+   * @method _goToStep
+   */
+  function _goToStep(step) {
+    //because steps starts with zero
+    this._currentStep = step - 2;
+    if(typeof (this._introItems) !== 'undefined') {
+      _nextStep.call(this);
+    }
+  }
+
+  /**
+   * Go to next step on intro
+   *
+   * @api private
+   * @method _nextStep
+   */
+  function _nextStep() {
+    if (typeof (this._currentStep) === 'undefined') {
+      this._currentStep = 0;
+    } else {
+      ++this._currentStep;
+    }
+
+    if((this._introItems.length) <= this._currentStep) {
+      //end of the intro
+      //check if any callback is defined
+      if (typeof (this._introCompleteCallback) === 'function') {
+        this._introCompleteCallback.call(this);
+      }
+      _exitIntro.call(this, this._targetElement);
+      return;
+    }
+
+    var nextStep = this._introItems[this._currentStep];
+    if (typeof (this._introBeforeChangeCallback) !== 'undefined') {
+      this._introBeforeChangeCallback.call(this, nextStep.element);
+    }
+
+    _showElement.call(this, nextStep);
+  }
+
+  /**
+   * Go to previous step on intro
+   *
+   * @api private
+   * @method _nextStep
+   */
+  function _previousStep() {
+    if (this._currentStep === 0) {
+      return false;
+    }
+
+    var nextStep = this._introItems[--this._currentStep];
+    if (typeof (this._introBeforeChangeCallback) !== 'undefined') {
+      this._introBeforeChangeCallback.call(this, nextStep.element);
+    }
+
+    _showElement.call(this, nextStep);
+  }
+
+  /**
+   * Exit from intro
+   *
+   * @api private
+   * @method _exitIntro
+   * @param {Object} targetElement
+   */
+  function _exitIntro(targetElement) {
+    //remove overlay layer from the page
+    var overlayLayer = targetElement.querySelector('.introjs-overlay');
+    //for fade-out animation
+    overlayLayer.style.opacity = 0;
+    setTimeout(function () {
+      if (overlayLayer.parentNode) {
+        overlayLayer.parentNode.removeChild(overlayLayer);
+      }
+    }, 500);
+    //remove all helper layers
+    var helperLayer = targetElement.querySelector('.introjs-helperLayer');
+    if (helperLayer) {
+      helperLayer.parentNode.removeChild(helperLayer);
+    }
+    //remove `introjs-showElement` class from the element
+    var showElement = document.querySelector('.introjs-showElement');
+    if (showElement) {
+      showElement.className = showElement.className.replace(/introjs-[a-zA-Z]+/g, '').replace(/^\s+|\s+$/g, ''); // This is a manual trim.
+    }
+
+    //remove `introjs-fixParent` class from the elements
+    var fixParents = document.querySelectorAll('.introjs-fixParent');
+    if (fixParents && fixParents.length > 0) {
+      for (var i = fixParents.length - 1; i >= 0; i--) {
+        fixParents[i].className = fixParents[i].className.replace(/introjs-fixParent/g, '').replace(/^\s+|\s+$/g, '');
+      };
+    }
+    //clean listeners
+    if (window.removeEventListener) {
+      window.removeEventListener('keydown', this._onKeyDown, true);
+    } else if (document.detachEvent) { //IE
+      document.detachEvent('onkeydown', this._onKeyDown);
+    }
+    //set the step to zero
+    this._currentStep = undefined;
+  }
+
+  /**
+   * Render tooltip box in the page
+   *
+   * @api private
+   * @method _placeTooltip
+   * @param {Object} targetElement
+   * @param {Object} tooltipLayer
+   * @param {Object} arrowLayer
+   */
+  function _placeTooltip(targetElement, tooltipLayer, arrowLayer) {
+    //reset the old style
+    tooltipLayer.style.top     = null;
+    tooltipLayer.style.right   = null;
+    tooltipLayer.style.bottom  = null;
+    tooltipLayer.style.left    = null;
+
+    //prevent error when `this._currentStep` is undefined
+    if(!this._introItems[this._currentStep]) return;
+
+    var tooltipCssClass = '';
+
+    //if we have a custom css class for each step
+    var currentStepObj = this._introItems[this._currentStep];
+    if (typeof (currentStepObj.tooltipClass) === 'string') {
+      tooltipCssClass = currentStepObj.tooltipClass;
+    } else {
+      tooltipCssClass = this._options.tooltipClass;
+    }
+
+    tooltipLayer.className = ('introjs-tooltip ' + tooltipCssClass).replace(/^\s+|\s+$/g, '');
+
+    //custom css class for tooltip boxes
+    var tooltipCssClass = this._options.tooltipClass;
+
+    var currentTooltipPosition = this._introItems[this._currentStep].position;
+    switch (currentTooltipPosition) {
+      case 'top':
+        tooltipLayer.style.left = '15px';
+        tooltipLayer.style.top = '-' + (_getOffset(tooltipLayer).height + 10) + 'px';
+        arrowLayer.className = 'introjs-arrow bottom';
+        break;
+      case 'right':
+        tooltipLayer.style.left = (_getOffset(targetElement).width + 20) + 'px';
+        arrowLayer.className = 'introjs-arrow left';
+        break;
+      case 'left':
+        tooltipLayer.style.top = '15px';
+        tooltipLayer.style.right = (_getOffset(targetElement).width + 20) + 'px';
+        arrowLayer.className = 'introjs-arrow right';
+        break;
+      case 'bottom':
+      // Bottom going to follow the default behavior
+      default:
+        tooltipLayer.style.bottom = '-' + (_getOffset(tooltipLayer).height + 10) + 'px';
+        arrowLayer.className = 'introjs-arrow top';
+        break;
+    }
+  }
+
+  /**
+   * Update the position of the helper layer on the screen
+   *
+   * @api private
+   * @method _setHelperLayerPosition
+   * @param {Object} helperLayer
+   */
+  function _setHelperLayerPosition(helperLayer) {
+    if(helperLayer) {
+      //prevent error when `this._currentStep` in undefined
+      if(!this._introItems[this._currentStep]) return;
+
+      var elementPosition = _getOffset(this._introItems[this._currentStep].element);
+      //set new position to helper layer
+      helperLayer.setAttribute('style', 'width: ' + (elementPosition.width  + 10)  + 'px; ' +
+                                        'height:' + (elementPosition.height + 10)  + 'px; ' +
+                                        'top:'    + (elementPosition.top    - 5)   + 'px;' +
+                                        'left: '  + (elementPosition.left   - 5)   + 'px;');
+    }
+  }
+
+  /**
+   * Show an element on the page
+   *
+   * @api private
+   * @method _showElement
+   * @param {Object} targetElement
+   */
+  function _showElement(targetElement) {
+
+    if (typeof (this._introChangeCallback) !== 'undefined') {
+        this._introChangeCallback.call(this, targetElement.element);
+    }
+
+    var self = this,
+        oldHelperLayer = document.querySelector('.introjs-helperLayer'),
+        elementPosition = _getOffset(targetElement.element);
+
+    if(oldHelperLayer != null) {
+      var oldHelperNumberLayer = oldHelperLayer.querySelector('.introjs-helperNumberLayer'),
+          oldtooltipLayer      = oldHelperLayer.querySelector('.introjs-tooltiptext'),
+          oldArrowLayer        = oldHelperLayer.querySelector('.introjs-arrow'),
+          oldtooltipContainer  = oldHelperLayer.querySelector('.introjs-tooltip'),
+          skipTooltipButton    = oldHelperLayer.querySelector('.introjs-skipbutton'),
+          prevTooltipButton    = oldHelperLayer.querySelector('.introjs-prevbutton'),
+          nextTooltipButton    = oldHelperLayer.querySelector('.introjs-nextbutton');
+
+      //hide the tooltip
+      oldtooltipContainer.style.opacity = 0;
+
+      //set new position to helper layer
+      _setHelperLayerPosition.call(self, oldHelperLayer);
+
+      //remove `introjs-fixParent` class from the elements
+      var fixParents = document.querySelectorAll('.introjs-fixParent');
+      if (fixParents && fixParents.length > 0) {
+        for (var i = fixParents.length - 1; i >= 0; i--) {
+          fixParents[i].className = fixParents[i].className.replace(/introjs-fixParent/g, '').replace(/^\s+|\s+$/g, '');
+        };
+      }
+
+      //remove old classes
+      var oldShowElement = document.querySelector('.introjs-showElement');
+      oldShowElement.className = oldShowElement.className.replace(/introjs-[a-zA-Z]+/g, '').replace(/^\s+|\s+$/g, '');
+      //we should wait until the CSS3 transition is competed (it's 0.3 sec) to prevent incorrect `height` and `width` calculation
+      if (self._lastShowElementTimer) {
+        clearTimeout(self._lastShowElementTimer);
+      }
+      self._lastShowElementTimer = setTimeout(function() {
+        //set current step to the label
+        if(oldHelperNumberLayer != null) {
+          oldHelperNumberLayer.innerHTML = targetElement.step;
+        }
+        //set current tooltip text
+        oldtooltipLayer.innerHTML = targetElement.intro;
+        //set the tooltip position
+        _placeTooltip.call(self, targetElement.element, oldtooltipContainer, oldArrowLayer);
+        //show the tooltip
+        oldtooltipContainer.style.opacity = 1;
+      }, 350);
+
+    } else {
+      var helperLayer  = document.createElement('div'),
+          arrowLayer   = document.createElement('div'),
+          tooltipLayer = document.createElement('div');
+
+      helperLayer.className = 'introjs-helperLayer';
+
+      //set new position to helper layer
+      _setHelperLayerPosition.call(self, helperLayer);
+
+      //add helper layer to target element
+      this._targetElement.appendChild(helperLayer);
+
+      arrowLayer.className = 'introjs-arrow';
+
+      tooltipLayer.innerHTML = '<div class="introjs-tooltiptext">' +
+                               targetElement.intro +
+                               '</div><div class="introjs-tooltipbuttons"></div>';
+
+      //add helper layer number
+      if (this._options.showStepNumbers) {
+        var helperNumberLayer = document.createElement('span');
+        helperNumberLayer.className = 'introjs-helperNumberLayer';
+        helperNumberLayer.innerHTML = targetElement.step;
+        helperLayer.appendChild(helperNumberLayer);
+      }
+      tooltipLayer.appendChild(arrowLayer);
+      helperLayer.appendChild(tooltipLayer);
+
+      //next button
+      var nextTooltipButton = document.createElement('a');
+
+      nextTooltipButton.onclick = function() {
+        if(self._introItems.length - 1 != self._currentStep) {
+          _nextStep.call(self);
+        }
+      };
+
+      nextTooltipButton.href = 'javascript:void(0);';
+      nextTooltipButton.innerHTML = this._options.nextLabel;
+
+      //previous button
+      var prevTooltipButton = document.createElement('a');
+
+      prevTooltipButton.onclick = function() {
+        if(self._currentStep != 0) {
+          _previousStep.call(self);
+        }
+      };
+
+      prevTooltipButton.href = 'javascript:void(0);';
+      prevTooltipButton.innerHTML = this._options.prevLabel;
+
+      //skip button
+      var skipTooltipButton = document.createElement('a');
+      skipTooltipButton.className = 'introjs-button introjs-skipbutton';
+      skipTooltipButton.href = 'javascript:void(0);';
+      skipTooltipButton.innerHTML = this._options.skipLabel;
+
+      skipTooltipButton.onclick = function() {
+        if (self._introItems.length - 1 == self._currentStep && typeof (self._introCompleteCallback) === 'function') {
+          self._introCompleteCallback.call(self);
+        }
+
+        if (self._introItems.length - 1 != self._currentStep && typeof (self._introExitCallback) === 'function') {
+          self._introExitCallback.call(self);
+        }
+
+        _exitIntro.call(self, self._targetElement);
+      };
+
+      var tooltipButtonsLayer = tooltipLayer.querySelector('.introjs-tooltipbuttons');
+      tooltipButtonsLayer.appendChild(skipTooltipButton);
+
+      //in order to prevent displaying next/previous button always
+      if (this._introItems.length > 1) {
+        tooltipButtonsLayer.appendChild(prevTooltipButton);
+        tooltipButtonsLayer.appendChild(nextTooltipButton);
+      }
+
+      //set proper position
+      _placeTooltip.call(self, targetElement.element, tooltipLayer, arrowLayer);
+    }
+
+    if (this._currentStep == 0) {
+      prevTooltipButton.className = 'introjs-button introjs-prevbutton introjs-disabled';
+      nextTooltipButton.className = 'introjs-button introjs-nextbutton';
+      skipTooltipButton.innerHTML = this._options.skipLabel;
+    } else if (this._introItems.length - 1 == this._currentStep) {
+      skipTooltipButton.innerHTML = this._options.doneLabel;
+      prevTooltipButton.className = 'introjs-button introjs-prevbutton';
+      nextTooltipButton.className = 'introjs-button introjs-nextbutton introjs-disabled';
+    } else {
+      prevTooltipButton.className = 'introjs-button introjs-prevbutton';
+      nextTooltipButton.className = 'introjs-button introjs-nextbutton';
+      skipTooltipButton.innerHTML = this._options.skipLabel;
+    }
+
+    //Set focus on "next" button, so that hitting Enter always moves you onto the next step
+    nextTooltipButton.focus();
+
+    //add target element position style
+    targetElement.element.className += ' introjs-showElement';
+
+    var currentElementPosition = _getPropValue(targetElement.element, 'position');
+    if (currentElementPosition !== 'absolute' &&
+        currentElementPosition !== 'relative') {
+      //change to new intro item
+      targetElement.element.className += ' introjs-relativePosition';
+    }
+
+    var parentElm = targetElement.element.parentNode;
+    while(parentElm != null) {
+      if(parentElm.tagName.toLowerCase() === 'body') break;
+
+      var zIndex = _getPropValue(parentElm, 'z-index');
+      if(/[0-9]+/.test(zIndex)) {
+        parentElm.className += ' introjs-fixParent';
+      }
+      parentElm = parentElm.parentNode;
+    }
+
+    if (!_elementInViewport(targetElement.element)) {
+      var rect = targetElement.element.getBoundingClientRect(),
+          top = rect.bottom - (rect.bottom - rect.top),
+          bottom = rect.bottom - _getWinSize().height;
+
+      // Scroll up
+      if (top < 0) {
+        window.scrollBy(0, top - 30); // 30px padding from edge to look nice
+
+      // Scroll down
+      } else {
+        window.scrollBy(0, bottom + 100); // 70px + 30px padding from edge to look nice
+      }
+    }
+  }
+
+  /**
+   * Get an element CSS property on the page
+   * Thanks to JavaScript Kit: http://www.javascriptkit.com/dhtmltutors/dhtmlcascade4.shtml
+   *
+   * @api private
+   * @method _getPropValue
+   * @param {Object} element
+   * @param {String} propName
+   * @returns Element's property value
+   */
+  function _getPropValue (element, propName) {
+    var propValue = '';
+    if (element.currentStyle) { //IE
+      propValue = element.currentStyle[propName];
+    } else if (document.defaultView && document.defaultView.getComputedStyle) { //Others
+      propValue = document.defaultView.getComputedStyle(element, null).getPropertyValue(propName);
+    }
+
+    //Prevent exception in IE
+    if(propValue && propValue.toLowerCase) {
+      return propValue.toLowerCase();
+    } else {
+      return propValue;
+    }
+  }
+
+  /**
+   * Provides a cross-browser way to get the screen dimensions
+   * via: http://stackoverflow.com/questions/5864467/internet-explorer-innerheight
+   *
+   * @api private
+   * @method _getWinSize
+   * @returns {Object} width and height attributes
+   */
+  function _getWinSize() {
+    if (window.innerWidth != undefined) {
+      return { width: window.innerWidth, height: window.innerHeight };
+    } else {
+      var D = document.documentElement;
+      return { width: D.clientWidth, height: D.clientHeight };
+    }
+  }
+
+  /**
+   * Add overlay layer to the page
+   * http://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport
+   *
+   * @api private
+   * @method _elementInViewport
+   * @param {Object} el
+   */
+  function _elementInViewport(el) {
+    var rect = el.getBoundingClientRect();
+
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      (rect.bottom+80) <= window.innerHeight && // add 80 to get the text right
+      rect.right <= window.innerWidth
+    );
+  }
+
+  /**
+   * Add overlay layer to the page
+   *
+   * @api private
+   * @method _addOverlayLayer
+   * @param {Object} targetElm
+   */
+  function _addOverlayLayer(targetElm) {
+    var overlayLayer = document.createElement('div'),
+        styleText = '',
+        self = this;
+
+    //set css class name
+    overlayLayer.className = 'introjs-overlay';
+
+    //check if the target element is body, we should calculate the size of overlay layer in a better way
+    if (targetElm.tagName.toLowerCase() === 'body') {
+      styleText += 'top: 0;bottom: 0; left: 0;right: 0;position: fixed;';
+      overlayLayer.setAttribute('style', styleText);
+    } else {
+      //set overlay layer position
+      var elementPosition = _getOffset(targetElm);
+      if(elementPosition) {
+        styleText += 'width: ' + elementPosition.width + 'px; height:' + elementPosition.height + 'px; top:' + elementPosition.top + 'px;left: ' + elementPosition.left + 'px;';
+        overlayLayer.setAttribute('style', styleText);
+      }
+    }
+
+    targetElm.appendChild(overlayLayer);
+
+    overlayLayer.onclick = function() {
+      if(self._options.exitOnOverlayClick == true) {
+        _exitIntro.call(self, targetElm);
+      }
+      //check if any callback is defined
+      if (self._introExitCallback != undefined) {
+        self._introExitCallback.call(self);
+      }
+    };
+
+    setTimeout(function() {
+      styleText += 'opacity: .8;';
+      overlayLayer.setAttribute('style', styleText);
+    }, 10);
+    return true;
+  }
+
+  /**
+   * Get an element position on the page
+   * Thanks to `meouw`: http://stackoverflow.com/a/442474/375966
+   *
+   * @api private
+   * @method _getOffset
+   * @param {Object} element
+   * @returns Element's position info
+   */
+  function _getOffset(element) {
+    var elementPosition = {};
+
+    //set width
+    elementPosition.width = element.offsetWidth;
+
+    //set height
+    elementPosition.height = element.offsetHeight;
+
+    //calculate element top and left
+    var _x = 0;
+    var _y = 0;
+    while(element && !isNaN(element.offsetLeft) && !isNaN(element.offsetTop)) {
+      _x += element.offsetLeft;
+      _y += element.offsetTop;
+      element = element.offsetParent;
+    }
+    //set top
+    elementPosition.top = _y;
+    //set left
+    elementPosition.left = _x;
+
+    return elementPosition;
+  }
+
+  /**
+   * Overwrites obj1's values with obj2's and adds obj2's if non existent in obj1
+   * via: http://stackoverflow.com/questions/171251/how-can-i-merge-properties-of-two-javascript-objects-dynamically
+   *
+   * @param obj1
+   * @param obj2
+   * @returns obj3 a new object based on obj1 and obj2
+   */
+  function _mergeOptions(obj1,obj2) {
+    var obj3 = {};
+    for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+    for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+    return obj3;
+  }
+
+  var introJs = function (targetElm) {
+    if (typeof (targetElm) === 'object') {
+      //Ok, create a new instance
+      return new IntroJs(targetElm);
+
+    } else if (typeof (targetElm) === 'string') {
+      //select the target element with query selector
+      var targetElement = document.querySelector(targetElm);
+
+      if (targetElement) {
+        return new IntroJs(targetElement);
+      } else {
+        throw new Error('There is no element with given selector.');
+      }
+    } else {
+      return new IntroJs(document.body);
+    }
+  };
+
+  /**
+   * Current IntroJs version
+   *
+   * @property version
+   * @type String
+   */
+  introJs.version = VERSION;
+
+  //Prototype
+  introJs.fn = IntroJs.prototype = {
+    clone: function () {
+      return new IntroJs(this);
+    },
+    setOption: function(option, value) {
+      this._options[option] = value;
+      return this;
+    },
+    setOptions: function(options) {
+      this._options = _mergeOptions(this._options, options);
+      return this;
+    },
+    start: function () {
+      _introForElement.call(this, this._targetElement);
+      return this;
+    },
+    goToStep: function(step) {
+      _goToStep.call(this, step);
+      return this;
+    },
+    exit: function() {
+      _exitIntro.call(this, this._targetElement);
+    },
+    refresh: function() {
+      _setHelperLayerPosition.call(this, document.querySelector('.introjs-helperLayer'));
+      return this;
+    },
+    onbeforechange: function(providedCallback) {
+      if (typeof (providedCallback) === 'function') {
+        this._introBeforeChangeCallback = providedCallback;
+      } else {
+        throw new Error('Provided callback for onbeforechange was not a function');
+      }
+      return this;
+    },
+    onchange: function(providedCallback) {
+      if (typeof (providedCallback) === 'function') {
+        this._introChangeCallback = providedCallback;
+      } else {
+        throw new Error('Provided callback for onchange was not a function.');
+      }
+      return this;
+    },
+    oncomplete: function(providedCallback) {
+      if (typeof (providedCallback) === 'function') {
+        this._introCompleteCallback = providedCallback;
+      } else {
+        throw new Error('Provided callback for oncomplete was not a function.');
+      }
+      return this;
+    },
+    onexit: function(providedCallback) {
+      if (typeof (providedCallback) === 'function') {
+        this._introExitCallback = providedCallback;
+      } else {
+        throw new Error('Provided callback for onexit was not a function.');
+      }
+      return this;
+    }
+  };
+
+  exports.introJs = introJs;
+  return introJs;
+}));
+
+});
 require.register("eugenics-mindmap/index.js", function(exports, require, module){
 require('./controller');
+var $ = require('jquery');
+var cookie = require('cookie');
 
-// var MindMap = require('mindmap');
-// var Fullscreen = require('fullscreen');
-// var $ = require('jquery');
-// var _ = require('underscore');
-// var Backbone = require('backbone');
-// var select = require('select');
+var Tip = require('tip');
+Tip('a[title]', {auto: false});
 
+// Handle Feature introduction
+var intro = require('intro.js').introJs;
 
-// // // on search we need to clear our options,
-// // // we should also do a debounced search.
+function startIntro(){
+  intro()
+    .setOptions({ skipLabel: "Exit Tour" })
+    .start();
+}
 
-// // function search(term){
-// //   _.each(searchBox.options, function(opt){
-// //     searchBox.remove(opt.name);
-// //   });
-// //   var re = new RegExp(term, 'i');
-// //   var filtered = _.filter(eugenicsMap.docs, function(doc){
-// //    return re.test(doc.title);
-// //   });
-// //   _.each(filtered, function(res){
-// //     searchBox.add(res.title, res);
-// //   });
-// //   if (filtered[0]){
-// //     searchBox.highlight(filtered[0].title);
-// //   }
-// // }
+// Only automatically start the introduction if
+// this is the first time the user has visited this
+// particular prod. We store cookies to determine
+// if the user is returning.
+var hasVisited = cookie('mindmap');
+if (!hasVisited) {
+  startIntro();
+  cookie('mindmap', 'visited');
+}
 
-// // var searchBox = select()
-// //   .label('Search the Mindmap')
-// //   .searchable()
-// //   .on('search', search)
-// //   .on('change', function(select){
-// //     var val = select.values()[0];
-// //     eugenicsMap.selectNode(val._id);
-// //     var toDeselect = eugenicsMap.selectedNode._id;
-// //     initialBuild();
-// //     if (toDeselect) {
-// //       console.log('deselect!', toDeselect);
-// //       mymap.deselectNode(toDeselect);
-// //     }
-// //     router.navigate('discover/mindmap/'+ val._id);
-
-// //   });
-
-// // $('#query').append(searchBox.el);
-
-
-
-// var getUnique = function(arr){
-//   var u = {}, a = [];
-//   for(var i = 0, l = arr.length; i < l; ++i){
-//     if(u.hasOwnProperty(arr[i]._id)) {
-//        continue;
-//     }
-//     a.push(arr[i]);
-//     u[arr[i]._id] = 1;
-//  }
-//  return a;
-// }
-
-// var el = document.getElementById('mindmap');
-// var mymap = new MindMap(el);
-
-// var EugenicsMap = function(docs){
-//   this.docs = docs;
-// };
-
-// EugenicsMap.prototype.bind = function(){
-//   mymap.on('nodeSelected', _.bind(this.onNodeSelected, this));
-//   $('#fullscreenmode').on('click', function(e){
-//     e.preventDefault();
-//     Fullscreen(document.getElementById('app'));
-//   });
-
-//   Fullscreen.on('change', function(full){
-//     if (full){
-//       setTimeout(function(){
-//         mymap.width($('#mindmap').width());
-//       }, 200);
-//       mymap.height($(window).height());
-//       mymap.determineOffset();
-//       mymap.animate();
-//     } else {
-//       mymap.width($(el).width());
-//       mymap.height(600);
-//       mymap.determineOffset();
-//       mymap.animate();
-//     }
-//   });
-// };
-
-// EugenicsMap.prototype.selectRandom = function(){
-//   var random = this.docs[Math.floor(Math.random()*this.docs.length)];
-//   this.selectedNode = random;
-//   this.currentSideview = new SideView(random).render();
-//   // mymap.selectNode(random._id);
-// };
-
-// EugenicsMap.prototype.selectNode = function(id){
-//   var node = _.find(this.docs, function(doc){
-//     return doc._id === id;
-//   });
-//   this.selectedNode = node;
-//   this.currentSideview = new SideView(node).render();
-// };
-
-// EugenicsMap.prototype.onNodeSelected = function(node){
-//   router.navigate('discover/mindmap/'+ node.attr._id);
-//   if (this.selectedNode && this.selectedNode != node) {
-//     mymap.deselectNode(this.selectedNode._id);
-//   }
-//   this.currentSideview = new SideView(node.attr).render();
-//   this.selectedNode = node.attr;
-//   this.determineNodes().determineLinks();
-//   this.draw();
-// };
-
-// EugenicsMap.prototype.determineNodes = function(){
-//   var links = this.selectedNode.connections;
-//   var self = this;
-//   this.connectedNodes = _.map(links, function(link){
-//     var _id = (link.from._id !== self.selectedNode._id)
-//       ? link.from._id
-//       : link.to._id;
-//     return self.get(_id);
-//   });
-
-//   this.connectedNodes = _.compact(this.connectedNodes);
-
-//   return this;
-// };
-
-// // xxx this is pretty insane. there's a better way.
-// EugenicsMap.prototype.determineLinks = function(){
-//   this.links = _.clone(this.selectedNode.connections || []);
-//   var self = this;
-//   _.each(this.links, function(l){
-//     delete l.opacity;
-//   });
-
-//   var connections = _.chain(this.connectedNodes)
-//     .pluck('connections')
-//     .flatten()
-//     .uniq()
-//     .value();
-
-//   _.each(connections, function(link){
-//     var from = false;
-//     var to = false;
-//     _.each(self.connectedNodes, function(n){
-//       if (n._id === link.from._id) from = true;
-//       if (n._id === link.to._id) to = true;
-//     });
-//     if (from && to) {
-//       var contains = _.some(self.links, function(l){
-//         return l._id === link._id;
-//       });
-//       if (!contains){
-//         link.opacity = 0.1;
-//         self.links.push(link);
-//       }
-//     }
-//   });
-
-//   return this;
-// };
-
-// EugenicsMap.prototype.get = function(_id){
-//   return _.find(this.docs, function(doc){
-//     return doc._id === _id;
-//   });
-// };
-
-// EugenicsMap.prototype.draw = function(){
-//   this.connectedNodes.push(this.selectedNode);
-//   mymap.nodes.data(this.connectedNodes, function(attr){
-//     return attr._id;
-//   });
-
-//   mymap.links.data(this.links, function(attr){
-//     return attr._id;
-//   });
-
-//   return this;
-// };
-
-// var eugenicsMap;
-
-// function boot(fn){
-//   $.get('/api/prods/mindmap', function(docs){
-//     docs = _.map(docs, function(doc){
-//       if (doc.image && doc.image.url) {
-//         doc.image.url = doc.image.url + '/convert?w=100&h=100&fit=crop&align=faces';
-//       }
-//       return doc;
-//     });
-//     eugenicsMap = new EugenicsMap(docs);
-//     mymap.width($('#mindmap').width());
-//     fn();
-//   });
-// }
-
-
-
-// ////////////
-// // Search //
-// ////////////
-
-// // var lazySearch = _.debounce(search, 350);
-
-// // function search(e){
-// //   var val = $(e.currentTarget).val();
-// //   var re = new RegExp(val, 'i');
-// //   var filtered = _.filter(eugenicsMap.docs, function(doc){
-// //    return re.test(doc.title);
-// //   });
-// //   if (filtered.length < 1) return;
-// //   if (filtered[0] == eugenicsMap.selectedNode) return;
-// //   eugenicsMap.selectNode(filtered[0]._id);
-// //   initialBuild();
-// // }
-
-// // $('#query').on('input', lazySearch);
-
-
-
-// //////////////////////////////////////
-// // Sideview to display node content //
-// //////////////////////////////////////
-
-// var linearConversion = require('linear-conversion');
-
-// var SideView = function(model){
-//   this.model = model;
-//   this.$el = $('#data');
-//   this.conversion = linearConversion([0, 10], [10, 30]);
-//   this.template = require('./template');
-// };
-
-// SideView.prototype.render = function(){
-//   var model = _.clone(this.model);
-//   model.links = this.getConnectedNodes();
-//   this.$el.html(this.template(model));
-//   this.$el.find('a.link').bind('click', _.bind(this.selectNode, this));
-//   return this;
-// };
-
-// SideView.prototype.selectNode = function(e){
-//   e.preventDefault();
-//   var _id = $(e.currentTarget).data('id');
-//   mymap.selectNode(_id);
-// };
-
-// SideView.prototype.getConnectedNodes = function(){
-//   var self = this;
-//   return _.chain(self.model.connections)
-//     .map(function(conn){
-//       var obj = {};
-//       if (conn.from._id === self.model._id) _.extend(obj, conn.to);
-//       else _.extend(obj, conn.from);
-//       obj.size = self.conversion(conn.strength);
-//       return obj;
-//     })
-//     .sortBy(function(conn){
-//       return -conn.size;
-//     })
-//     .value();
-// }
-
-
-// function initialBuild(options){
-//   options = options || {};
-//   if (options.random) eugenicsMap.selectRandom();
-
-//   eugenicsMap
-//     .determineNodes()
-//     .determineLinks()
-//     .draw();
-
-//   mymap.selectNode(eugenicsMap.selectedNode._id, true);
-
-//   mymap.animate();
-//   eugenicsMap.bind();
-// }
-
-// var Router = Backbone.Router.extend({
-//   routes: {
-//     'discover/mindmap' : 'random',
-//     'discover/mindmap/' : 'random',
-//     'discover/mindmap/:id' : 'select'
-//   },
-//   random: function(){
-//     if (!eugenicsMap){
-//       boot(function(){ initialBuild({ random: true }); });
-//     }
-//     else {
-//       eugenicsMap.selectRandom();
-//     }
-//   },
-//   select: function(id){
-//     console.log('select', id);
-//     if (!eugenicsMap) {
-//       boot(function(){
-//         eugenicsMap.selectNode(id);
-//         initialBuild();
-//         mymap.selectNode(id, true);
-//       });
-//     }
-//   }
-// });
-
-// var router = new Router();
-// Backbone.history.start({ pushState: true });
-
-
-
+// You can always trigger the
+$('#help').on('click', function(e){
+  e.preventDefault();
+  startIntro();
+});
 });
 require.register("eugenics-mindmap/controller.js", function(exports, require, module){
 var MindMap = require('mindmap');
@@ -18251,7 +19251,10 @@ var _ = require('underscore');
 var Backbone = require('backbone');
 var EmitterManager = require('emitter-manager');
 
-var myMap = new MindMap(document.getElementById('mindmap'));
+var wrapper = document.getElementById('mindmap');
+var myMap = new MindMap(wrapper);
+myMap.isLoading(true);
+myMap.animate();
 var CurrentSideView = require('./side-view');
 
 exports.myMap = myMap;
@@ -18284,7 +19287,9 @@ EugenicsMap.prototype.bind = function(){
   this.listenTo(myMap, 'nodeSelected', this.onnodeselected);
   $('#fullscreenmode').on('click', function(e){
     e.preventDefault();
-    Fullscreen(document.getElementById('app'));
+    if (Fullscreen.supported){
+      Fullscreen(document.getElementById('app'));
+    }
   });
 
   Fullscreen.on('change', function(full){
@@ -18292,34 +19297,27 @@ EugenicsMap.prototype.bind = function(){
       setTimeout(function(){
         myMap.width($('#mindmap').width());
         myMap.height($(window).height());
-        myMap.determineOffset();
         myMap.animate();
-      }, 500);
+      }, 1000);
     } else {
       setTimeout(function(){
-        myMap.width($(el).width());
+        myMap.width($(wrapper).width());
         myMap.height(600);
-        myMap.determineOffset();
         myMap.animate();
-      }, 500);
+      }, 1000);
     }
   });
 
 };
 
 EugenicsMap.prototype.findById = function(id){
-  console.log('this docs!', this.docs);
   return _.find(this.docs, function(doc){
     return doc._id == id;
   });
 };
 
 EugenicsMap.prototype.selectNode = function(id, silent){
-  console.log('select node!', id);
-  if (this.selectedNode) {
-    myMap.deselectNode(this.selectedNode._id);
-    console.log('deselecting', this.selectedNode._id);
-  }
+  if (this.selectedNode)  this.previousNode = this.selectedNode;
   this.selectedNode = this.findById(id);
   this.redraw();
 };
@@ -18331,7 +19329,6 @@ EugenicsMap.prototype.selectRandom = function(){
 
 // If we want to programatically select a node, we should select
 EugenicsMap.prototype.onnodeselected = function(node){
-  console.log('nodeselected');
   router.navigate('discover/mindmap/'+ node.attr._id);
   if (this.selectedNode) myMap.deselectNode(this.selectedNode._id);
   this.selectedNode = node.attr;
@@ -18340,7 +19337,6 @@ EugenicsMap.prototype.onnodeselected = function(node){
 
 
 EugenicsMap.prototype.redraw = function(){
-  console.log('redrawing', this.selectedNode);
   var node = this.selectedNode;
   if (this.currentSideView) this.currentSideView.close();
   this.currentSideView = new CurrentSideView(node).render();
@@ -18356,6 +19352,10 @@ EugenicsMap.prototype.redraw = function(){
     return attr._id;
   });
   myMap.selectNode(node._id, true);
+  if (this.previousNode){
+    myMap.deselectNode(this.previousNode._id);
+    delete this.previousNode;
+  }
   return this;
 };
 
@@ -18367,6 +19367,9 @@ EugenicsMap.prototype.fetch = function(fn){
   this.fetching = true;
   var self = this;
   $.get('/api/prods/mindmap', function(docs){
+
+    myMap.isLoading(false);
+
     // format our image url
     self.docs = _.map(docs, function(doc){
       if (doc.image && doc.image.url) {
@@ -18378,11 +19381,8 @@ EugenicsMap.prototype.fetch = function(fn){
     self.ready = true;
     self.fetching = false;
 
-    console.log(self.callbacks);
-
     // call everyone back to say that we are ready
     _.each(self.callbacks, function(tocall){
-      console.log('calling back!');
       tocall();
     });
   });
@@ -18440,7 +19440,6 @@ function boot(options, fn){
   myMap.width($('#mindmap').width());
   booted = true;
   eugenicsMap.fetch(function(){
-    console.log('fetch complete');
     if (options.random) eugenicsMap.selectRandom();
     myMap.animate();
     if (fn) fn();
@@ -18463,9 +19462,10 @@ var Router = Backbone.Router.extend({
   select: function(id){
     if (!booted) {
       boot({}, function(){
-        console.log('select id');
         eugenicsMap.selectNode(id, true);
       });
+    } else {
+      eugenicsMap.selectNode(id, true);
     }
   }
 });
@@ -18490,8 +19490,7 @@ var eugenicsMap = require('./controller').controller;
  */
 
 var search = SelectBox()
-  .label('Search')
-  .searchable()
+  .label('Search the Mind Map')
   .on('search', search)
   .on('change', onchange);
 
@@ -18573,6 +19572,7 @@ SideView.prototype.render = function(){
 
 SideView.prototype.close = function(){
   this.events.unbind();
+  this.$el.empty();
 };
 
 SideView.prototype.selectNode = function(e){
@@ -18858,6 +19858,7 @@ require.alias("eugenicsarchivesca-mind-map/lib/collection.js", "eugenics-mindmap
 require.alias("eugenicsarchivesca-mind-map/lib/nodes.js", "eugenics-mindmap/deps/mindmap/lib/nodes.js");
 require.alias("eugenicsarchivesca-mind-map/lib/links.js", "eugenics-mindmap/deps/mindmap/lib/links.js");
 require.alias("eugenicsarchivesca-mind-map/lib/canvas.js", "eugenics-mindmap/deps/mindmap/lib/canvas.js");
+require.alias("eugenicsarchivesca-mind-map/lib/loading.js", "eugenics-mindmap/deps/mindmap/lib/loading.js");
 require.alias("eugenicsarchivesca-mind-map/index.js", "eugenics-mindmap/deps/mindmap/index.js");
 require.alias("eugenicsarchivesca-mind-map/index.js", "mindmap/index.js");
 require.alias("component-raf/index.js", "eugenicsarchivesca-mind-map/deps/raf/index.js");
@@ -18915,8 +19916,6 @@ require.alias("yields-scrolltop/index.js", "eugenicsarchivesca-mind-map/deps/scr
 
 require.alias("anthonyshort-emitter-manager/index.js", "eugenicsarchivesca-mind-map/deps/emitter-manager/index.js");
 require.alias("anthonyshort-map/index.js", "anthonyshort-emitter-manager/deps/map/index.js");
-
-require.alias("component-autoscale-canvas/index.js", "eugenicsarchivesca-mind-map/deps/autoscale-canvas/index.js");
 
 require.alias("component-pinch/index.js", "eugenicsarchivesca-mind-map/deps/pinch/index.js");
 require.alias("component-pinch/e.js", "eugenicsarchivesca-mind-map/deps/pinch/e.js");
@@ -19038,6 +20037,21 @@ require.alias("component-matches-selector/index.js", "component-delegate/deps/ma
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
+
+require.alias("component-tip/index.js", "eugenics-mindmap/deps/tip/index.js");
+require.alias("component-tip/template.js", "eugenics-mindmap/deps/tip/template.js");
+require.alias("component-tip/index.js", "tip/index.js");
+require.alias("component-emitter/index.js", "component-tip/deps/emitter/index.js");
+
+require.alias("component-jquery/index.js", "component-tip/deps/jquery/index.js");
+
+require.alias("component-cookie/index.js", "eugenics-mindmap/deps/cookie/index.js");
+require.alias("component-cookie/index.js", "cookie/index.js");
+
+require.alias("eugenicsarchivesca-intro.js/intro.js", "eugenics-mindmap/deps/intro.js/intro.js");
+require.alias("eugenicsarchivesca-intro.js/intro.js", "eugenics-mindmap/deps/intro.js/index.js");
+require.alias("eugenicsarchivesca-intro.js/intro.js", "intro.js/index.js");
+require.alias("eugenicsarchivesca-intro.js/intro.js", "eugenicsarchivesca-intro.js/index.js");
 
 require.alias("eugenics-mindmap/index.js", "eugenics-mindmap/index.js");
 

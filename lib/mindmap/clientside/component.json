@@ -10,7 +10,10 @@
     "bmcmahen/backbone": "*",
     "yields/select": "*",
     "anthonyshort/emitter-manager": "*",
-    "component/events": "*"
+    "component/events": "*",
+    "component/tip": "*",
+    "component/cookie": "*",
+    "eugenicsarchivesca/intro.js": "*"
   },
   "development": {},
   "main": "index.js",

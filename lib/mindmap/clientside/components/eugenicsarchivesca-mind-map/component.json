@@ -24,7 +24,6 @@
     "timoxley/offset": "*",
     "yields/scrolltop": "*",
     "anthonyshort/emitter-manager": "*",
-    "component/autoscale-canvas": "*",
     "component/pinch": "*",
     "stagas/mouseleave": "*"
   },
@@ -38,6 +37,7 @@
     "lib/collection.js",
     "lib/nodes.js",
     "lib/links.js",
-    "lib/canvas.js"
+    "lib/canvas.js",
+    "lib/loading.js"
   ]
 }

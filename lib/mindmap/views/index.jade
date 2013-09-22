@@ -9,18 +9,20 @@ block append components
     require('eugenics-mindmap');
 
 block subnav-mindmap
-  .prod.active
+  .prod.active(data-intro='The Mind Map is a tool that makes it easy to visualize connections between different concepts related to Eugenics. Click "Next" to get an introduction to this tool, or click "Exit Tour" to bypass this tutorial and access the Mind Map immediately.', data-step='1', data-position='bottom')
     img(src='/img/frontend/mindmap.png', role='presentation')
     span.label Mind Map
 
 block content
   #app
     .prod-heading
-      a#fullscreenmode(href='#')
+      a#fullscreenmode(href='#', title='Enter Fullscreen Mode', data-intro='You can enter fullscreen by clicking this link.', data-step='4')
         i.icon-fullscreen.icon-large
-      #query
-    #mindmap
-    #data
+      #query(data-intro='And you can search the Mind Map for specific entries by typing your query here.', data-step='5')
+      a#help(href='#', title='Get Help', data-intro='Finally, to access this introductory tutorial again, click this button. Have fun exploring the Mind Map!', data-step='6')
+        i.icon-question.icon-large
+    #mindmap(data-intro='You can think of the mind map as a set of floating encyclopedia entries. The highlighted node represents the currently selected entry. The connected nodes represent those entries that are related to the currently selected entry. The thicker the line, the closer the relationship. Try clicking on a node, and notice that the mind map changes to show the newly connected entries.  You can also click and drag nodes to move them into, or out of view.', data-step='2', data-position='right')
+    #data(data-intro='This area contains information about the selected node. You will find a brief description of the node, images, and a list of related encyclopedia entries. You may also be able to view the same entry using different tools, such as the Timeline or Heroes and Villains.', data-step='3', data-position='left')
       h2#map-heading
       p#map-content
       #map-links
