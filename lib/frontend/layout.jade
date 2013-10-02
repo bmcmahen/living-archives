@@ -16,30 +16,11 @@ html(lang='en')
       script(type='text/javascript') try{Typekit.load();}catch(e){}
 
   body
-    block header
-      header#header
-        .navbar
-          .navbar-inner
-            .container
-              a.btn.btn-navbar(data-toggle='collapse', data-target='.nav-collapse')
-                span.icon-bar
-                span.icon-bar
-                span.icon-bar
-              img.logo(src='/img/logo.png')
-              a.logo(href='#', name='Eugenics Archives Canada', aria-hidden='true') Eugenics Archive
-              .nav-collapse
-                ul.nav(role='navigation')
-                  li
-                    block nav-discover
-                      a(href='/discover') Discovery Tools
-                  li
-                    block nav-av
-                      a(href='/audio-video') Audio & Video
-                  li
-                    block nav-info
-                      a(href='http://eugenicsarchive.ca') About the Project
 
     block subheader
+
+    script(type="text/javascript", src='/javascripts/application.js')
+    script require('application');
 
     section#main(role='main')
       .container
@@ -47,5 +28,7 @@ html(lang='en')
         block content
 
         block templates
+
+
 
   block components

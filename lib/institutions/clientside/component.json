@@ -16,7 +16,8 @@
   "main": "index.js",
   "scripts": [
     "index.js",
-    "leaflet-label.js"
+    "leaflet-label.js",
+    "swipe-views.js"
   ],
   "styles": [
     "styles/institutions.styl"
@@ -24,6 +25,7 @@
   "templates": [
     "templates/institution.jade",
     "templates/button.jade",
-    "templates/institutions.jade"
+    "templates/institutions.jade",
+    "templates/institutionalization.jade"
   ]
 }

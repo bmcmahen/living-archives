@@ -1,0 +1,121 @@
+.swipe-container {
+  width: 100%;
+  overflow: hidden;
+  background: #464952;
+  padding: 0 5px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.swipe-container .next-button,
+.swipe-container .prev-button {
+  position: absolute;
+  top: 50%;
+  margin-top: -20px;
+  border-radius: 50px;
+  font-size: 20px;
+  line-height: 22px;
+  font-weight: bold;
+  border: 3px solid;
+  padding: 7px 15px;
+  z-index: 500;
+  background: #fff;
+}
+
+.swipe-container .next-button.visible,
+.swipe-container .prev-button.visible {
+  display: inline-block;
+}
+
+.swipe-container .prev-button {
+  left: 10px;
+}
+
+.swipe-container .next-button {
+  right: 10px;
+}
+
+.swipe-list:after,
+.swipe-list:before {
+  content: "";
+  display: table;
+}
+
+.swipe-list:after {
+  clear: both;
+}
+
+.swipe-list {
+  list-style-type: none;
+  position: relative;
+  width: 100%;
+  padding: 0;
+}
+
+.swipe-item {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  border-right: 0.5em solid transparent;
+  border-left: 0.5em solid transparent;
+  float: left;
+  list-style-type: none;
+}
+
+.swipe-item a {
+  display: block;
+  border: 4px solid transparent;
+  border-radius: 3px;
+}
+
+.swipe-item a:hover {
+  border-color: #bbb;
+}
+
+.swipe-item a.active,
+.swipe-item a:active,
+.swipe-item a.active:hover {
+  border-color: #049cdb;
+}
+
+.swipe-item img {
+  width: 100%;
+}
+
+.swipe-container.touchmoving img,
+.swipe-container.touchmoving a {
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  -o-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+.zoom-image {
+  width: 100%;
+  height: 100px;
+  background-color: white;
+}
+
+span.label {
+  font: 700 11px/18px arial, sans-serif;
+  text-transform: uppercase;
+  color: white;
+  display: inline-block;
+  margin-top: 5px;
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  background: rgba(255, 255, 255, 0.89);
+  color: black;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.prod {
+  position: relative;
+  border-radius: 3px;
+  overflow: hidden;
+}

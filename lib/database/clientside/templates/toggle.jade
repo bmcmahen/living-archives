@@ -1,0 +1,8 @@
+label #{object.label}
+  if object.required
+    span *
+  input(id=object.name, type='checkbox', name=object.name, class=object.className, checked=object.value ? 'checked' : false)
+if object.error
+  p.error-text=object.error
+if object.helpText
+  span.help-block=object.helpText

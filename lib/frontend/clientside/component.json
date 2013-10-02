@@ -4,11 +4,10 @@
   "dependencies": {
     "ftlabs/fastclick" : "*",
     "CamShaft/bootstrap-grid" : "*",
-    "CamShaft/bootstrap-reset" : "*"
+    "CamShaft/bootstrap-reset" : "*",
+    "jonykrause/fluid-slider": "*"
   },
-  "development": {
-
-    },
+  "development": {},
   "main": "index.js",
   "scripts": [
     "index.js"
@@ -17,7 +16,8 @@
     "styles/base.styl",
     "styles/buttons.styl",
     "styles/navigation.styl",
-    "styles/tip.styl"
+    "styles/tip.styl",
+    "styles/navbar.styl"
   ],
   "templates": []
 }

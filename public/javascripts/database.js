@@ -8638,7 +8638,8 @@ var EugenicsDocument = new Model('document')
   .attr('ambiQuoteSource')
   .attr('latitude')
   .attr('longitude')
-  .attr('connections');
+  .attr('connections')
+  .attr('residentialSchool');
 
 EugenicsDocument.prototype.unset = function(key){
 	var _this = this;
@@ -9105,14 +9106,11 @@ var typeToFullType = {
 
 module.exports = function(controller){
 
-console.log('hello', controller);
-
 ///////////////////////////
 // Document Summary View //
 ///////////////////////////
 
 var DocumentView = function(){
-	console.log(controller);
 	this.controller = controller;
 	this.wrapper = dom('#document-summary');
 	var self = this;
@@ -9797,6 +9795,7 @@ FieldView.prototype.parse = function(){
     ? this.el.find('textarea')
     : this.el.find('input[name]');
 
+  // checkbox means prods
   if (widget === 'checkbox'){
     var checkedProds = [];
     inputEl.each(function(input){
@@ -9806,6 +9805,11 @@ FieldView.prototype.parse = function(){
     });
 
     return (checkedProds.length > 0) ? checkedProds : null;
+  }
+
+  // toggle refers to a single checkbox, with true or false state.
+  if (widget === 'toggle') {
+    return inputEl.get().checked ? true : false;
   }
 
   if (widget === 'select') {
@@ -9824,7 +9828,8 @@ FieldView.prototype.widgetTemplates = {
   'checkbox' : require('../templates/checkbox'),
   'select' : require('../templates/select'),
   'image' : require('../templates/image'),
-  'button' : require('../templates/button')
+  'button' : require('../templates/button'),
+  'toggle' : require('../templates/toggle')
 };
 
 FieldView.prototype.close = function(){
@@ -9849,7 +9854,6 @@ FieldView.prototype.uploadImage = function(e){
     image.metadata = meta;
     _this.model.loading(false);
     _this.model.value(image);
-    console.log('set value', _this.model);
   });
 };
 
@@ -10300,7 +10304,8 @@ module.exports = {
   institutions : function(){
     return {
       latitude : { widget: 'text', label: 'Latitude' },
-      longitude : { widget: 'text', label: 'Longitude' }
+      longitude : { widget: 'text', label: 'Longitude' },
+      residentialSchool : { widget: 'toggle', label: 'Residential School' }
     };
   },
 
@@ -10486,6 +10491,8 @@ Connection.prototype.nodeToLink = function(nodeView){
 	this.potentialNodes.models = this.potentialNodes.reject(function(node){
 		return node == nodeView;
 	}).value();
+
+
 
 	// create a new link model & fill it with attributes
 	var model = new LinkModel();
@@ -11206,6 +11213,28 @@ module.exports = function anonymous(locals) {
 var buf = [];
 with (locals || {}) {
 buf.push("<span class=\"document-name\">" + (jade.escape(null == (jade.interp = title) ? "" : jade.interp)) + "</span><button class=\"btn btn-small btn-warning remove\">Remove</button><select class=\"strength\"><option" + (jade.attrs({ 'value':('1'), 'selected':((strength === 1)) }, {"value":true,"selected":true})) + ">1</option><option" + (jade.attrs({ 'value':('2'), 'selected':((strength === 2)) }, {"value":true,"selected":true})) + ">2</option><option" + (jade.attrs({ 'value':('3'), 'selected':((strength === 3)) }, {"value":true,"selected":true})) + ">3</option><option" + (jade.attrs({ 'value':('4'), 'selected':((strength === 4)) }, {"value":true,"selected":true})) + ">4</option><option" + (jade.attrs({ 'value':('5'), 'selected':((strength === 5)) }, {"value":true,"selected":true})) + ">5</option><option" + (jade.attrs({ 'value':('6'), 'selected':((strength === 6)) }, {"value":true,"selected":true})) + ">6</option><option" + (jade.attrs({ 'value':('7'), 'selected':((strength === 7)) }, {"value":true,"selected":true})) + ">7</option><option" + (jade.attrs({ 'value':('8'), 'selected':((strength === 8)) }, {"value":true,"selected":true})) + ">8</option><option" + (jade.attrs({ 'value':('9'), 'selected':((strength === 9)) }, {"value":true,"selected":true})) + ">9</option><option" + (jade.attrs({ 'value':('10'), 'selected':((strength === 10)) }, {"value":true,"selected":true})) + ">10</option></select>");
+}
+return buf.join("");
+}
+});
+require.register("eugenicsdatabase/templates/toggle.js", function(exports, require, module){
+module.exports = function anonymous(locals) {
+var buf = [];
+with (locals || {}) {
+buf.push("<label>" + (jade.escape((jade.interp = object.label) == null ? '' : jade.interp)) + "");
+if ( object.required)
+{
+buf.push("<span>*</span>");
+}
+buf.push("<input" + (jade.attrs({ 'id':(object.name), 'type':('checkbox'), 'name':(object.name), 'checked':(object.value ? 'checked' : false), "class": (object.className) }, {"id":true,"type":true,"name":true,"class":true,"checked":true})) + "/></label>");
+if ( object.error)
+{
+buf.push("<p class=\"error-text\">" + (jade.escape(null == (jade.interp = object.error) ? "" : jade.interp)) + "</p>");
+}
+if ( object.helpText)
+{
+buf.push("<span class=\"help-block\">" + (jade.escape(null == (jade.interp = object.helpText) ? "" : jade.interp)) + "</span>");
+}
 }
 return buf.join("");
 }

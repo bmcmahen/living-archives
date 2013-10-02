@@ -14355,6 +14355,7 @@ module.exports = function(){
   var $ = require('jquery');
   var _ = require('underscore');
   var Backbone = require('backbone');
+  var SwipeView = require('./swipe-views');
 
   require('./leaflet-label');
 
@@ -14371,6 +14372,7 @@ module.exports = function(){
     this.bind();
   };
 
+  // use component/events instead
   Pamphlet.prototype.bind = function(){
     this.accordion
       .on('active', bind(this, this.makeActive))
@@ -14430,10 +14432,9 @@ module.exports = function(){
     var _this = this;
     e.preventDefault();
     this.overlay.show();
-    $.get('/discover/institutions/institutionalization', function(data){
-      _this.$swipeContent.html(data);
-      _this.currentSwipe = new SwipeView(_this);
-    });
+    this.showing = 'institutionalization';
+    this.$swipeContent.html(require('./templates/institutionalization'));
+    this.currentSwipe = new SwipeView(this);
   };
 
   Pamphlet.prototype.showDeinstitutionalization = function(e){
@@ -15067,6 +15068,79 @@ L.FeatureGroup.include({
 
 }(this, document));
 });
+require.register("institutions/swipe-views.js", function(exports, require, module){
+
+  // SWIPE VIEWS
+  var Swipe = require('swipe');
+  var $ = require('jquery');
+  var _ = require('underscore');
+
+  var SwipeView = function(context){
+    this.context = context;
+    this.$el = $('#swipe-container');
+    this.swipe = new Swipe(this.$el[0]).duration(600);
+    this.$container = $('#swipe-container');
+    this.$items = this.$container.find('li');
+    this.$list = this.$container.find('ul');
+    this.$selected = $('#switch li.active').find('a');
+    this.$continueButtons = $('.continue');
+    this.$switchItems = $('.switch-item');
+    this.$exit = $('a.exit');
+    this.bind();
+    this.setSize();
+  };
+
+  module.exports = SwipeView;
+
+  SwipeView.prototype.setSize = function(){
+    var w = this.$container.width();
+    var h = $(window).height() - 145;
+    this.$items.css({
+      width: w + 'px',
+      height: h + 'px'
+    });
+    this.$container.height(h);
+    this.$list.height(h);
+    this.swipe.refresh();
+  };
+
+  SwipeView.prototype.bind = function(){
+    var _this = this;
+    this.swipe.on('showing', bind(this, this.onShow));
+    this.$switchItems.on('click', function(e){
+      e.preventDefault();
+      var i = $(e.currentTarget).text();
+      _this.swipe.show(+i);
+    });
+    $(window).on('resize', bind(this, this.setSize));
+    this.$exit.on('click', bind(this, this.onExit));
+    $(window).on('keydown', function(e){
+      if (e.which === 37) {
+        _this.swipe.prev();
+      } else if (e.which === 39) {
+        _this.swipe.next();
+      }
+    });
+    this.$continueButtons.on('click', function(){
+      _this.swipe.next();
+    });
+  };
+
+  SwipeView.prototype.onExit = function(e){
+    e.preventDefault();
+    this.context.overlay.hide();
+    $(window).off('keydown');
+    $('#swipe-content').html('');
+  };
+
+  SwipeView.prototype.onShow = function(i){
+    if (this.$selected) {
+      this.$selected.parent().removeClass('active');
+    }
+    this.$selected = $('#'+i);
+    this.$selected.parent().addClass('active');
+  };
+});
 require.register("institutions/jade-runtime.js", function(exports, require, module){
 
 jade = (function(exports){
@@ -15303,6 +15377,15 @@ module.exports = function anonymous(locals) {
 var buf = [];
 with (locals || {}) {
 buf.push("<div id=\"swipe-block\"><div id=\"map-wrapper\"><div id=\"map\" class=\"dark\"></div></div><div id=\"swipe-controller\"><ul id=\"switch\" class=\"switch clearfix\"><li class=\"clearfix map\"><a href=\"#\" class=\"exit\">Exit Fullscreen</a></li><li class=\"grid clearfix map\"><a id=\"show-all\" href=\"#\" title=\"Show All Institutions\"><i class=\"icon-th icon-2x\"></i></a></li><li id=\"numbers\" class=\"map\"><span id=\"current-number\" class=\"num\"></span><span class=\"divider\">of</span><span id=\"last-number\" class=\"num\"></span></li></ul></div></div>");
+}
+return buf.join("");
+}
+});
+require.register("institutions/templates/institutionalization.js", function(exports, require, module){
+module.exports = function anonymous(locals) {
+var buf = [];
+with (locals || {}) {
+buf.push("<div id=\"swipe-block\" class=\"hidden\"><div id=\"swipe-container\"><ul><li class=\"one\"><div class=\"relative\"><div class=\"swipe-content white top left one-thirds\"><h3>Being in the Institution</h3><p>Lorem ipsum Eiusmod sint irure qui dolor occaecat sed sunt enim ullamco velit quis ad laborum cupidatat laboris occaecat ut pariatur eiusmod labore et aliqua ex sint dolore sed Excepteur elit occaecat dolore magna dolor est irure occaecat id in. Lorem ipsum Occaecat magna esse Excepteur occaecat laborum irure veniam ex enim cillum cillum mollit cupidatat magna commodo consectetur et deserunt ullamco fugiat cupidatat culpa mollit exercitation officia in exercitation dolor anim et consectetur nisi ex sunt in officia.</p><p>Lorem ipsum Exercitation dolore sint adipisicing id proident adipisicing ut in eiusmod exercitation mollit adipisicing laboris quis nostrud est deserunt culpa Ut Duis.</p></div></div></li><li style=\"background: url(&quot;/img/frontend/institutions/inst6.jpg&quot;) no-repeat center center\"><div class=\"relative\"><div class=\"swipe-content white top left one-thirds\"><h3>Entering the Institution</h3><p>Lorem ipsum Fugiat eu aliqua aliquip qui aliqua consequat dolore cupidatat non velit ea nulla consequat officia ea commodo amet incididunt cillum in consectetur incididunt sunt nisi sit reprehenderit anim laborum nulla consequat in.</p></div></div></li><li style=\"background: url(&quot;/img/frontend/institutions/EugenicsBoard1936b_UniversityofAlbertaArchives.jpg&quot;) no-repeat center center\"><div class=\"relative\"><div class=\"swipe-content bottom left half white\"><h3>The People</h3><p>Lorem ipsum Nisi tempor dolor voluptate laborum sed quis consequat sed fugiat cillum ut in non deserunt ex aliquip. Lorem ipsum Exercitation sint veniam irure anim in pariatur sint proident ullamco labore reprehenderit eu dolore consectetur nostrud nulla et minim exercitation et quis sit.three</p></div></div></li><li style=\"background: url(&quot;/img/frontend/institutions/reddeer.png&quot;) no-repeat center center\"><div class=\"relative\"><div class=\"swipe-content right top two-thirds white\"><h3>Leilani Muir</h3><img src=\"/img/frontend/institutions/leilanimuir.jpg\" class=\"pull-left\"/><p>Lorem ipsum Nisi irure quis esse aute velit aute aliqua ea officia qui consectetur ut dolor cupidatat nulla quis consequat adipisicing dolor consectetur Duis cillum veniam qui sunt.</p><!-- iframe(width=\"560\", height=\"315\", src=\"http://www.youtube.com/embed/TWS3dr4pv0E\", frameborder=\"0\", allowfullscreen)--></div></div></li><li><div class=\"relative\"><div class=\"swipe-content\"><p>Lorem ipsum Qui dolor aute adipisicing nostrud aute nulla ullamco sed ut non quis labore tempor sed veniam fugiat ullamco nostrud nulla sit esse est dolore esse nisi consectetur sit velit cupidatat dolore.five</p></div></div></li></ul></div><a href=\"#\" class=\"exit\">Exit Fullscreen</a></div><div id=\"swipe-controller\"><ul id=\"switch\" class=\"switch\"><li class=\"active\"><a id=\"0\" href=\"#\" class=\"switch-item\">0</a></li><li><a id=\"1\" href=\"#\" class=\"switch-item\">1</a></li><li><a id=\"2\" href=\"#\" class=\"switch-item\">2</a></li><li><a id=\"3\" href=\"#\" class=\"switch-item\">3</a></li><li><a id=\"4\" href=\"#\" class=\"switch-item\">4</a></li></ul></div>");
 }
 return buf.join("");
 }

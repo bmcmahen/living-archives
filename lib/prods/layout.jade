@@ -6,42 +6,55 @@ block nav-discover
     span Discovery Tools
 
 block subheader
-  #sub-header
-    .container
-      .row
-        .span2
-          a(href='/discover/whatis')
-            block subnav-whatis
-              .prod
-                .zoom-image(style='background-image: url("/img/frontend/whatis.png")')
-                span.label What is Eugenics?
-         .span2
-          a(href='/discover/heroes')
-            block subnav-heroes
-              .prod
-                .zoom-image(style='background-image: url("/img/frontend/hero.png")')
-                span.label Heroes & Villains
-        .span2
-          a(href='/discover/timeline')
-            block subnav-timeline
-              .prod
-                .zoom-image(style='background-image: url("/img/frontend/timeline.png")')
-                span.label Timeline
-        .span2
-          a(href='/discover/mindmap')
-            block subnav-mindmap
-              .prod
-                .zoom-image(style='background-image: url("/img/frontend/mindmap.png")')
-                span.label Mind Map
-        .span2
-          a(href='/discover/institutions')
-            block subnav-institutions
-              .prod
-                .zoom-image(style='background-image: url("/img/frontend/institutions.png")')
-                span.label Institutions
-        .span2
-          a(href='/discover/exploring')
-            block subnav-exploring
-              .prod
-                .zoom-image(style='background-image: url("/img/frontend/archive.png")')
-                span.label Explore Archives
+  #swipe-container.swipe-container
+    ul#js-swipe.swipe-list
+      li.swipe-item
+        a(href='/discover/whatis')
+          block subnav-whatis
+            .prod
+              .zoom-image(style='background-image: url("/img/frontend/whatis.png")')
+              span.label What is Eugenics?
+      li.swipe-item
+        a(href='/discover/heroes')
+          block subnav-heroes
+            .prod
+              .zoom-image(style='background-image: url("/img/frontend/hero.png")')
+              span.label Heroes & Villains
+      li.swipe-item
+        a(href='/discover/timeline')
+          block subnav-timeline
+            .prod
+              .zoom-image(style='background-image: url("/img/frontend/timeline.png")')
+              span.label Timeline
+      li.swipe-item
+        a(href='/discover/mindmap')
+          block subnav-mindmap
+            .prod
+              .zoom-image(style='background-image: url("/img/frontend/mindmap.png")')
+              span.label Mind Map
+      li.swipe-item
+        a(href='/discover/institutions')
+          block subnav-institutions
+            .prod
+              .zoom-image(style='background-image: url("/img/frontend/institutions.png")')
+              span.label Institutions
+      li.swipe-item
+        a(href='/discover/ourstories')
+          block subnav-ourstories
+            .prod
+              .zoom-image(style='background: #ddd')
+              span.label Our Stories
+      li.swipe-item
+        a(href='/discover/exploring')
+          block subnav-exploring
+            .prod
+              .zoom-image(style='background-image: url("/img/frontend/archive.png")')
+              span.label Explore Archives
+      li.swipe-item
+        a(href='/discover/game')
+          block subnav-game
+            .prod
+              .zoom-image(style='background: #ddd')
+              span.label Game
+    .prev-button.visible Previous
+    .next-button.visible More

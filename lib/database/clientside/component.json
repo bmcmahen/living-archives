@@ -63,7 +63,8 @@
     "templates/select.jade",
     "templates/text.jade",
     "templates/textarea.jade",
-    "templates/connection-select.jade"
+    "templates/connection-select.jade",
+    "templates/toggle.jade"
   ],
   "styles": [
     "styles/bootstrap.css",
