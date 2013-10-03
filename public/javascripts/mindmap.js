@@ -19301,8 +19301,7 @@ EugenicsMap.prototype.bind = function(){
       }, 1000);
     } else {
       setTimeout(function(){
-        myMap.width($(wrapper).width());
-        myMap.height(600);
+        setDimensions();
         myMap.animate();
       }, 1000);
     }
@@ -19435,9 +19434,19 @@ EugenicsMap.prototype.determineLinks = function(){
   return this;
 }
 
+function setDimensions(){
+  var h = $(window).height() - $('#navbar-swipe-container').height();
+  var w = $('#mindmap').width();
+  $('#app').height(h);
+  myMap.height(h);
+  myMap.width(w);
+}
+
+$(window).on('resize', _.debounce(setDimensions, 50));
+
 function boot(options, fn){
   options = options || {};
-  myMap.width($('#mindmap').width());
+  setDimensions();
   booted = true;
   eugenicsMap.fetch(function(){
     if (options.random) eugenicsMap.selectRandom();

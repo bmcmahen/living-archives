@@ -6,7 +6,7 @@ block nav-discover
     span Discovery Tools
 
 block subheader
-  #swipe-container.swipe-container
+  #navbar-swipe-container.navbar-swipe-container
     ul#js-swipe.swipe-list
       li.swipe-item
         a(href='/discover/whatis')
@@ -56,5 +56,7 @@ block subheader
             .prod
               .zoom-image(style='background: #ddd')
               span.label Game
-    .prev-button.visible Previous
-    .next-button.visible More
+    a.prev-button(href='#')
+      i.icon-chevron-left
+    a.next-button(href='#')
+      i.icon-chevron-right

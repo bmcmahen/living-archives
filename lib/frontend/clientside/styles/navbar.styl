@@ -1,37 +1,56 @@
-.swipe-container {
+.navbar-swipe-container {
   width: 100%;
   overflow: hidden;
   background: #464952;
-  padding: 0 5px;
+  padding: 0 15px;
   box-sizing: border-box;
   position: relative;
 }
 
-.swipe-container .next-button,
-.swipe-container .prev-button {
+
+.navbar-swipe-container .next-button,
+.navbar-swipe-container .prev-button {
   position: absolute;
   top: 50%;
-  margin-top: -20px;
-  border-radius: 50px;
-  font-size: 20px;
+  margin-top: -28px;
+  border-radius: 50%;
+  font-size: 28px;
+  vertical-align: top;
   line-height: 22px;
   font-weight: bold;
   border: 3px solid;
-  padding: 7px 15px;
+  padding: 11px 16px 9px 18px;
   z-index: 500;
   background: #fff;
+  color: #333;
 }
 
-.swipe-container .next-button.visible,
-.swipe-container .prev-button.visible {
-  display: inline-block;
+.navbar-swipe-container .prev-button {
+  padding: 11px 18px 9px 16px;
 }
 
-.swipe-container .prev-button {
+.navbar-swipe-container .next-button:hover,
+.navbar-swipe-container .prev-button:hover {
+  color: #049cdb;
+  text-decoration: none;
+}
+
+.navbar-swipe-container .next-button:active,
+.navbar-swipe-container .prev-button:active {
+  background: #ddd;
+}
+
+
+.navbar-swipe-container .next-button.hide,
+.navbar-swipe-container .prev-button.hide {
+  display: none;
+}
+
+.navbar-swipe-container .prev-button {
   left: 10px;
 }
 
-.swipe-container .next-button {
+.navbar-swipe-container .next-button {
   right: 10px;
 }
 
@@ -82,8 +101,8 @@
   width: 100%;
 }
 
-.swipe-container.touchmoving img,
-.swipe-container.touchmoving a {
+.navbar-swipe-container.touchmoving img,
+.navbar-swipe-container.touchmoving a {
   -webkit-user-select: none;  /* Chrome all / Safari all */
   -moz-user-select: none;     /* Firefox all */
   -ms-user-select: none;      /* IE 10+ */
@@ -99,8 +118,7 @@
 }
 
 span.label {
-  font: 700 11px/18px arial, sans-serif;
-  text-transform: uppercase;
+  font: 500 12px/20px arial, sans-serif;
   color: white;
   display: inline-block;
   margin-top: 5px;

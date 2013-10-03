@@ -2,10 +2,12 @@
   "name": "application",
   "description": "universal application assets",
   "dependencies": {
-    "ftlabs/fastclick" : "*",
-    "CamShaft/bootstrap-grid" : "*",
-    "CamShaft/bootstrap-reset" : "*",
-    "jonykrause/fluid-slider": "*"
+    "ftlabs/fastclick": "*",
+    "CamShaft/bootstrap-grid": "*",
+    "CamShaft/bootstrap-reset": "*",
+    "jonykrause/fluid-slider": "*",
+    "component/event": "*",
+    "component/classes": "*"
   },
   "development": {},
   "main": "index.js",
@@ -19,5 +21,6 @@
     "styles/tip.styl",
     "styles/navbar.styl"
   ],
-  "templates": []
+  "templates": [],
+  "remotes": []
 }

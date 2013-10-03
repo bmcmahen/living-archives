@@ -961,49 +961,6 @@ if (typeof define !== 'undefined' && define.amd) {
 });
 
 
-require.register("component-event/index.js", function(exports, require, module){
-
-/**
- * Bind `el` event `type` to `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
-
-exports.bind = function(el, type, fn, capture){
-  if (el.addEventListener) {
-    el.addEventListener(type, fn, capture);
-  } else {
-    el.attachEvent('on' + type, fn);
-  }
-  return fn;
-};
-
-/**
- * Unbind `el` event `type`'s callback `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
-
-exports.unbind = function(el, type, fn, capture){
-  if (el.removeEventListener) {
-    el.removeEventListener(type, fn, capture);
-  } else {
-    el.detachEvent('on' + type, fn);
-  }
-  return fn;
-};
-
-});
 require.register("component-query/index.js", function(exports, require, module){
 
 function one(selector, el) {
@@ -1738,7 +1695,7 @@ Swipe.prototype.unbind = function(){
  */
 
 Swipe.prototype.ontouchstart = function(e){
-  e.stopPropagation();    
+  e.stopPropagation();
   if (e.touches) e = e.touches[0];
 
   this.transitionDuration(0);
@@ -1799,7 +1756,7 @@ Swipe.prototype.ontouchmove = function(e){
   var dir = this.dx < 0 ? 1 : 0;
   if (this.isFirst() && 0 == dir) this.dx /= 2;
   if (this.isLast() && 1 == dir) this.dx /= 2;
-  translate(this.child, -((i * w) + -this.dx / this.sensitivity), 0, this.unit);
+  translate(this.child, -((i * w) + -this.dx / 13), 0, this.unit);
 };
 
 /**
@@ -2193,8 +2150,231 @@ FluidSlider.prototype.update = function() {
 
 
 });
+require.register("component-event/index.js", function(exports, require, module){
+
+/**
+ * Bind `el` event `type` to `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.bind = function(el, type, fn, capture){
+  if (el.addEventListener) {
+    el.addEventListener(type, fn, capture);
+  } else {
+    el.attachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+/**
+ * Unbind `el` event `type`'s callback `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.unbind = function(el, type, fn, capture){
+  if (el.removeEventListener) {
+    el.removeEventListener(type, fn, capture);
+  } else {
+    el.detachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+});
+require.register("component-indexof/index.js", function(exports, require, module){
+module.exports = function(arr, obj){
+  if (arr.indexOf) return arr.indexOf(obj);
+  for (var i = 0; i < arr.length; ++i) {
+    if (arr[i] === obj) return i;
+  }
+  return -1;
+};
+});
+require.register("component-classes/index.js", function(exports, require, module){
+/**
+ * Module dependencies.
+ */
+
+var index = require('indexof');
+
+/**
+ * Whitespace regexp.
+ */
+
+var re = /\s+/;
+
+/**
+ * toString reference.
+ */
+
+var toString = Object.prototype.toString;
+
+/**
+ * Wrap `el` in a `ClassList`.
+ *
+ * @param {Element} el
+ * @return {ClassList}
+ * @api public
+ */
+
+module.exports = function(el){
+  return new ClassList(el);
+};
+
+/**
+ * Initialize a new ClassList for `el`.
+ *
+ * @param {Element} el
+ * @api private
+ */
+
+function ClassList(el) {
+  if (!el) throw new Error('A DOM element reference is required');
+  this.el = el;
+  this.list = el.classList;
+}
+
+/**
+ * Add class `name` if not already present.
+ *
+ * @param {String} name
+ * @return {ClassList}
+ * @api public
+ */
+
+ClassList.prototype.add = function(name){
+  // classList
+  if (this.list) {
+    this.list.add(name);
+    return this;
+  }
+
+  // fallback
+  var arr = this.array();
+  var i = index(arr, name);
+  if (!~i) arr.push(name);
+  this.el.className = arr.join(' ');
+  return this;
+};
+
+/**
+ * Remove class `name` when present, or
+ * pass a regular expression to remove
+ * any which match.
+ *
+ * @param {String|RegExp} name
+ * @return {ClassList}
+ * @api public
+ */
+
+ClassList.prototype.remove = function(name){
+  if ('[object RegExp]' == toString.call(name)) {
+    return this.removeMatching(name);
+  }
+
+  // classList
+  if (this.list) {
+    this.list.remove(name);
+    return this;
+  }
+
+  // fallback
+  var arr = this.array();
+  var i = index(arr, name);
+  if (~i) arr.splice(i, 1);
+  this.el.className = arr.join(' ');
+  return this;
+};
+
+/**
+ * Remove all classes matching `re`.
+ *
+ * @param {RegExp} re
+ * @return {ClassList}
+ * @api private
+ */
+
+ClassList.prototype.removeMatching = function(re){
+  var arr = this.array();
+  for (var i = 0; i < arr.length; i++) {
+    if (re.test(arr[i])) {
+      this.remove(arr[i]);
+    }
+  }
+  return this;
+};
+
+/**
+ * Toggle class `name`.
+ *
+ * @param {String} name
+ * @return {ClassList}
+ * @api public
+ */
+
+ClassList.prototype.toggle = function(name){
+  // classList
+  if (this.list) {
+    this.list.toggle(name);
+    return this;
+  }
+
+  // fallback
+  if (this.has(name)) {
+    this.remove(name);
+  } else {
+    this.add(name);
+  }
+  return this;
+};
+
+/**
+ * Return an array of classes.
+ *
+ * @return {Array}
+ * @api public
+ */
+
+ClassList.prototype.array = function(){
+  var str = this.el.className.replace(/^\s+|\s+$/g, '');
+  var arr = str.split(re);
+  if ('' === arr[0]) arr.shift();
+  return arr;
+};
+
+/**
+ * Check if class `name` is present.
+ *
+ * @param {String} name
+ * @return {ClassList}
+ * @api public
+ */
+
+ClassList.prototype.has =
+ClassList.prototype.contains = function(name){
+  return this.list
+    ? this.list.contains(name)
+    : !! ~index(this.array(), name);
+};
+
+});
 require.register("application/index.js", function(exports, require, module){
 var slider = require('fluid-slider');
+var events = require('event');
+var classes = require('classes');
+
 var el = document.getElementById('js-swipe');
 var breakPoints = {
   0: 3,
@@ -2205,6 +2385,28 @@ var breakPoints = {
   1200: 8
 };
 var insta = slider(el, { breakpointItems: breakPoints } );
+var next = document.querySelector('.next-button');
+var prev = document.querySelector('.prev-button');
+
+function toggleVisibility(){
+  if (insta.swiper.isLast()){ classes(next).add('hide') }
+  else { classes(next).remove('hide'); }
+  if (insta.swiper.isFirst()){ classes(prev).add('hide')}
+  else { classes(prev).remove('hide'); }
+}
+
+toggleVisibility();
+insta.swiper.on('show', toggleVisibility);
+
+events.bind(next, 'click', function(e){
+  e.preventDefault();
+  insta.swiper.next();
+});
+
+events.bind(prev, 'click', function(e){
+  e.preventDefault();
+  insta.swiper.prev();
+});
 });
 require.register("application/jade-runtime.js", function(exports, require, module){
 
@@ -2449,6 +2651,13 @@ require.alias("jonykrause-translate/index.js", "jonykrause-translate/index.js");
 require.alias("jkroso-computed-style/index.js", "jonykrause-swipe/deps/computed-style/index.js");
 
 require.alias("jonykrause-fluid-slider/index.js", "jonykrause-fluid-slider/index.js");
+
+require.alias("component-event/index.js", "application/deps/event/index.js");
+require.alias("component-event/index.js", "event/index.js");
+
+require.alias("component-classes/index.js", "application/deps/classes/index.js");
+require.alias("component-classes/index.js", "classes/index.js");
+require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
 
 require.alias("application/index.js", "application/index.js");
 

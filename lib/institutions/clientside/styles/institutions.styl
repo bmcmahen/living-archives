@@ -1,3 +1,6 @@
+#app
+  padding 0
+  padding-top 0
 
 #accordion-wrapper
   width 100%
@@ -6,6 +9,7 @@
   padding 0
   overflow hidden
   height 500px
+  background-color black
 
 .white
   margin 30px
@@ -14,8 +18,10 @@
   background rgba(255,255,255,0.95)
 
 .accordion-child
-  height 500px
-  width 25%
+  height 100%
+  width 33.333333333%
+  border: 2px solid;
+  box-sizing: border-box;
   transition width .5s, opacity .5s
   transition-timing-function ease-in-out
   float left
@@ -24,16 +30,20 @@
   overflow hidden
   transform translate3d(0,0,0)
 
+  &:first-child
+    border-right none
+
   & .accordion-content
     display block
 
   & .accordion-content h3
     font-size 25px
-    margin 25px
+    margin 0
+    display block
+    text-align center
     padding 3px 7px
     line-height 29px
     border-bottom none
-    border-radius 3px
     background white
     background rgba(255,255,255,0.95)
 
@@ -72,7 +82,11 @@
       box-shadow none
 
   &.collapsed
-    width 10%
+    width 15%
+    -webkit-filter: brightness(0.5);
+    -moz-filter: brightness(0.5);
+    -ms-filter: brightness(0.5);
+    filter: brightness(0.5);
 
     & h3
       opacity 0
@@ -121,14 +135,12 @@ a.controls
 .institutions
   background url('/img/frontend/institutions/inst7.jpg') no-repeat center center
 
-.leaving
-  background url('/img/frontend/institutions/inst10.jpg') no-repeat center center
+.residential
+  background url('/img/frontend/institutions/residential-map.jpg') no-repeat center center
+  border-left none
 
-.people
-  background url('/img/frontend/institutions/EugenicsBoard1936b_UniversityofAlbertaArchives.jpg') no-repeat center center
-
-.contemporary
-  background url('/img/frontend/institutions/inst3.jpg') no-repeat center center
+.insitution-map
+  background url('/img/frontend/institutions/map.jpg') no-repeat center center
 
 // Institutions - Places
 
@@ -380,7 +392,7 @@ p.small
 
 #map-wrapper .swipe-content
   display none
-  max-height: 90%
+  max-height: 80%
   overflow-x: hidden
   overflow-y: auto
   box-sizing: border-box

@@ -10,45 +10,32 @@ block append components
   script(src='/javascripts/institutions.js')
   script require('institutions')();
 
-block subnav-institutions
-  .prod.active
-    img(src='/img/frontend/institutions.png', role='presentation')
-    span.label Institutions
-
 block content
   #app
     div
       ul#accordion-wrapper
         li.accordion-child.institutions
           .accordion-content
-            h3 Institutions
-          .accordion-active-content
-            .white
-              h3 Institutions
-              p Institutions were an integral part of eugenics in Western Canada.  They were a well-used way of separating different people in society based on economics, background, gender, disability and “race.”  There were many institutions and residential schools that served this purpose in Western Canada.
-              a#institutions.learn-more(href='#') Learn More <i class='icon-arrow-right'></i>
-        li.accordion-child.people
-          .accordion-content
             h3 Being in the Institution
           .accordion-active-content
             .white
               h3 Being in the Institution
               p Being in an institution was a complex process, with many repercussions.  Learn about life as a resident of an institution here.  You can also learn about people involved with institutional life like doctors, nurses, and community members.
-              a#institutionalization.learn-more(href='#') Learn More <i class='icon-arrow-right'></i>
-        li.accordion-child.leaving
+              a#being-in.learn-more(href='#') Learn More <i class='icon-arrow-right'></i>
+        li.accordion-child.insitution-map
           .accordion-content
-            h3 Leaving the Institution
+            h3 Canadian Institutions
           .accordion-active-content
             .white
-              h3 Leaving the Institution
+              h3 Western Canadian Institutions
+              p Institutions were an integral part of eugenics in Western Canada.  They were a well-used way of separating different people in society based on economics, background, gender, disability and “race.”  There were many institutions and residential schools that served this purpose in Western Canada.
+              a#institutions.learn-more(href='#') Learn More <i class='icon-arrow-right'></i>
+        li.accordion-child.residential
+          .accordion-content
+            h3 Residential Schools
+          .accordion-active-content
+            .white
+              h3 Residential Schools
               p Equally important and complicated is the process of leaving institutions and trying to live outside of them.  This was often such a mix of freedom and difficulty adjusting to a new life, that many mixed reactions happened after leaving.
-              a#deinstitutionalization.learn-more(href='#') Learn More <i class='icon-arrow-right'></i>
-        li.accordion-child.contemporary
-          .accordion-content
-            h3 Institutions Today
-          .accordion-active-content
-            .white
-              h3 Institutions Today
-              p The process of being institutionalized is far from being a thing of the past.  Learn about the role of institutions in our world today here, and their lasting impact on society.
-              a#contemporary.learn-more(href='#') Learn More <i class='icon-arrow-right'></i>
-  #swipe-content
+              a#residential-schools.learn-more(href='#') Learn More <i class='icon-arrow-right'></i>
+        #swipe-content
