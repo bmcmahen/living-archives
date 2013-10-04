@@ -10,6 +10,12 @@ block append components
   script(src='/javascripts/institutions.js')
   script require('institutions')();
 
+block subnav-institutions
+  a.active(href='/discover/institutions')
+    .prod
+      .zoom-image(style='background-image: url("/img/frontend/institutions.png")')
+      span.label Institutions
+
 block content
   #app
     div

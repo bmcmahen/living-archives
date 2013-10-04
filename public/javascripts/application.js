@@ -2370,10 +2370,179 @@ ClassList.prototype.contains = function(name){
 };
 
 });
+require.register("component-path-to-regexp/index.js", function(exports, require, module){
+/**
+ * Expose `pathtoRegexp`.
+ */
+
+module.exports = pathtoRegexp;
+
+/**
+ * Normalize the given path string,
+ * returning a regular expression.
+ *
+ * An empty array should be passed,
+ * which will contain the placeholder
+ * key names. For example "/user/:id" will
+ * then contain ["id"].
+ *
+ * @param  {String|RegExp|Array} path
+ * @param  {Array} keys
+ * @param  {Object} options
+ * @return {RegExp}
+ * @api private
+ */
+
+function pathtoRegexp(path, keys, options) {
+  options = options || {};
+  var sensitive = options.sensitive;
+  var strict = options.strict;
+  keys = keys || [];
+
+  if (path instanceof RegExp) return path;
+  if (path instanceof Array) path = '(' + path.join('|') + ')';
+
+  path = path
+    .concat(strict ? '' : '/?')
+    .replace(/\/\(/g, '(?:/')
+    .replace(/(\/)?(\.)?:(\w+)(?:(\(.*?\)))?(\?)?(\*)?/g, function(_, slash, format, key, capture, optional, star){
+      keys.push({ name: key, optional: !! optional });
+      slash = slash || '';
+      return ''
+        + (optional ? '' : slash)
+        + '(?:'
+        + (optional ? slash : '')
+        + (format || '') + (capture || (format && '([^/.]+?)' || '([^/]+?)')) + ')'
+        + (optional || '')
+        + (star ? '(/*)?' : '');
+    })
+    .replace(/([\/.])/g, '\\$1')
+    .replace(/\*/g, '(.*)');
+
+  return new RegExp('^' + path + '$', sensitive ? '' : 'i');
+};
+
+});
+require.register("component-route/index.js", function(exports, require, module){
+
+/**
+ * Module dependencies.
+ */
+
+var toRegexp = require('path-to-regexp');
+
+/**
+ * Expose `Route`.
+ */
+
+module.exports = Route;
+
+/**
+ * Initialize a route with the given `path`.
+ *
+ * @param {String|Regexp} path
+ * @return {Type}
+ * @api public
+ */
+
+function Route(path) {
+  this.path = path;
+  this.keys = [];
+  this.regexp = toRegexp(path, this.keys);
+  this._before = [];
+  this._after = [];
+}
+
+/**
+ * Add before `fn`.
+ *
+ * @param {Function} fn
+ * @return {Route} self
+ * @api public
+ */
+
+Route.prototype.before = function(fn){
+  this._before.push(fn);
+  return this;
+};
+
+/**
+ * Add after `fn`.
+ *
+ * @param {Function} fn
+ * @return {Route} self
+ * @api public
+ */
+
+Route.prototype.after = function(fn){
+  this._after.push(fn);
+  return this;
+};
+
+/**
+ * Invoke callbacks for `type` with `args`.
+ *
+ * @param {String} type
+ * @param {Array} args
+ * @api public
+ */
+
+Route.prototype.call = function(type, args){
+  args = args || [];
+  var fns = this['_' + type];
+  if (!fns) throw new Error('invalid type');
+  for (var i = 0; i < fns.length; i++) {
+    fns[i].apply(null, args);
+  }
+};
+
+/**
+ * Check if `path` matches this route,
+ * returning `false` or an object.
+ *
+ * @param {String} path
+ * @return {Object}
+ * @api public
+ */
+
+Route.prototype.match = function(path){
+  var keys = this.keys;
+  var qsIndex = path.indexOf('?');
+  var pathname = ~qsIndex ? path.slice(0, qsIndex) : path;
+  var m = this.regexp.exec(pathname);
+  var params = [];
+  var args = [];
+
+  if (!m) return false;
+
+  for (var i = 1, len = m.length; i < len; ++i) {
+    var key = keys[i - 1];
+
+    var val = 'string' == typeof m[i]
+      ? decodeURIComponent(m[i])
+      : m[i];
+
+    if (key) {
+      params[key.name] = undefined !== params[key.name]
+        ? params[key.name]
+        : val;
+    } else {
+      params.push(val);
+    }
+
+    args.push(val);
+  }
+
+  params.args = args;
+  return params;
+};
+
+});
 require.register("application/index.js", function(exports, require, module){
 var slider = require('fluid-slider');
 var events = require('event');
 var classes = require('classes');
+var Route = require('route');
 
 var el = document.getElementById('js-swipe');
 var breakPoints = {
@@ -2398,6 +2567,8 @@ function toggleVisibility(){
 toggleVisibility();
 insta.swiper.on('show', toggleVisibility);
 
+window.swipe = insta.swiper;
+
 events.bind(next, 'click', function(e){
   e.preventDefault();
   insta.swiper.next();
@@ -2407,6 +2578,25 @@ events.bind(prev, 'click', function(e){
   e.preventDefault();
   insta.swiper.prev();
 });
+
+// Router
+// This is less than ideal... the basic idea is that,
+// since each prod is rendered on the server, we need some
+// way on the client to indicate which prod is currently
+// selected. Then, we need to highlight and make that prod
+// in view, in the list...
+var currentRoute = new Route('/discover/:prod');
+var match = currentRoute.match(window.location.pathname);
+if (match){
+  switch (match.prod) {
+    case 'institutions':
+      insta.swiper.show(4, 0);
+      break;
+    case 'mindmap':
+      insta.swiper.show(3, 0);
+      break;
+  }
+}
 });
 require.register("application/jade-runtime.js", function(exports, require, module){
 
@@ -2658,6 +2848,10 @@ require.alias("component-event/index.js", "event/index.js");
 require.alias("component-classes/index.js", "application/deps/classes/index.js");
 require.alias("component-classes/index.js", "classes/index.js");
 require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
+
+require.alias("component-route/index.js", "application/deps/route/index.js");
+require.alias("component-route/index.js", "route/index.js");
+require.alias("component-path-to-regexp/index.js", "component-route/deps/path-to-regexp/index.js");
 
 require.alias("application/index.js", "application/index.js");
 

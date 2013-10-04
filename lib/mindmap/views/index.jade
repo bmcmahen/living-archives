@@ -7,7 +7,11 @@ block append components
   script(src="/javascripts/mindmap.js")
   script require('eugenics-mindmap');
 
-
+block subnav-mindmap
+  a.active(href='/discover/mindmap')
+    .prod
+      .zoom-image(style='background-image: url("/img/frontend/mindmap.png")')
+      span.label Mind Map
 
 block content
   #app

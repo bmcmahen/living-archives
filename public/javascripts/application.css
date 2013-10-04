@@ -722,6 +722,7 @@ textarea {
 
 
 
+
 /* line 1 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/node_modules/component-stylus-plugin/node_modules/stylus/lib/functions/index.styl */
 
 /* line 3 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/variables.styl */
@@ -1250,12 +1251,13 @@ legend {
   width: 100%;
   overflow: hidden;
   background: #464952;
+  background: #b9b9b9;
   padding: 0 15px;
   box-sizing: border-box;
   position: relative;
 }
 
-/* line 11 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 12 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .navbar-swipe-container .next-button,
 .navbar-swipe-container .prev-button {
   position: absolute;
@@ -1273,53 +1275,53 @@ legend {
   color: #333;
 }
 
-/* line 27 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 28 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .navbar-swipe-container .prev-button {
   padding: 11px 18px 9px 16px;
 }
 
-/* line 31 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 32 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .navbar-swipe-container .next-button:hover,
 .navbar-swipe-container .prev-button:hover {
   color: #049cdb;
   text-decoration: none;
 }
 
-/* line 36 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 37 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .navbar-swipe-container .next-button:active,
 .navbar-swipe-container .prev-button:active {
   background: #ddd;
 }
 
-/* line 41 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 42 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .navbar-swipe-container .next-button.hide,
 .navbar-swipe-container .prev-button.hide {
   display: none;
 }
 
-/* line 45 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 46 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .navbar-swipe-container .prev-button {
   left: 10px;
 }
 
-/* line 49 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 50 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .navbar-swipe-container .next-button {
   right: 10px;
 }
 
-/* line 53 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 54 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .swipe-list:after,
 .swipe-list:before {
   content: "";
   display: table;
 }
 
-/* line 58 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 59 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .swipe-list:after {
   clear: both;
 }
 
-/* line 62 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 63 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .swipe-list {
   list-style-type: none;
   position: relative;
@@ -1327,7 +1329,7 @@ legend {
   padding: 0;
 }
 
-/* line 69 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 70 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .swipe-item {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -1338,31 +1340,36 @@ legend {
   list-style-type: none;
 }
 
-/* line 79 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 80 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .swipe-item a {
   display: block;
   border: 4px solid transparent;
   border-radius: 3px;
 }
 
-/* line 85 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 86 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .swipe-item a:hover {
-  border-color: #bbb;
+  border-color: #888;
 }
 
-/* line 89 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 90 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .swipe-item a.active,
 .swipe-item a:active,
 .swipe-item a.active:hover {
   border-color: #049cdb;
 }
 
-/* line 93 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 94 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+.swipe-item a.active span.label {
+  color: #049cdb;
+}
+
+/* line 98 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .swipe-item img {
   width: 100%;
 }
 
-/* line 97 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 102 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .navbar-swipe-container.touchmoving img,
 .navbar-swipe-container.touchmoving a {
   -webkit-user-select: none;
@@ -1376,14 +1383,14 @@ legend {
   pointer-events: none;
 }
 
-/* line 106 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 111 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .zoom-image {
   width: 100%;
   height: 100px;
   background-color: #fff;
 }
 
-/* line 112 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 117 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 span.label {
   font: 500 12px/20px arial, sans-serif;
   color: #fff;
@@ -1399,7 +1406,7 @@ span.label {
   text-align: center;
 }
 
-/* line 127 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
+/* line 132 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/navbar.styl */
 .prod {
   position: relative;
   border-radius: 3px;
