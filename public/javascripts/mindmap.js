@@ -19210,6 +19210,91 @@ require.register("eugenicsarchivesca-intro.js/intro.js", function(exports, requi
 }));
 
 });
+require.register("yields-capitalize/index.js", function(exports, require, module){
+
+/**
+ * Capitalize the provided `str`.
+ *
+ * example:
+ *
+ *        capitalize('foo');
+ *        // > Foo
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+exports = module.exports = function (str) {
+  return str.charAt(0).toUpperCase()
+    + str.slice(1);
+};
+
+/**
+ * Capitalize words.
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+exports.words = function(str){
+  return str.replace(/\w+/g, exports);
+};
+
+});
+require.register("matthewp-text/index.js", function(exports, require, module){
+
+var text = 'innerText' in document.createElement('div')
+  ? 'innerText'
+  : 'textContent'
+
+module.exports = function (el, val) {
+  if (val == null) return el[text];
+  el[text] = val;
+};
+
+});
+require.register("eugenicsarchivesca-cross-link/index.js", function(exports, require, module){
+var each = require('each');
+var capitalize = require('capitalize');
+var innerText = require('text');
+var domify = require('domify');
+var classes = require('classes');
+var listTemplate = require('./list');
+
+var urls = {
+  'mindmap' : function(id) {
+    return '/discover/mindmap/'+id;
+  },
+  'institutions' : function(id, obj) {
+    if (obj.residentialSchool) return '/discover/mindmap/residential/'+id;
+    else return '/discover/mindmap/map/'+id;
+  },
+  'timeline': function(id) {
+    return '/discover/timeline/'+id;
+  }
+};
+
+module.exports = function(obj, current){
+  var prods = obj.prods;
+  if (!prods) return false;
+  if (prods.length < 1) return false;
+  var $list = document.createElement('ul');
+  classes($list).add('prod-links');
+  each(prods, function(prod){
+    if (prod === current) return;
+    var $li = domify(listTemplate);
+    var $a = $li.querySelector('a');
+    var name = capitalize(prod);
+    innerText($a, name);
+    $a.href = urls[prod](obj._id, obj);
+    $list.appendChild($li);
+  });
+  return $list;
+};
+});
+require.register("eugenicsarchivesca-cross-link/list.js", function(exports, require, module){
+module.exports = '<li class=\'prod-link\'>\n  <a></a>\n</li>';
+});
 require.register("eugenics-mindmap/index.js", function(exports, require, module){
 require('./controller');
 var $ = require('jquery');
@@ -19553,6 +19638,7 @@ var linearConversion = require('linear-conversion');
 var $ = require('jquery');
 var events = require('events');
 var _ = require('underscore');
+var crossLink = require('cross-link');
 
 var myMap = require('./controller').myMap;
 
@@ -19574,6 +19660,10 @@ SideView.prototype.render = function(){
   var model = _.clone(this.model);
   model.links = this.getConnectedNodes();
   this.$el.html(this.template(model));
+  var clinks = crossLink(model, 'mindmap');
+  if (clinks) {
+    this.$el.find('#other-prods').append(clinks);
+  }
   this.events = events(this.$el.get(0), this);
   this.events.bind('click .link', 'selectNode');
   return this;
@@ -19793,6 +19883,10 @@ module.exports = function anonymous(locals) {
 var buf = [];
 with (locals || {}) {
 buf.push("<h2>" + (jade.escape(null == (jade.interp = title) ? "" : jade.interp)) + "</h2><p>" + (((jade.interp = fullDescription) == null ? '' : jade.interp)) + "</p>");
+if ( locals.prods.length > 1)
+{
+buf.push("<p>You can also view this entry on the:</p><div id=\"other-prods\"></div>");
+}
 if ( locals.resources)
 {
 // iterate resources
@@ -20061,6 +20155,26 @@ require.alias("eugenicsarchivesca-intro.js/intro.js", "eugenics-mindmap/deps/int
 require.alias("eugenicsarchivesca-intro.js/intro.js", "eugenics-mindmap/deps/intro.js/index.js");
 require.alias("eugenicsarchivesca-intro.js/intro.js", "intro.js/index.js");
 require.alias("eugenicsarchivesca-intro.js/intro.js", "eugenicsarchivesca-intro.js/index.js");
+
+require.alias("eugenicsarchivesca-cross-link/index.js", "eugenics-mindmap/deps/cross-link/index.js");
+require.alias("eugenicsarchivesca-cross-link/list.js", "eugenics-mindmap/deps/cross-link/list.js");
+require.alias("eugenicsarchivesca-cross-link/index.js", "eugenics-mindmap/deps/cross-link/index.js");
+require.alias("eugenicsarchivesca-cross-link/index.js", "cross-link/index.js");
+require.alias("component-each/index.js", "eugenicsarchivesca-cross-link/deps/each/index.js");
+require.alias("component-to-function/index.js", "component-each/deps/to-function/index.js");
+
+require.alias("component-type/index.js", "component-each/deps/type/index.js");
+
+require.alias("yields-capitalize/index.js", "eugenicsarchivesca-cross-link/deps/capitalize/index.js");
+
+require.alias("matthewp-text/index.js", "eugenicsarchivesca-cross-link/deps/text/index.js");
+
+require.alias("component-domify/index.js", "eugenicsarchivesca-cross-link/deps/domify/index.js");
+
+require.alias("component-classes/index.js", "eugenicsarchivesca-cross-link/deps/classes/index.js");
+require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
+
+require.alias("eugenicsarchivesca-cross-link/index.js", "eugenicsarchivesca-cross-link/index.js");
 
 require.alias("eugenics-mindmap/index.js", "eugenics-mindmap/index.js");
 

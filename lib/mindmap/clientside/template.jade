@@ -1,5 +1,8 @@
 h2=title
 p !{fullDescription}
+if locals.prods.length > 1
+  p You can also view this entry on the:
+  #other-prods
 if locals.resources
   for resource in resources
     p.small !{resource.resource}

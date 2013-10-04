@@ -1,9 +1,12 @@
 .swipe-content.white.top.right.one-thirds.animated
-	h3=locals.title
-	p.subhead=locals.location
-	p !{locals.fullDescription}
-	if locals.resources
-		for resource in resources
-			p.small !{resource.resource}
-	if locals.image
-		.images
+  h3=locals.title
+  p.subhead=locals.location
+  p !{locals.fullDescription}
+  if locals.prods.length > 1
+    p You can also view this document on:
+    #other-prods
+  if locals.resources
+    for resource in resources
+      p.small !{resource.resource}
+  if locals.image
+    .images

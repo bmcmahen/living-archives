@@ -14344,6 +14344,388 @@ Tip.prototype.remove = function(){
 require.register("component-tip/template.js", function(exports, require, module){
 module.exports = '<div class="tip tip-hide">\n  <div class="tip-arrow"></div>\n  <div class="tip-inner"></div>\n</div>';
 });
+require.register("component-to-function/index.js", function(exports, require, module){
+
+/**
+ * Expose `toFunction()`.
+ */
+
+module.exports = toFunction;
+
+/**
+ * Convert `obj` to a `Function`.
+ *
+ * @param {Mixed} obj
+ * @return {Function}
+ * @api private
+ */
+
+function toFunction(obj) {
+  switch ({}.toString.call(obj)) {
+    case '[object Object]':
+      return objectToFunction(obj);
+    case '[object Function]':
+      return obj;
+    case '[object String]':
+      return stringToFunction(obj);
+    case '[object RegExp]':
+      return regexpToFunction(obj);
+    default:
+      return defaultToFunction(obj);
+  }
+}
+
+/**
+ * Default to strict equality.
+ *
+ * @param {Mixed} val
+ * @return {Function}
+ * @api private
+ */
+
+function defaultToFunction(val) {
+  return function(obj){
+    return val === obj;
+  }
+}
+
+/**
+ * Convert `re` to a function.
+ *
+ * @param {RegExp} re
+ * @return {Function}
+ * @api private
+ */
+
+function regexpToFunction(re) {
+  return function(obj){
+    return re.test(obj);
+  }
+}
+
+/**
+ * Convert property `str` to a function.
+ *
+ * @param {String} str
+ * @return {Function}
+ * @api private
+ */
+
+function stringToFunction(str) {
+  // immediate such as "> 20"
+  if (/^ *\W+/.test(str)) return new Function('_', 'return _ ' + str);
+
+  // properties such as "name.first" or "age > 18"
+  return new Function('_', 'return _.' + str);
+}
+
+/**
+ * Convert `object` to a function.
+ *
+ * @param {Object} object
+ * @return {Function}
+ * @api private
+ */
+
+function objectToFunction(obj) {
+  var match = {}
+  for (var key in obj) {
+    match[key] = typeof obj[key] === 'string'
+      ? defaultToFunction(obj[key])
+      : toFunction(obj[key])
+  }
+  return function(val){
+    if (typeof val !== 'object') return false;
+    for (var key in match) {
+      if (!(key in val)) return false;
+      if (!match[key](val[key])) return false;
+    }
+    return true;
+  }
+}
+
+});
+require.register("component-type/index.js", function(exports, require, module){
+
+/**
+ * toString ref.
+ */
+
+var toString = Object.prototype.toString;
+
+/**
+ * Return the type of `val`.
+ *
+ * @param {Mixed} val
+ * @return {String}
+ * @api public
+ */
+
+module.exports = function(val){
+  switch (toString.call(val)) {
+    case '[object Function]': return 'function';
+    case '[object Date]': return 'date';
+    case '[object RegExp]': return 'regexp';
+    case '[object Arguments]': return 'arguments';
+    case '[object Array]': return 'array';
+    case '[object String]': return 'string';
+  }
+
+  if (val === null) return 'null';
+  if (val === undefined) return 'undefined';
+  if (val && val.nodeType === 1) return 'element';
+  if (val === Object(val)) return 'object';
+
+  return typeof val;
+};
+
+});
+require.register("component-each/index.js", function(exports, require, module){
+
+/**
+ * Module dependencies.
+ */
+
+var toFunction = require('to-function');
+var type;
+
+try {
+  type = require('type-component');
+} catch (e) {
+  type = require('type');
+}
+
+/**
+ * HOP reference.
+ */
+
+var has = Object.prototype.hasOwnProperty;
+
+/**
+ * Iterate the given `obj` and invoke `fn(val, i)`.
+ *
+ * @param {String|Array|Object} obj
+ * @param {Function} fn
+ * @api public
+ */
+
+module.exports = function(obj, fn){
+  fn = toFunction(fn);
+  switch (type(obj)) {
+    case 'array':
+      return array(obj, fn);
+    case 'object':
+      if ('number' == typeof obj.length) return array(obj, fn);
+      return object(obj, fn);
+    case 'string':
+      return string(obj, fn);
+  }
+};
+
+/**
+ * Iterate string chars.
+ *
+ * @param {String} obj
+ * @param {Function} fn
+ * @api private
+ */
+
+function string(obj, fn) {
+  for (var i = 0; i < obj.length; ++i) {
+    fn(obj.charAt(i), i);
+  }
+}
+
+/**
+ * Iterate object keys.
+ *
+ * @param {Object} obj
+ * @param {Function} fn
+ * @api private
+ */
+
+function object(obj, fn) {
+  for (var key in obj) {
+    if (has.call(obj, key)) {
+      fn(key, obj[key]);
+    }
+  }
+}
+
+/**
+ * Iterate array-ish.
+ *
+ * @param {Array|Object} obj
+ * @param {Function} fn
+ * @api private
+ */
+
+function array(obj, fn) {
+  for (var i = 0; i < obj.length; ++i) {
+    fn(obj[i], i);
+  }
+}
+
+});
+require.register("yields-capitalize/index.js", function(exports, require, module){
+
+/**
+ * Capitalize the provided `str`.
+ *
+ * example:
+ *
+ *        capitalize('foo');
+ *        // > Foo
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+exports = module.exports = function (str) {
+  return str.charAt(0).toUpperCase()
+    + str.slice(1);
+};
+
+/**
+ * Capitalize words.
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+exports.words = function(str){
+  return str.replace(/\w+/g, exports);
+};
+
+});
+require.register("matthewp-text/index.js", function(exports, require, module){
+
+var text = 'innerText' in document.createElement('div')
+  ? 'innerText'
+  : 'textContent'
+
+module.exports = function (el, val) {
+  if (val == null) return el[text];
+  el[text] = val;
+};
+
+});
+require.register("component-domify/index.js", function(exports, require, module){
+
+/**
+ * Expose `parse`.
+ */
+
+module.exports = parse;
+
+/**
+ * Wrap map from jquery.
+ */
+
+var map = {
+  option: [1, '<select multiple="multiple">', '</select>'],
+  optgroup: [1, '<select multiple="multiple">', '</select>'],
+  legend: [1, '<fieldset>', '</fieldset>'],
+  thead: [1, '<table>', '</table>'],
+  tbody: [1, '<table>', '</table>'],
+  tfoot: [1, '<table>', '</table>'],
+  colgroup: [1, '<table>', '</table>'],
+  caption: [1, '<table>', '</table>'],
+  tr: [2, '<table><tbody>', '</tbody></table>'],
+  td: [3, '<table><tbody><tr>', '</tr></tbody></table>'],
+  th: [3, '<table><tbody><tr>', '</tr></tbody></table>'],
+  col: [2, '<table><tbody></tbody><colgroup>', '</colgroup></table>'],
+  _default: [0, '', '']
+};
+
+/**
+ * Parse `html` and return the children.
+ *
+ * @param {String} html
+ * @return {Array}
+ * @api private
+ */
+
+function parse(html) {
+  if ('string' != typeof html) throw new TypeError('String expected');
+
+  // tag name
+  var m = /<([\w:]+)/.exec(html);
+  if (!m) throw new Error('No elements were generated.');
+  var tag = m[1];
+
+  // body support
+  if (tag == 'body') {
+    var el = document.createElement('html');
+    el.innerHTML = html;
+    return el.removeChild(el.lastChild);
+  }
+
+  // wrap map
+  var wrap = map[tag] || map._default;
+  var depth = wrap[0];
+  var prefix = wrap[1];
+  var suffix = wrap[2];
+  var el = document.createElement('div');
+  el.innerHTML = prefix + html + suffix;
+  while (depth--) el = el.lastChild;
+
+  var els = el.children;
+  if (1 == els.length) {
+    return el.removeChild(els[0]);
+  }
+
+  var fragment = document.createDocumentFragment();
+  while (els.length) {
+    fragment.appendChild(el.removeChild(els[0]));
+  }
+
+  return fragment;
+}
+
+});
+require.register("eugenicsarchivesca-cross-link/index.js", function(exports, require, module){
+var each = require('each');
+var capitalize = require('capitalize');
+var innerText = require('text');
+var domify = require('domify');
+var classes = require('classes');
+var listTemplate = require('./list');
+
+var urls = {
+  'mindmap' : function(id) {
+    return '/discover/mindmap/'+id;
+  },
+  'institutions' : function(id, obj) {
+    if (obj.residentialSchool) return '/discover/mindmap/residential/'+id;
+    else return '/discover/mindmap/map/'+id;
+  },
+  'timeline': function(id) {
+    return '/discover/timeline/'+id;
+  }
+};
+
+module.exports = function(obj, current){
+  var prods = obj.prods;
+  if (!prods) return false;
+  if (prods.length < 1) return false;
+  var $list = document.createElement('ul');
+  classes($list).add('prod-links');
+  each(prods, function(prod){
+    if (prod === current) return;
+    var $li = domify(listTemplate);
+    var $a = $li.querySelector('a');
+    var name = capitalize(prod);
+    innerText($a, name);
+    $a.href = urls[prod](obj._id, obj);
+    $list.appendChild($li);
+  });
+  return $list;
+};
+});
+require.register("eugenicsarchivesca-cross-link/list.js", function(exports, require, module){
+module.exports = '<li class=\'prod-link\'>\n  <a></a>\n</li>';
+});
 require.register("institutions/index.js", function(exports, require, module){
 module.exports = function(){
 
@@ -14354,6 +14736,7 @@ module.exports = function(){
   var _ = require('underscore');
   var Backbone = require('backbone');
   var events = require('events');
+  var crossLink = require('cross-link');
 
   var SwipeView = require('./swipe-views');
 
@@ -14527,7 +14910,8 @@ module.exports = function(){
         fullDescription: 'Some description of residential schools, with instructions.',
         latitude: 53.81049579707404,
         longitude: -107.02273530005431,
-        zoom: 5
+        zoom: 5,
+        prods: []
       };
     } else {
       json = {
@@ -14535,7 +14919,8 @@ module.exports = function(){
         fullDescription: 'Institutions were an integral part of eugenics in Western Canada.  They were a well-used way of separating different people in society based on economics, background, gender, disability and “race.”  There were many institutions and residential schools that served this purpose in Western Canada. <p> Please click on the insitutions either using the map or the navigation below to learn more about each one.</p>',
         latitude: 53.81049579707404,
         longitude: -107.02273530005431,
-        zoom: 5
+        zoom: 5,
+        prods: []
       };
     }
     var view = new InstitutionView(this, json, 0).render().show();
@@ -14601,9 +14986,11 @@ module.exports = function(){
 
   InstitutionView.prototype.render = function(){
     this.$content = $(this.InstitutionTemplate(this.json));
-    // this.$button = $(this.ButtonTemplate(this.json));
+    var clinks = crossLink(this.json, 'institutions');
+    if (clinks){
+      this.$content.find('#other-prods').append(clinks);
+    }
     this.context.$mapWrapper.append(this.$content);
-    // this.context.$switch.append(this.$button);
     if (this.json.image){
       var imageView = new InstitutionImage(this.json);
       this.$content.find('.images').append(imageView.render().$el);
@@ -15369,6 +15756,10 @@ module.exports = function anonymous(locals) {
 var buf = [];
 with (locals || {}) {
 buf.push("<div class=\"swipe-content white top right one-thirds animated\"><h3>" + (jade.escape(null == (jade.interp = locals.title) ? "" : jade.interp)) + "</h3><p class=\"subhead\">" + (jade.escape(null == (jade.interp = locals.location) ? "" : jade.interp)) + "</p><p>" + (((jade.interp = locals.fullDescription) == null ? '' : jade.interp)) + "</p>");
+if ( locals.prods.length > 1)
+{
+buf.push("<p>You can also view this document on:</p><div id=\"other-prods\"></div>");
+}
 if ( locals.resources)
 {
 // iterate resources
@@ -15519,6 +15910,26 @@ require.alias("component-emitter/index.js", "component-tip/deps/emitter/index.js
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
 
 require.alias("component-jquery/index.js", "component-tip/deps/jquery/index.js");
+
+require.alias("eugenicsarchivesca-cross-link/index.js", "institutions/deps/cross-link/index.js");
+require.alias("eugenicsarchivesca-cross-link/list.js", "institutions/deps/cross-link/list.js");
+require.alias("eugenicsarchivesca-cross-link/index.js", "institutions/deps/cross-link/index.js");
+require.alias("eugenicsarchivesca-cross-link/index.js", "cross-link/index.js");
+require.alias("component-each/index.js", "eugenicsarchivesca-cross-link/deps/each/index.js");
+require.alias("component-to-function/index.js", "component-each/deps/to-function/index.js");
+
+require.alias("component-type/index.js", "component-each/deps/type/index.js");
+
+require.alias("yields-capitalize/index.js", "eugenicsarchivesca-cross-link/deps/capitalize/index.js");
+
+require.alias("matthewp-text/index.js", "eugenicsarchivesca-cross-link/deps/text/index.js");
+
+require.alias("component-domify/index.js", "eugenicsarchivesca-cross-link/deps/domify/index.js");
+
+require.alias("component-classes/index.js", "eugenicsarchivesca-cross-link/deps/classes/index.js");
+require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
+
+require.alias("eugenicsarchivesca-cross-link/index.js", "eugenicsarchivesca-cross-link/index.js");
 
 require.alias("institutions/index.js", "institutions/index.js");
 

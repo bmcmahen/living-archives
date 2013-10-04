@@ -324,6 +324,13 @@
 }
 
 
+
+ul.prod-links {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
 /* line 1 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/node_modules/component-stylus-plugin/node_modules/stylus/lib/functions/index.styl */
 
 /* line 3 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/variables.styl */

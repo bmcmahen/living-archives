@@ -13,7 +13,8 @@
     "component/events": "*",
     "component/tip": "*",
     "component/cookie": "*",
-    "eugenicsarchivesca/intro.js": "*"
+    "eugenicsarchivesca/intro.js": "*",
+    "eugenicsarchivesca/cross-link": "*"
   },
   "development": {},
   "main": "index.js",

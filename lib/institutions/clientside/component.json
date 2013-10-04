@@ -2,15 +2,16 @@
   "name": "institutions",
   "description": "institutions prod",
   "dependencies": {
-  	"eugenicsarchivesca/horizontal-accordion" : "*",
-  	"eugenicsarchivesca/overlay" : "*",
-  	"component/bind" : "*",
+    "eugenicsarchivesca/horizontal-accordion": "*",
+    "eugenicsarchivesca/overlay": "*",
+    "component/bind": "*",
     "component/jquery": "*",
     "component/events": "*",
     "component/swipe": "*",
     "component/underscore": "*",
     "bmcmahen/backbone": "*",
-    "component/tip": "*"
+    "component/tip": "*",
+    "eugenicsarchivesca/cross-link": "*"
   },
   "development": {},
   "main": "index.js",
@@ -27,5 +28,6 @@
     "templates/button.jade",
     "templates/institutions.jade",
     "templates/institutionalization.jade"
-  ]
+  ],
+  "remotes": []
 }

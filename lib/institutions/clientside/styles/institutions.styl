@@ -187,6 +187,7 @@ a.exit
   color white
   padding 5px 10px
   z-index 1500
+  font-size 17px
 
 
 #swipe-container
@@ -267,6 +268,9 @@ a.exit
   button:hover
     background: #fff;
 
+.grid a
+  display block
+
 .grid a i
   color: #707070
 
@@ -300,12 +304,13 @@ a.exit
 #swipe-controller
   position fixed
   bottom 0
-  left 0
+  left: 50%;
+  margin-left: -137.5px;
   right 0
   display block
+  width 280px
   z-index 1250
   text-align center
-  background rgba(49, 49, 49, 0.95)
 
 a.previous.hidden, a.learn-more.hidden
   opacity 0
@@ -359,6 +364,13 @@ a.previous.hidden, a.learn-more.hidden
 ul.switch
   box-sizing border-box
   margin 0
+  width: 280px;
+  margin: 0 auto;
+  background: #888;
+  background: rgba(43, 43, 43, 1);
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+  overflow: hidden;
 
   & li.circle
     cursor pointer
@@ -464,8 +476,8 @@ ul#switch li.map
   padding 10px
 
 #numbers
-  color: #707070
-  font-size: 15px
+  color: #999999;
+  font-size: 17px;
 
 #numbers span.divider
   padding 7px
