@@ -14,7 +14,8 @@
     "component/tip": "*",
     "component/cookie": "*",
     "eugenicsarchivesca/intro.js": "*",
-    "eugenicsarchivesca/cross-link": "*"
+    "eugenicsarchivesca/cross-link": "*",
+    "bmcmahen/image-zoom": "*"
   },
   "development": {},
   "main": "index.js",

@@ -1,0 +1,23 @@
+.zoom-image-clone {
+  position: fixed;
+  -moz-transition: -moz-transform 0.23s linear;
+  -ms-transition: -ms-transform 0.23s linear;
+  -webkit-transition: -webkit-transform 0.23s linear;
+  transition: transform 0.23s linear;
+  z-index: 500;
+  cursor: -webkit-zoom-out;
+  cursor: -moz-zoom-out;
+  cursor: -ms-zoom-out;
+  cursor: zoom-out;
+}
+
+#overlay {
+  transition: opacity 300ms;
+  -webkit-transition: opacity 300ms;
+  -moz-transition: opacity 300ms;
+  -ms-transition: opacity 300ms;
+  -o-transition: opacity 300ms;
+  background-color: white;
+  background-color: rgba(255,255,255,0.97);
+}
+

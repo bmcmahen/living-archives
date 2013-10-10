@@ -13,4 +13,4 @@ if locals.links.length
       a.link(href='#', data-id=link._id, style='font-size:'+link.size+'px;')=link.title
 if locals.image
   .images
-    img(src=image.url + '/convert?w=125&h=100')
+    img.zoom(src=locals.image.original_url, data-zoom-url=locals.image.original_url, data-zoom-padding='20')

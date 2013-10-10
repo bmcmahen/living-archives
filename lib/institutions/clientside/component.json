@@ -11,7 +11,8 @@
     "component/underscore": "*",
     "bmcmahen/backbone": "*",
     "component/tip": "*",
-    "eugenicsarchivesca/cross-link": "*"
+    "eugenicsarchivesca/cross-link": "*",
+    "bmcmahen/image-zoom": "*"
   },
   "development": {},
   "main": "index.js",

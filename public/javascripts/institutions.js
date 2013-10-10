@@ -14726,6 +14726,616 @@ module.exports = function(obj, current){
 require.register("eugenicsarchivesca-cross-link/list.js", function(exports, require, module){
 module.exports = '<li class=\'prod-link\'>\n  <a></a>\n</li>';
 });
+require.register("ianstormtaylor-redraw/index.js", function(exports, require, module){
+
+/**
+ * Expose `redraw`.
+ */
+
+module.exports = redraw;
+
+
+/**
+ * Force a redraw on an `el`.
+ *
+ * @param {Element} el
+ */
+
+function redraw (el) {
+  el.offsetHeight;
+}
+});
+require.register("anthonyshort-has-transitions/index.js", function(exports, require, module){
+/**
+ * This will store the property that the current
+ * browser uses for transitionDuration
+ */
+var property;
+
+/**
+ * The properties we'll check on an element
+ * to determine if it actually has transitions
+ * We use duration as this is the only property
+ * needed to technically have transitions
+ * @type {Array}
+ */
+var types = [
+  "transitionDuration",
+  "MozTransitionDuration",
+  "webkitTransitionDuration"
+];
+
+/**
+ * Determine the correct property for this browser
+ * just once so we done need to check every time
+ */
+while(types.length) {
+  var type = types.shift();
+  if(type in document.body.style) {
+    property = type;
+  }
+}
+
+/**
+ * Determine if the browser supports transitions or
+ * if an element has transitions at all.
+ * @param  {Element}  el Optional. Returns browser support if not included
+ * @return {Boolean}
+ */
+function hasTransitions(el){
+  if(!property) {
+    return false; // No browser support for transitions
+  }
+  if(!el) {
+    return property != null; // We just want to know if browsers support it
+  }
+  var duration = getComputedStyle(el)[property];
+  return duration !== "" && parseFloat(duration) !== 0; // Does this element have transitions?
+}
+
+module.exports = hasTransitions;
+});
+require.register("anthonyshort-css-emitter/index.js", function(exports, require, module){
+/**
+ * Module Dependencies
+ */
+
+var events = require('event');
+
+// CSS events
+
+var watch = [
+  'transitionend'
+, 'webkitTransitionEnd'
+, 'oTransitionEnd'
+, 'MSTransitionEnd'
+, 'animationend'
+, 'webkitAnimationEnd'
+, 'oAnimationEnd'
+, 'MSAnimationEnd'
+];
+
+/**
+ * Expose `CSSnext`
+ */
+
+module.exports = CssEmitter;
+
+/**
+ * Initialize a new `CssEmitter`
+ *
+ */
+
+function CssEmitter(element){
+  if (!(this instanceof CssEmitter)) return new CssEmitter(element);
+  this.el = element;
+}
+
+/**
+ * Bind CSS events.
+ *
+ * @api public
+ */
+
+CssEmitter.prototype.bind = function(fn){
+  for (var i=0; i < watch.length; i++) {
+    events.bind(this.el, watch[i], fn);
+  }
+  return this;
+};
+
+/**
+ * Unbind CSS events
+ * 
+ * @api public
+ */
+
+CssEmitter.prototype.unbind = function(fn){
+  for (var i=0; i < watch.length; i++) {
+    events.unbind(this.el, watch[i], fn);
+  }
+  return this;
+};
+
+/**
+ * Fire callback only once
+ * 
+ * @api public
+ */
+
+CssEmitter.prototype.once = function(fn){
+  var self = this;
+  function on(){
+    self.unbind(on);
+    fn.apply(self.el, arguments);
+  }
+  self.bind(on);
+  return this;
+};
+
+
+});
+require.register("anthonyshort-after-transition/index.js", function(exports, require, module){
+var hasTransitions = require('has-transitions');
+var emitter = require('css-emitter');
+
+function afterTransition(el, callback) {
+  if(hasTransitions(el)) {
+    return emitter(el).bind(callback);
+  }
+  return callback.apply(el);
+};
+
+afterTransition.once = function(el, callback) {
+  afterTransition(el, function fn(){
+    callback.apply(el);
+    emitter(el).unbind(fn);
+  });
+};
+
+module.exports = afterTransition;
+});
+require.register("bmcmahen-scale-to-bounds/index.js", function(exports, require, module){
+/**
+ * Return the maximum size given a set of bounds
+ * while maintaining the original aspect ratio.
+ * @param  {Number} ow original width
+ * @param  {Number} oh original height
+ * @param  {Number} mw max width
+ * @param  {Number} mh max height
+ * @return {Object}
+ */
+
+module.exports = function(ow, oh, mw, mh){
+  var scale = Math.min(mw / ow, mh / oh);
+  if (scale > 1) scale = 1;
+  return {
+    width : ow * scale,
+    height : oh * scale
+  };
+};
+});
+require.register("bmcmahen-viewport/index.js", function(exports, require, module){
+
+/**
+ * get the current viewport size
+ * credit goes here: http://stackoverflow.com/a/11744120/1198166
+ * @return {Object} containing width and height
+ */
+
+module.exports = function(){
+  var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0];
+
+  return {
+    width: w.innerWidth || e.clientWidth || g.clientWidth,
+    height: w.innerHeight|| e.clientHeight|| g.clientHeight
+  };
+}
+});
+require.register("bmcmahen-overlay/index.js", function(exports, require, module){
+
+/**
+ * Module dependencies.
+ */
+
+var Emitter = require('emitter');
+var classes = require('classes');
+var redraw = require('redraw');
+var afterTransition = require('after-transition');
+
+/**
+ * Expose `Overlay`.
+ */
+
+module.exports = Overlay;
+
+/**
+ * Initialize a new `Overlay`.
+ *
+ * @param {Object} options
+ * @api public
+ */
+
+function Overlay(className) {
+  if (!(this instanceof Overlay)) return new Overlay();
+  this.el = document.createElement('div');
+  if (className) classes(this.el).add(className);
+  this.el.id = 'overlay';
+}
+
+/**
+ * Mixin 'Emitter'
+ */
+
+Emitter(Overlay.prototype);
+
+/**
+ * Show the overlay.
+ *
+ * Emits "show" event.
+ *
+ * @return {Overlay}
+ * @api public
+ */
+
+Overlay.prototype.show = function(){
+  document.getElementsByTagName('body')[0].appendChild(this.el);
+  this.emit('show');
+  redraw(this.el);
+  var self = this;
+  afterTransition.once(this.el, function(){
+    self.emit('shown');
+  });
+  classes(this.el).add('show');
+  return this;
+};
+
+/**
+ * Hide the overlay.
+ *
+ * Emits "hide" event, and "hidden" when finished.
+ *
+ * @return {Overlay}
+ * @api public
+ */
+
+Overlay.prototype.hide = function(){
+  if (!this.el) return;
+  this.emit('hide');
+  var self = this;
+  afterTransition.once(this.el, function(){
+    self.emit('hidden');
+    self.el.parentNode.removeChild(self.el);
+  });
+  classes(this.el).remove('show');
+  return this;
+};
+
+
+
+});
+require.register("javve-get-attribute/index.js", function(exports, require, module){
+/**
+ * Return the value for `attr` at `element`.
+ *
+ * @param {Element} el
+ * @param {String} attr
+ * @api public
+ */
+
+module.exports = function(el, attr) {
+  var result = (el.getAttribute && el.getAttribute(attr)) || null;
+  if( !result ) {
+    var attrs = el.attributes;
+    var length = attrs.length;
+    for(var i = 0; i < length; i++) {
+      if (attr[i] !== undefined) {
+        if(attr[i].nodeName === attr) {
+          result = attr[i].nodeValue;
+        }
+      }
+    }
+  }
+  return result;
+}
+});
+require.register("bmcmahen-target/index.js", function(exports, require, module){
+module.exports = function(e){
+  e = e || window.event;
+  return e.target || e.srcElement;
+};
+});
+require.register("yields-prevent/index.js", function(exports, require, module){
+
+/**
+ * prevent default on the given `e`.
+ * 
+ * examples:
+ * 
+ *      anchor.onclick = prevent;
+ *      anchor.onclick = function(e){
+ *        if (something) return prevent(e);
+ *      };
+ * 
+ * @param {Event} e
+ */
+
+module.exports = function(e){
+  e = e || window.event
+  return e.preventDefault
+    ? e.preventDefault()
+    : e.returnValue = false;
+};
+
+});
+require.register("bmcmahen-image-zoom/index.js", function(exports, require, module){
+var Emitter = require('emitter');
+var classes = require('classes');
+var transform = require('transform-property');
+var redraw = require('redraw');
+var events = require('events');
+var afterTransition = require('after-transition');
+var scale = require('scale-to-bounds');
+var viewport = require('viewport');
+var has3d = require('has-translate3d');
+var overlay = require('overlay');
+var delegate = require('delegate');
+var attr = require('get-attribute');
+var target = require('target');
+var prevent = require('prevent');
+
+/**
+ * Create the supported translate string.
+ * @param  {Int} x coordinate
+ * @param  {Int} y coordinate
+ * @return {String}
+ */
+
+function translateString(x, y){
+  return has3d
+    ? 'translate3d('+ x +'px, '+ y +'px, 0)'
+    : 'translate('+ x +'px, '+ y + 'px)';
+}
+
+/**
+ * Bootstrap-style API that allows designers to invoke zooming
+ * the element using markup
+ */
+
+var zoomListener = delegate.bind(document, '[data-zoom-url]', 'click', function(e){
+  new Zoom(target(e)).show();
+});
+
+
+
+/**
+ * Javascript API. Pass in either an element or list
+ * of elements, plus the optional URL of the image.
+ * @param  {Element} el
+ * @param  {String} url
+ * @return {Zoom}
+ */
+
+module.exports = function(el, url){
+  delegate.unbind(document, 'click', zoomListener, false);
+  if (typeof el == 'object'){
+    var zooms = [];
+    for (var i = 0; i < el.length; i++){
+      zooms.push(new Zoom(el[i]).bind());
+    }
+    return zooms;
+  }
+  return new Zoom(el, url).bind();
+};
+
+/**
+ * Zoom Constructor
+ * @param {Element} el
+ * @param {String} url
+ */
+
+var Zoom = function(el, url){
+  this.thumb = el;
+  if (attr(this.thumb, 'data-zoom-overlay')) this.overlay();
+  this.padding();
+  this.backgroundURL = url;
+  this.viewport = {};
+};
+
+Emitter(Zoom.prototype);
+
+/**
+ * Bind zoom click event.
+ * @return {Zoom}
+ */
+
+Zoom.prototype.bind = function(){
+  this.events = events(this.thumb, this);
+  this.events.bind('click', 'show');
+  return this;
+};
+
+/**
+ * Enable overlay.
+ * @return {Zoom}
+ */
+
+Zoom.prototype.overlay = function(){
+  this._overlay = overlay();
+  return this;
+};
+
+/**
+ * Set padding (or should this be margin?) around the zoomed
+ * image.
+ * @param  {Number} num in pixels
+ * @return {Zoom}
+ */
+
+Zoom.prototype.padding = function(num){
+  this._padding = num || attr(this.thumb, 'data-zoom-padding') || 0;
+  return this;
+};
+
+/**
+ * While our image is loading, we add a loading
+ * class to our target element.
+ * @param  {Function} fn
+ */
+
+Zoom.prototype.loadImage = function(fn){
+  if (this.hasLoaded) return fn();
+  var img = this.clone = new Image();
+  var self = this;
+  setTimeout(function(){
+    if (!self.hasLoaded) self.loading();
+  }, 50);
+  img.onload = function(){
+    self.hasLoaded = true;
+    self.finishLoading();
+    self.imageWidth = img.width;
+    self.imageHeight = img.height;
+    fn();
+  };
+  img.src = this.src;
+};
+
+Zoom.prototype.loading = function(){
+  classes(this.thumb).add('loading');
+};
+
+Zoom.prototype.finishLoading = function(){
+  classes(this.thumb).remove('loading');
+};
+
+Zoom.prototype.getDimensions = function(fn){
+  var pos = this.thumb.getBoundingClientRect();
+  this.origin = {
+    x : pos.left,
+    y : pos.top,
+    w : this.thumb.clientWidth,
+    h : this.thumb.clientHeight
+  };
+  this.src = attr(this.thumb, 'data-zoom-url') || this.backgroundURL;
+  return this;
+};
+
+Zoom.prototype.appendClone = function(){
+  classes(this.clone).add('zoom-image-clone');
+  this.docEvents = events(document, this);
+  this.docEvents.bind('click', 'hide');
+  this.windowEvents = events(window, this);
+  this.windowEvents.bind('resize');
+  document.body.appendChild(this.clone);
+  return this;
+};
+
+// Debounce this?
+Zoom.prototype.onresize = function(){
+  this.determineZoomedSize();
+  this.updateStyles();
+};
+
+Zoom.prototype.determineZoomedSize = function(){
+  // image size
+  var iw = this.imageWidth;
+  var ih = this.imageHeight;
+
+  // viewport size
+  var vp = viewport();
+
+  // zoomed image max size
+  var target = scale(iw, ih, vp.width - this._padding, vp.height - this._padding);
+
+  // determine left & top position of zoomed image
+  var left = (vp.width / 2) - (target.width / 2);
+  var top = (vp.height / 2) - (target.height / 2);
+
+  this.target = {
+    x : left,
+    y: top,
+    w: target.width,
+    h: target.height
+  };
+
+  return this;
+};
+
+Zoom.prototype.updateStyles = function(){
+  var t = this.target;
+  var s = this.clone.style;
+  s.width = t.w + 'px';
+  s.height = t.h + 'px';
+  s.left = t.x + 'px';
+  s.top = t.y + 'px';
+}
+
+Zoom.prototype.setOriginalDeminsions = function(){
+  var o = this.origin;
+  var t = this.target;
+  this.updateStyles();
+
+  if (transform){
+    var scale = o.w / t.w;
+    var translateX = (o.x + (o.w / 2)) - (t.x + (t.w / 2));
+    var translateY = (o.y + (o.h / 2)) - (t.y + (t.h / 2));
+    var translate3d = translateString(translateX, translateY);
+    var scale = ' scale('+ scale +')';
+    this.clone.style[transform] = translate3d + scale;
+  }
+  return this;
+};
+
+
+Zoom.prototype.setTargetPosition = function(){
+  if (transform){
+    this.clone.style[transform] = translateString(0, 0) + ' scale(1)';
+  }
+  return this;
+}
+
+Zoom.prototype.show = function(e){
+  if (e) prevent(e);
+  this.getDimensions();
+  var self = this;
+  this.loadImage(function(){
+    self.emit('showing');
+    if (self._overlay) self._overlay.show();
+    self.determineZoomedSize()
+      .setOriginalDeminsions()
+      .appendClone();
+    self.thumb.style.opacity = 0;
+    redraw(self.clone);
+    self.setTargetPosition();
+    afterTransition.once(self.clone, function(){
+      self.emit('shown');
+    });
+  });
+};
+
+Zoom.prototype.hide = function(e){
+  if (e) prevent(e);
+  this.windowEvents.unbind();
+  this.docEvents.unbind();
+  this.setOriginalDeminsions();
+  var self = this;
+  self.emit('hiding');
+  if (self._overlay) {
+    self._overlay.hide();
+  }
+  afterTransition.once(self.clone, function(){
+    self.thumb.style.opacity = 1;
+    self.clone.parentNode.removeChild(self.clone);
+    self.emit('hidden');
+  });
+  return this;
+}
+
+
+});
 require.register("institutions/index.js", function(exports, require, module){
 module.exports = function(){
 
@@ -14741,6 +15351,7 @@ module.exports = function(){
   var SwipeView = require('./swipe-views');
 
   require('./leaflet-label');
+  require('image-zoom');
 
   var $app = $('#accordion-wrapper');
   function setDimensions(){
@@ -15789,7 +16400,7 @@ buf.push("<p class=\"small\">" + (((jade.interp = resource.resource) == null ? '
 }
 if ( locals.image)
 {
-buf.push("<div class=\"images\"></div>");
+buf.push("<img" + (jade.attrs({ 'src':(locals.image.url), 'data-zoom-url':(locals.image.url), 'data-zoom-padding':('20'), "class": ('zoom') }, {"src":true,"data-zoom-url":true,"data-zoom-padding":true})) + "/>");
 }
 buf.push("</div>");
 }
@@ -15930,6 +16541,92 @@ require.alias("component-classes/index.js", "eugenicsarchivesca-cross-link/deps/
 require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
 
 require.alias("eugenicsarchivesca-cross-link/index.js", "eugenicsarchivesca-cross-link/index.js");
+
+require.alias("bmcmahen-image-zoom/index.js", "institutions/deps/image-zoom/index.js");
+require.alias("bmcmahen-image-zoom/index.js", "institutions/deps/image-zoom/index.js");
+require.alias("bmcmahen-image-zoom/index.js", "image-zoom/index.js");
+require.alias("component-classes/index.js", "bmcmahen-image-zoom/deps/classes/index.js");
+require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
+
+require.alias("component-emitter/index.js", "bmcmahen-image-zoom/deps/emitter/index.js");
+require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
+
+require.alias("component-transform-property/index.js", "bmcmahen-image-zoom/deps/transform-property/index.js");
+
+require.alias("ianstormtaylor-redraw/index.js", "bmcmahen-image-zoom/deps/redraw/index.js");
+
+require.alias("component-events/index.js", "bmcmahen-image-zoom/deps/events/index.js");
+require.alias("component-event/index.js", "component-events/deps/event/index.js");
+
+require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
+require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
+
+require.alias("anthonyshort-after-transition/index.js", "bmcmahen-image-zoom/deps/after-transition/index.js");
+require.alias("anthonyshort-after-transition/index.js", "bmcmahen-image-zoom/deps/after-transition/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-has-transitions/index.js");
+
+require.alias("anthonyshort-css-emitter/index.js", "anthonyshort-after-transition/deps/css-emitter/index.js");
+require.alias("component-emitter/index.js", "anthonyshort-css-emitter/deps/emitter/index.js");
+require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
+
+require.alias("component-event/index.js", "anthonyshort-css-emitter/deps/event/index.js");
+
+require.alias("anthonyshort-after-transition/index.js", "anthonyshort-after-transition/index.js");
+
+require.alias("bmcmahen-scale-to-bounds/index.js", "bmcmahen-image-zoom/deps/scale-to-bounds/index.js");
+require.alias("bmcmahen-scale-to-bounds/index.js", "bmcmahen-image-zoom/deps/scale-to-bounds/index.js");
+require.alias("bmcmahen-scale-to-bounds/index.js", "bmcmahen-scale-to-bounds/index.js");
+
+require.alias("bmcmahen-viewport/index.js", "bmcmahen-image-zoom/deps/viewport/index.js");
+require.alias("bmcmahen-viewport/index.js", "bmcmahen-image-zoom/deps/viewport/index.js");
+require.alias("bmcmahen-viewport/index.js", "bmcmahen-viewport/index.js");
+
+require.alias("component-has-translate3d/index.js", "bmcmahen-image-zoom/deps/has-translate3d/index.js");
+require.alias("component-transform-property/index.js", "component-has-translate3d/deps/transform-property/index.js");
+
+require.alias("bmcmahen-overlay/index.js", "bmcmahen-image-zoom/deps/overlay/index.js");
+require.alias("component-classes/index.js", "bmcmahen-overlay/deps/classes/index.js");
+require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
+
+require.alias("component-emitter/index.js", "bmcmahen-overlay/deps/emitter/index.js");
+require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
+
+require.alias("anthonyshort-after-transition/index.js", "bmcmahen-overlay/deps/after-transition/index.js");
+require.alias("anthonyshort-after-transition/index.js", "bmcmahen-overlay/deps/after-transition/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-has-transitions/index.js");
+
+require.alias("anthonyshort-css-emitter/index.js", "anthonyshort-after-transition/deps/css-emitter/index.js");
+require.alias("component-emitter/index.js", "anthonyshort-css-emitter/deps/emitter/index.js");
+require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
+
+require.alias("component-event/index.js", "anthonyshort-css-emitter/deps/event/index.js");
+
+require.alias("anthonyshort-after-transition/index.js", "anthonyshort-after-transition/index.js");
+
+require.alias("ianstormtaylor-redraw/index.js", "bmcmahen-overlay/deps/redraw/index.js");
+
+require.alias("component-delegate/index.js", "bmcmahen-image-zoom/deps/delegate/index.js");
+require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
+
+require.alias("javve-get-attribute/index.js", "bmcmahen-image-zoom/deps/get-attribute/index.js");
+
+require.alias("bmcmahen-target/index.js", "bmcmahen-image-zoom/deps/target/index.js");
+require.alias("bmcmahen-target/index.js", "bmcmahen-image-zoom/deps/target/index.js");
+require.alias("bmcmahen-target/index.js", "bmcmahen-target/index.js");
+
+require.alias("yields-prevent/index.js", "bmcmahen-image-zoom/deps/prevent/index.js");
+
+require.alias("bmcmahen-image-zoom/index.js", "bmcmahen-image-zoom/index.js");
 
 require.alias("institutions/index.js", "institutions/index.js");
 

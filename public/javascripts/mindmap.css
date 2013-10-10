@@ -331,6 +331,60 @@ ul.prod-links {
   padding: 0;
 }
 
+
+
+
+
+
+
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,.85);
+  transition: opacity 300ms;
+  -webkit-transition: opacity 300ms;
+  -moz-transition: opacity 300ms;
+  -ms-transition: opacity 300ms;
+  -o-transition: opacity 300ms;
+  z-index: 500;
+  pointer-events: none;
+  opacity: 0;
+}
+
+#overlay.show {
+  opacity: 1;
+}
+
+
+
+.zoom-image-clone {
+  position: fixed;
+  -moz-transition: -moz-transform 0.23s linear;
+  -ms-transition: -ms-transform 0.23s linear;
+  -webkit-transition: -webkit-transform 0.23s linear;
+  transition: transform 0.23s linear;
+  z-index: 500;
+  cursor: -webkit-zoom-out;
+  cursor: -moz-zoom-out;
+  cursor: -ms-zoom-out;
+  cursor: zoom-out;
+}
+
+#overlay {
+  transition: opacity 300ms;
+  -webkit-transition: opacity 300ms;
+  -moz-transition: opacity 300ms;
+  -ms-transition: opacity 300ms;
+  -o-transition: opacity 300ms;
+  background-color: white;
+  background-color: rgba(255,255,255,0.97);
+}
+
+
+
 /* line 1 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/node_modules/component-stylus-plugin/node_modules/stylus/lib/functions/index.styl */
 
 /* line 3 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/frontend/clientside/styles/variables.styl */
@@ -513,4 +567,15 @@ p.small {
   width: 100%;
   box-sizing: border-box;
   background: #eee;
+}
+
+/* line 157 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+img.zoom {
+  max-height: 250px;
+  margin-top: 15px;
+  cursor: pointer;
+  cursor: -webkit-zoom-in;
+  cursor: -moz-zoom-in;
+  cursor: -ms-zoom-in;
+  cursor: zoom-in;
 }

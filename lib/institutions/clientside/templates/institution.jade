@@ -9,4 +9,4 @@
     for resource in resources
       p.small !{resource.resource}
   if locals.image
-    .images
+    img.zoom(src=locals.image.url, data-zoom-url=locals.image.url, data-zoom-padding='20')
