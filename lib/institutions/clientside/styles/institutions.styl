@@ -183,12 +183,20 @@ a.controls
     display inline-block
     transition opacity .5s
 
-a.exit
-  color white
-  padding 5px 10px
-  z-index 1500
-  font-size 17px
+button.exit
+  position: fixed;
+  bottom: 5px;
+  left: 5px;
+  background: #fff;
+  border: none;
+  color: #333;
+  visibility: none;
+  font-weight: bold;
+  padding: 10px;
+  font-size: 13px;
 
+button.exit:active
+  background: #ddd;
 
 #swipe-container
   width: 100%;
@@ -497,3 +505,34 @@ img.zoom
   cursor: -moz-zoom-in
   cursor: -ms-zoom-in
   cursor: zoom-in
+
+#overlay
+  z-index 1250
+  background white
+  background rgba(255,255,255,0.95)
+
+.zoom-out
+  position fixed
+  top 5px
+  left 5px
+  background white
+  border none
+  color #333
+  visibility none
+  font-weight bold
+  opacity 0
+  padding: 10px
+  font-size: 13px
+  pointer-events none
+  transition opacity 0.3s linear
+
+.zoom-out.show
+  visibility true
+  pointer-events auto
+  opacity 1
+
+.zoom-out:active
+  background #ddd
+
+i.margin-right
+  margin-right 4px

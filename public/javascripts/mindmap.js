@@ -2283,6 +2283,49 @@ function within (evt, elem, fallback) {
 }
 
 });
+require.register("component-event/index.js", function(exports, require, module){
+
+/**
+ * Bind `el` event `type` to `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.bind = function(el, type, fn, capture){
+  if (el.addEventListener) {
+    el.addEventListener(type, fn, capture);
+  } else {
+    el.attachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+/**
+ * Unbind `el` event `type`'s callback `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.unbind = function(el, type, fn, capture){
+  if (el.removeEventListener) {
+    el.removeEventListener(type, fn, capture);
+  } else {
+    el.detachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+});
 require.register("stagas-mouseleave/index.js", function(exports, require, module){
 
 /**
@@ -2290,6 +2333,7 @@ require.register("stagas-mouseleave/index.js", function(exports, require, module
  */
 
 var within = require('within')
+var events = require('event')
 
 module.exports = mouseleave
 
@@ -2304,7 +2348,7 @@ function mouseleave (el, fn) {
   }
   listeners.push(listener)
   fns.push(fn)
-  el.addEventListener('mouseout', listener)
+  events.bind(el, 'mouseout', listener)
 }
 
 mouseleave.bind = mouseleave
@@ -2313,8 +2357,28 @@ mouseleave.unbind = function (el, fn) {
   var idx = fns.indexOf(fn)
   if (!~idx) return
   fns.splice(idx, 1)
-  el.removeEventListener('mouseout', listeners.splice(idx, 1)[0])
+  events.unbind(el, 'mouseout', listeners.splice(idx, 1)[0])
 }
+
+});
+require.register("yields-is-touch/index.js", function(exports, require, module){
+
+/**
+ * Whether or not touch is supported.
+ * 
+ * Example:
+ * 
+ *      var touchable = require('touch');
+ *      touchable();
+ *      // > true
+ * 
+ * @return {Boolean}
+ */
+
+module.exports = function(){
+  return 'ontouchstart' in window
+    || 'onmsgesturechange' in window;
+};
 
 });
 require.register("eugenicsarchivesca-mind-map/index.js", function(exports, require, module){
@@ -3395,7 +3459,8 @@ var events = require('events')
   , offset = require('offset')
   , pinch = require('pinch')
   , mouseleave = require('mouseleave')
-  , scrollTop = require('scrolltop');
+  , scrollTop = require('scrolltop')
+  , isTouch = require('is-touch');
 
 // Imports
 var constants = require('./constants');
@@ -3712,7 +3777,7 @@ NodeView.prototype.render = function(ctx){
 
     // Show the title of the image on hover.
     // Should we just always show it if using touch?
-    if (model.mouseOver && model.attr.title){
+    if (model.mouseOver && model.attr.title || isTouch()){
       ctx.fillStyle = 'black';
       ctx.font = 'bold 13px Arial';
       ctx.fillText(model.attr.title, 0, 55);
@@ -16191,7 +16256,7 @@ var proto = Element.prototype;
  * Vendor function.
  */
 
-var vendor = proto.matchesSelector
+var vendor = proto.matches
   || proto.webkitMatchesSelector
   || proto.mozMatchesSelector
   || proto.msMatchesSelector
@@ -17657,56 +17722,32 @@ Manager.prototype.off = function(obj, name, fn) {
 
 module.exports = Manager;
 });
-require.register("component-event/index.js", function(exports, require, module){
+require.register("discore-closest/index.js", function(exports, require, module){
+var matches = require('matches-selector')
 
-/**
- * Bind `el` event `type` to `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
+module.exports = function (element, selector, checkYoSelf, root) {
+  element = checkYoSelf ? element : element.parentNode
+  root = root || document
 
-exports.bind = function(el, type, fn, capture){
-  if (el.addEventListener) {
-    el.addEventListener(type, fn, capture);
-  } else {
-    el.attachEvent('on' + type, fn);
-  }
-  return fn;
-};
-
-/**
- * Unbind `el` event `type`'s callback `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
-
-exports.unbind = function(el, type, fn, capture){
-  if (el.removeEventListener) {
-    el.removeEventListener(type, fn, capture);
-  } else {
-    el.detachEvent('on' + type, fn);
-  }
-  return fn;
-};
-
+  do {
+    if (matches(element, selector))
+      return element
+    // After `matches` on the edge case that
+    // the selector matches the root
+    // (when the root is not the document)
+    if (element === root)
+      return
+    // Make sure `element !== document`
+    // otherwise we get an illegal invocation
+  } while ((element = element.parentNode) && element !== document)
+}
 });
 require.register("component-delegate/index.js", function(exports, require, module){
-
 /**
  * Module dependencies.
  */
 
-var matches = require('matches-selector')
+var closest = require('closest')
   , event = require('event');
 
 /**
@@ -17725,9 +17766,10 @@ var matches = require('matches-selector')
 
 exports.bind = function(el, selector, type, fn, capture){
   return event.bind(el, type, function(e){
-    if (matches(e.target, selector)) fn(e);
+    var target = e.target || e.srcElement;
+    e.delegateTarget = closest(target, selector, true, el);
+    if (e.delegateTarget) fn.call(el, e);
   }, capture);
-  return callback;
 };
 
 /**
@@ -20183,6 +20225,7 @@ function setDimensions(){
   $('#app').height(h);
   myMap.height(h);
   myMap.width(w);
+  myMap.animate();
 }
 
 $(window).on('resize', _.debounce(setDimensions, 50));
@@ -20602,7 +20645,7 @@ buf.push("<div><a" + (jade.attrs({ 'href':('#'), 'data-id':(link._id), 'style':(
 }
 if ( locals.image)
 {
-buf.push("<div class=\"images\"><img" + (jade.attrs({ 'src':(locals.image.original_url), 'data-zoom-url':(locals.image.original_url), 'data-zoom-padding':('20'), "class": ('zoom') }, {"src":true,"data-zoom-url":true,"data-zoom-padding":true})) + "/></div>");
+buf.push("<div class=\"images\"><img" + (jade.attrs({ 'src':(locals.image.original_url), 'data-zoom-overlay':('true'), 'data-zoom-url':(locals.image.original_url), 'data-zoom-padding':('20'), "class": ('zoom') }, {"src":true,"data-zoom-overlay":true,"data-zoom-url":true,"data-zoom-padding":true})) + "/></div>");
 }
 }
 return buf.join("");
@@ -20632,8 +20675,12 @@ require.alias("component-events/index.js", "eugenicsarchivesca-mind-map/deps/eve
 require.alias("component-event/index.js", "component-events/deps/event/index.js");
 
 require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
@@ -20685,8 +20732,12 @@ require.alias("component-events/index.js", "component-pinch/deps/events/index.js
 require.alias("component-event/index.js", "component-events/deps/event/index.js");
 
 require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
@@ -20694,6 +20745,10 @@ require.alias("component-pinch/index.js", "component-pinch/index.js");
 
 require.alias("stagas-mouseleave/index.js", "eugenicsarchivesca-mind-map/deps/mouseleave/index.js");
 require.alias("stagas-within/index.js", "stagas-mouseleave/deps/within/index.js");
+
+require.alias("component-event/index.js", "stagas-mouseleave/deps/event/index.js");
+
+require.alias("yields-is-touch/index.js", "eugenicsarchivesca-mind-map/deps/is-touch/index.js");
 
 require.alias("eugenicsarchivesca-mind-map/index.js", "eugenicsarchivesca-mind-map/index.js");
 
@@ -20742,8 +20797,12 @@ require.alias("component-events/index.js", "component-pillbox/deps/events/index.
 require.alias("component-event/index.js", "component-events/deps/event/index.js");
 
 require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
@@ -20769,8 +20828,12 @@ require.alias("component-events/index.js", "yields-select/deps/events/index.js")
 require.alias("component-event/index.js", "component-events/deps/event/index.js");
 
 require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
@@ -20794,8 +20857,12 @@ require.alias("component-events/index.js", "events/index.js");
 require.alias("component-event/index.js", "component-events/deps/event/index.js");
 
 require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
@@ -20850,8 +20917,12 @@ require.alias("component-events/index.js", "bmcmahen-image-zoom/deps/events/inde
 require.alias("component-event/index.js", "component-events/deps/event/index.js");
 
 require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
@@ -20901,8 +20972,12 @@ require.alias("anthonyshort-after-transition/index.js", "anthonyshort-after-tran
 require.alias("ianstormtaylor-redraw/index.js", "bmcmahen-overlay/deps/redraw/index.js");
 
 require.alias("component-delegate/index.js", "bmcmahen-image-zoom/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 

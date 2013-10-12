@@ -8,18 +8,14 @@ block append components
   script require('heroes-and-villains')();
 
 block subnav-heroes
-  .prod.active
-    img(src='/img/frontend/hero.png', role='presentation')
-    span.label Heroes & Villains
+  a(href='/discover/heroes').active
+    .prod
+      .zoom-image(style='background-image: url("/img/frontend/hero.png")')
+      span.label Heroes & Villains
 
 
 block content
   #app.heroes.transparent
-    .toolbar
-      a#fullscreenmode(href='#')
-        i.icon-fullscreen.icon-large
-      #flipcard-toolbar
-        input.filter(type='text', name='filter people', placeholder='Filter by Name')
     .content
       #flipcard-wrapper
 

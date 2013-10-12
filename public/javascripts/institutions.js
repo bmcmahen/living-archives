@@ -619,13 +619,228 @@ AccordionPane.prototype.removeCollapse = function(){
   this.context.emit('remove-collapse', this);
 };
 });
-require.register("eugenicsarchivesca-overlay/index.js", function(exports, require, module){
+require.register("anthonyshort-has-transitions/index.js", function(exports, require, module){
+/**
+ * This will store the property that the current
+ * browser uses for transitionDuration
+ */
+var property;
+
+/**
+ * The properties we'll check on an element
+ * to determine if it actually has transitions
+ * We use duration as this is the only property
+ * needed to technically have transitions
+ * @type {Array}
+ */
+var types = [
+  "transitionDuration",
+  "MozTransitionDuration",
+  "webkitTransitionDuration"
+];
+
+/**
+ * Determine the correct property for this browser
+ * just once so we done need to check every time
+ */
+while(types.length) {
+  var type = types.shift();
+  if(type in document.body.style) {
+    property = type;
+  }
+}
+
+/**
+ * Determine if the browser supports transitions or
+ * if an element has transitions at all.
+ * @param  {Element}  el Optional. Returns browser support if not included
+ * @return {Boolean}
+ */
+function hasTransitions(el){
+  if(!property) {
+    return false; // No browser support for transitions
+  }
+  if(!el) {
+    return property != null; // We just want to know if browsers support it
+  }
+  var duration = getComputedStyle(el)[property];
+  return duration !== "" && parseFloat(duration) !== 0; // Does this element have transitions?
+}
+
+module.exports = hasTransitions;
+});
+require.register("component-event/index.js", function(exports, require, module){
+
+/**
+ * Bind `el` event `type` to `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.bind = function(el, type, fn, capture){
+  if (el.addEventListener) {
+    el.addEventListener(type, fn, capture || false);
+  } else {
+    el.attachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+/**
+ * Unbind `el` event `type`'s callback `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.unbind = function(el, type, fn, capture){
+  if (el.removeEventListener) {
+    el.removeEventListener(type, fn, capture || false);
+  } else {
+    el.detachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+});
+require.register("anthonyshort-css-emitter/index.js", function(exports, require, module){
+/**
+ * Module Dependencies
+ */
+
+var events = require('event');
+
+// CSS events
+
+var watch = [
+  'transitionend'
+, 'webkitTransitionEnd'
+, 'oTransitionEnd'
+, 'MSTransitionEnd'
+, 'animationend'
+, 'webkitAnimationEnd'
+, 'oAnimationEnd'
+, 'MSAnimationEnd'
+];
+
+/**
+ * Expose `CSSnext`
+ */
+
+module.exports = CssEmitter;
+
+/**
+ * Initialize a new `CssEmitter`
+ *
+ */
+
+function CssEmitter(element){
+  if (!(this instanceof CssEmitter)) return new CssEmitter(element);
+  this.el = element;
+}
+
+/**
+ * Bind CSS events.
+ *
+ * @api public
+ */
+
+CssEmitter.prototype.bind = function(fn){
+  for (var i=0; i < watch.length; i++) {
+    events.bind(this.el, watch[i], fn);
+  }
+  return this;
+};
+
+/**
+ * Unbind CSS events
+ * 
+ * @api public
+ */
+
+CssEmitter.prototype.unbind = function(fn){
+  for (var i=0; i < watch.length; i++) {
+    events.unbind(this.el, watch[i], fn);
+  }
+  return this;
+};
+
+/**
+ * Fire callback only once
+ * 
+ * @api public
+ */
+
+CssEmitter.prototype.once = function(fn){
+  var self = this;
+  function on(){
+    self.unbind(on);
+    fn.apply(self.el, arguments);
+  }
+  self.bind(on);
+  return this;
+};
+
+
+});
+require.register("anthonyshort-after-transition/index.js", function(exports, require, module){
+var hasTransitions = require('has-transitions');
+var emitter = require('css-emitter');
+
+function afterTransition(el, callback) {
+  if(hasTransitions(el)) {
+    return emitter(el).bind(callback);
+  }
+  return callback.apply(el);
+};
+
+afterTransition.once = function(el, callback) {
+  afterTransition(el, function fn(){
+    callback.apply(el);
+    emitter(el).unbind(fn);
+  });
+};
+
+module.exports = afterTransition;
+});
+require.register("ianstormtaylor-redraw/index.js", function(exports, require, module){
+
+/**
+ * Expose `redraw`.
+ */
+
+module.exports = redraw;
+
+
+/**
+ * Force a redraw on an `el`.
+ *
+ * @param {Element} el
+ */
+
+function redraw (el) {
+  el.offsetHeight;
+}
+});
+require.register("bmcmahen-overlay/index.js", function(exports, require, module){
+
 /**
  * Module dependencies.
  */
 
-var Emitter = require('emitter')
-  , classes = require('classes');
+var Emitter = require('emitter');
+var classes = require('classes');
+var redraw = require('redraw');
+var afterTransition = require('after-transition');
 
 /**
  * Expose `Overlay`.
@@ -640,11 +855,11 @@ module.exports = Overlay;
  * @api public
  */
 
-function Overlay(options) {
-  if (!(this instanceof Overlay)) return new Overlay(options);
-  options || (options = {});
-  this.duration = options.duration || 300;
-  this.id = options.id || 'overlay';
+function Overlay(className) {
+  if (!(this instanceof Overlay)) return new Overlay();
+  this.el = document.createElement('div');
+  if (className) classes(this.el).add(className);
+  this.el.id = 'overlay';
 }
 
 /**
@@ -663,49 +878,39 @@ Emitter(Overlay.prototype);
  */
 
 Overlay.prototype.show = function(){
-  if (this.el) return;
-  this.el = document.createElement('div');
-  this.el.className = 'hide';
-  this.el.id = this.id;
   document.getElementsByTagName('body')[0].appendChild(this.el);
   this.emit('show');
+  redraw(this.el);
   var self = this;
-  setTimeout(function(){
-    classes(self.el).remove('hide');
-  }, 0);
+  afterTransition.once(this.el, function(){
+    self.emit('shown');
+  });
+  classes(this.el).add('show');
   return this;
 };
 
 /**
  * Hide the overlay.
  *
- * Emits "hide" event.
+ * Emits "hide" event, and "hidden" when finished.
  *
  * @return {Overlay}
  * @api public
  */
 
 Overlay.prototype.hide = function(){
-  this.emit('hide');
-  return this.remove();
-};
-
-/**
- * Remove the overlay from the DOM
- * Emits 'close' event.
- */
-
-Overlay.prototype.remove = function(){
   if (!this.el) return;
+  this.emit('hide');
   var self = this;
-  classes(this.el).add('hide');
-  setTimeout(function(){
-    self.emit('close');
+  afterTransition.once(this.el, function(){
+    self.emit('hidden');
     self.el.parentNode.removeChild(self.el);
-    delete self.el;
-  }, this.duration);
+  });
+  classes(this.el).remove('show');
   return this;
 };
+
+
 
 });
 require.register("component-bind/index.js", function(exports, require, module){
@@ -10339,49 +10544,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 })( window );
 
 });
-require.register("component-event/index.js", function(exports, require, module){
-
-/**
- * Bind `el` event `type` to `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
-
-exports.bind = function(el, type, fn, capture){
-  if (el.addEventListener) {
-    el.addEventListener(type, fn, capture);
-  } else {
-    el.attachEvent('on' + type, fn);
-  }
-  return fn;
-};
-
-/**
- * Unbind `el` event `type`'s callback `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
-
-exports.unbind = function(el, type, fn, capture){
-  if (el.removeEventListener) {
-    el.removeEventListener(type, fn, capture);
-  } else {
-    el.detachEvent('on' + type, fn);
-  }
-  return fn;
-};
-
-});
 require.register("component-query/index.js", function(exports, require, module){
 
 function one(selector, el) {
@@ -10423,7 +10585,7 @@ var proto = Element.prototype;
  * Vendor function.
  */
 
-var vendor = proto.matchesSelector
+var vendor = proto.matches
   || proto.webkitMatchesSelector
   || proto.mozMatchesSelector
   || proto.msMatchesSelector
@@ -10454,13 +10616,32 @@ function match(el, selector) {
 }
 
 });
-require.register("component-delegate/index.js", function(exports, require, module){
+require.register("discore-closest/index.js", function(exports, require, module){
+var matches = require('matches-selector')
 
+module.exports = function (element, selector, checkYoSelf, root) {
+  element = checkYoSelf ? element : element.parentNode
+  root = root || document
+
+  do {
+    if (matches(element, selector))
+      return element
+    // After `matches` on the edge case that
+    // the selector matches the root
+    // (when the root is not the document)
+    if (element === root)
+      return
+    // Make sure `element !== document`
+    // otherwise we get an illegal invocation
+  } while ((element = element.parentNode) && element !== document)
+}
+});
+require.register("component-delegate/index.js", function(exports, require, module){
 /**
  * Module dependencies.
  */
 
-var matches = require('matches-selector')
+var closest = require('closest')
   , event = require('event');
 
 /**
@@ -10479,9 +10660,10 @@ var matches = require('matches-selector')
 
 exports.bind = function(el, selector, type, fn, capture){
   return event.bind(el, type, function(e){
-    if (matches(e.target, selector)) fn(e);
+    var target = e.target || e.srcElement;
+    e.delegateTarget = closest(target, selector, true, el);
+    if (e.delegateTarget) fn.call(el, e);
   }, capture);
-  return callback;
 };
 
 /**
@@ -10681,7 +10863,8 @@ function parse(event) {
 require.register("component-has-translate3d/index.js", function(exports, require, module){
 
 var prop = require('transform-property');
-if (!prop) return module.exports = false;
+// IE8<= doesn't have `getComputedStyle`
+if (!prop || !window.getComputedStyle) return module.exports = false;
 
 var map = {
   webkitTransform: '-webkit-transform',
@@ -10695,7 +10878,7 @@ var map = {
 var el = document.createElement('div');
 el.style[prop] = 'translate3d(1px,1px,1px)';
 document.body.insertBefore(el, null);
-var val = window.getComputedStyle(el).getPropertyValue(map[prop]);
+var val = getComputedStyle(el).getPropertyValue(map[prop]);
 document.body.removeChild(el);
 module.exports = null != val && val.length && 'none' != val;
 
@@ -14726,175 +14909,6 @@ module.exports = function(obj, current){
 require.register("eugenicsarchivesca-cross-link/list.js", function(exports, require, module){
 module.exports = '<li class=\'prod-link\'>\n  <a></a>\n</li>';
 });
-require.register("ianstormtaylor-redraw/index.js", function(exports, require, module){
-
-/**
- * Expose `redraw`.
- */
-
-module.exports = redraw;
-
-
-/**
- * Force a redraw on an `el`.
- *
- * @param {Element} el
- */
-
-function redraw (el) {
-  el.offsetHeight;
-}
-});
-require.register("anthonyshort-has-transitions/index.js", function(exports, require, module){
-/**
- * This will store the property that the current
- * browser uses for transitionDuration
- */
-var property;
-
-/**
- * The properties we'll check on an element
- * to determine if it actually has transitions
- * We use duration as this is the only property
- * needed to technically have transitions
- * @type {Array}
- */
-var types = [
-  "transitionDuration",
-  "MozTransitionDuration",
-  "webkitTransitionDuration"
-];
-
-/**
- * Determine the correct property for this browser
- * just once so we done need to check every time
- */
-while(types.length) {
-  var type = types.shift();
-  if(type in document.body.style) {
-    property = type;
-  }
-}
-
-/**
- * Determine if the browser supports transitions or
- * if an element has transitions at all.
- * @param  {Element}  el Optional. Returns browser support if not included
- * @return {Boolean}
- */
-function hasTransitions(el){
-  if(!property) {
-    return false; // No browser support for transitions
-  }
-  if(!el) {
-    return property != null; // We just want to know if browsers support it
-  }
-  var duration = getComputedStyle(el)[property];
-  return duration !== "" && parseFloat(duration) !== 0; // Does this element have transitions?
-}
-
-module.exports = hasTransitions;
-});
-require.register("anthonyshort-css-emitter/index.js", function(exports, require, module){
-/**
- * Module Dependencies
- */
-
-var events = require('event');
-
-// CSS events
-
-var watch = [
-  'transitionend'
-, 'webkitTransitionEnd'
-, 'oTransitionEnd'
-, 'MSTransitionEnd'
-, 'animationend'
-, 'webkitAnimationEnd'
-, 'oAnimationEnd'
-, 'MSAnimationEnd'
-];
-
-/**
- * Expose `CSSnext`
- */
-
-module.exports = CssEmitter;
-
-/**
- * Initialize a new `CssEmitter`
- *
- */
-
-function CssEmitter(element){
-  if (!(this instanceof CssEmitter)) return new CssEmitter(element);
-  this.el = element;
-}
-
-/**
- * Bind CSS events.
- *
- * @api public
- */
-
-CssEmitter.prototype.bind = function(fn){
-  for (var i=0; i < watch.length; i++) {
-    events.bind(this.el, watch[i], fn);
-  }
-  return this;
-};
-
-/**
- * Unbind CSS events
- * 
- * @api public
- */
-
-CssEmitter.prototype.unbind = function(fn){
-  for (var i=0; i < watch.length; i++) {
-    events.unbind(this.el, watch[i], fn);
-  }
-  return this;
-};
-
-/**
- * Fire callback only once
- * 
- * @api public
- */
-
-CssEmitter.prototype.once = function(fn){
-  var self = this;
-  function on(){
-    self.unbind(on);
-    fn.apply(self.el, arguments);
-  }
-  self.bind(on);
-  return this;
-};
-
-
-});
-require.register("anthonyshort-after-transition/index.js", function(exports, require, module){
-var hasTransitions = require('has-transitions');
-var emitter = require('css-emitter');
-
-function afterTransition(el, callback) {
-  if(hasTransitions(el)) {
-    return emitter(el).bind(callback);
-  }
-  return callback.apply(el);
-};
-
-afterTransition.once = function(el, callback) {
-  afterTransition(el, function fn(){
-    callback.apply(el);
-    emitter(el).unbind(fn);
-  });
-};
-
-module.exports = afterTransition;
-});
 require.register("bmcmahen-scale-to-bounds/index.js", function(exports, require, module){
 /**
  * Return the maximum size given a set of bounds
@@ -14934,88 +14948,6 @@ module.exports = function(){
     height: w.innerHeight|| e.clientHeight|| g.clientHeight
   };
 }
-});
-require.register("bmcmahen-overlay/index.js", function(exports, require, module){
-
-/**
- * Module dependencies.
- */
-
-var Emitter = require('emitter');
-var classes = require('classes');
-var redraw = require('redraw');
-var afterTransition = require('after-transition');
-
-/**
- * Expose `Overlay`.
- */
-
-module.exports = Overlay;
-
-/**
- * Initialize a new `Overlay`.
- *
- * @param {Object} options
- * @api public
- */
-
-function Overlay(className) {
-  if (!(this instanceof Overlay)) return new Overlay();
-  this.el = document.createElement('div');
-  if (className) classes(this.el).add(className);
-  this.el.id = 'overlay';
-}
-
-/**
- * Mixin 'Emitter'
- */
-
-Emitter(Overlay.prototype);
-
-/**
- * Show the overlay.
- *
- * Emits "show" event.
- *
- * @return {Overlay}
- * @api public
- */
-
-Overlay.prototype.show = function(){
-  document.getElementsByTagName('body')[0].appendChild(this.el);
-  this.emit('show');
-  redraw(this.el);
-  var self = this;
-  afterTransition.once(this.el, function(){
-    self.emit('shown');
-  });
-  classes(this.el).add('show');
-  return this;
-};
-
-/**
- * Hide the overlay.
- *
- * Emits "hide" event, and "hidden" when finished.
- *
- * @return {Overlay}
- * @api public
- */
-
-Overlay.prototype.hide = function(){
-  if (!this.el) return;
-  this.emit('hide');
-  var self = this;
-  afterTransition.once(this.el, function(){
-    self.emit('hidden');
-    self.el.parentNode.removeChild(self.el);
-  });
-  classes(this.el).remove('show');
-  return this;
-};
-
-
-
 });
 require.register("javve-get-attribute/index.js", function(exports, require, module){
 /**
@@ -15164,7 +15096,7 @@ Zoom.prototype.bind = function(){
  */
 
 Zoom.prototype.overlay = function(){
-  this._overlay = overlay();
+  this._overlay = overlay('image-zoom-overlay');
   return this;
 };
 
@@ -15366,7 +15298,6 @@ module.exports = function(){
 
   var Pamphlet = function(){
     this.accordion = new Accordion('#accordion-wrapper');
-    this.overlay = new Overlay();
     this.$institutions = $('#institutions');
     this.$beingIn = $('#being-in');
     this.$residential = $('#residential-schools');
@@ -15386,9 +15317,6 @@ module.exports = function(){
       .on('click', bind(this, this.showBeingIn));
     this.$residential
       .on('click', bind(this, this.showResidential));
-    this.overlay
-      .on('show', this.toggleFullscreen)
-      .on('hide', this.toggleFullscreen);
   };
 
   Pamphlet.prototype.makeActive = function(pane){
@@ -15404,14 +15332,9 @@ module.exports = function(){
     $(pane.el).removeClass('rendered');
   };
 
-  Pamphlet.prototype.toggleFullscreen = function(){
-    $('body').toggleClass('fullscreen');
-  };
-
   Pamphlet.prototype.closeView = function(){
     if (this.currentSwipe){
       this.currentSwipe.close();
-      this.overlay.hide();
       this.showing = false;
     }
     router.navigate('/discover/institutions/');
@@ -15421,7 +15344,6 @@ module.exports = function(){
     var _this = this;
     if (e) e.preventDefault();
     this.closeView();
-    this.overlay.show();
     this.showing = 'institutions';
     this.$swipeContent.html(require('./templates/institutions'));
     Tip('a[title]', {auto: false});
@@ -15432,7 +15354,6 @@ module.exports = function(){
   Pamphlet.prototype.showBeingIn = function(e){
     var _this = this;
     e.preventDefault();
-    this.overlay.show();
     this.showing = 'institutionalization';
     this.$swipeContent.html(require('./templates/institutionalization'));
     this.currentSwipe = new SwipeView(this);
@@ -15442,7 +15363,6 @@ module.exports = function(){
     var _this = this;
     if (e) e.preventDefault();
     this.closeView();
-    this.overlay.show();
     this.showing = 'residential';
     this.$swipeContent.html(require('./templates/institutions'));
     Tip('a[title]', {auto: false});
@@ -15451,57 +15371,35 @@ module.exports = function(){
   };
 
 
-  // this is lazy...
-  function updateCounter(current, total){
-    var active = true,
-    $current = $('#current-number')
-    $grid = $('#show-all');
-    if (current === 0){
-      current = 1;
-      active = false;
-    }
-    $current.text(current);
-    if (active) {
-      $current.addClass('active');
-      $grid.removeClass('active');
-    } else {
-      $grid.addClass('active');
-      $current.removeClass('active');
-    }
-    if (total) $('#last-number').text(total);
-  }
-
 
   // MAP VIEW
   var MapView = function(context, options){
     options = options || {};
     this.residential = options.residential;
     this.context = context;
-    this.$el = $('#swipe-container');
     this.$mapWrapper = $('#map-wrapper');
     this.$switch = $('#switch');
     var mapId = this.residential
       ? 'bmcmahen.map-cdmg2y3r'
       : 'bmcmahen.map-8vookjpl';
-    this.map = new L.mapbox.map('map', mapId);
-    this.$exit = $('a.exit');
-    this.setSize();
+    this.map = new L.mapbox.map('map', mapId, {
+      zoomControl: false,
+      attributionControl: false
+    });
+    this.$zoomOut = $('<button id="zoom-out"></button>')
+      .html('<i class="icon-zoom-out margin-right"></i> Show All')
+      .addClass('zoom-out')
+      .appendTo(this.$mapWrapper);
+    this.$exit = $('button.exit');
     this.bind();
     this.subViews = [];
     this.createGreeting();
     this.fetch();
   };
 
-  MapView.prototype.setSize = function(){
-    // var $windowHeight = $(window).height();
-    // this.$mapWrapper.height($windowHeight - 145);
-    // this.$mapWrapper.css('marginTop', 67 + 'px');
-  };
-
   MapView.prototype.bind = function(){
-    // $(window).on('resize', bind(this, this.setSize));
     this.$exit.on('click', bind(this, this.onExit));
-    $('#show-all').on('click', bind(this, this.showAll));
+    this.$zoomOut.on('click', bind(this, this.showAll));
   };
 
   MapView.prototype.close = function(){
@@ -15544,6 +15442,7 @@ module.exports = function(){
       _.find(self.subViews, function(view){
         if (view._id === id) {
           view.show();
+          self.$zoomOut.addClass('show');
           return true;
         }
       })
@@ -15554,6 +15453,7 @@ module.exports = function(){
     if (e) e.preventDefault();
     if (this.subViews && this.currentlySelected != this.subViews[0]) {
       this.subViews[0].show();
+      this.$zoomOut.removeClass('show');
       if (this.residential) router.navigate('/discover/institutions/residential');
       else router.navigate('/discover/institutions/map/');
     }
@@ -15572,7 +15472,7 @@ module.exports = function(){
           }
         }
       });
-      updateCounter(0, _this.subViews.length - 1);
+      // updateCounter(0, _this.subViews.length - 1);
       deferred.resolve();
     });
     return deferred.promise();
@@ -15623,10 +15523,11 @@ module.exports = function(){
     this.$content.addClass('active fadeInRight');
     this.context.currentlySelected = this;
     this.setMapView();
-    updateCounter(this.json.index);
+    // updateCounter(this.json.index);
     if (this._id) {
       if (this.residential) router.navigate('/discover/institutions/residential'+ this._id);
       else router.navigate('/discover/institutions/map/'+ this._id);
+      $('#zoom-out').addClass('show');
     }
     return this;
   };
@@ -16400,7 +16301,7 @@ buf.push("<p class=\"small\">" + (((jade.interp = resource.resource) == null ? '
 }
 if ( locals.image)
 {
-buf.push("<img" + (jade.attrs({ 'src':(locals.image.url), 'data-zoom-url':(locals.image.url), 'data-zoom-padding':('20'), "class": ('zoom') }, {"src":true,"data-zoom-url":true,"data-zoom-padding":true})) + "/>");
+buf.push("<img" + (jade.attrs({ 'src':(locals.image.url), 'data-zoom-overlay':('true'), 'data-zoom-url':(locals.image.url), 'data-zoom-padding':('20'), "class": ('zoom') }, {"src":true,"data-zoom-overlay":true,"data-zoom-url":true,"data-zoom-padding":true})) + "/>");
 }
 buf.push("</div>");
 }
@@ -16420,7 +16321,7 @@ require.register("institutions/templates/institutions.js", function(exports, req
 module.exports = function anonymous(locals) {
 var buf = [];
 with (locals || {}) {
-buf.push("<div id=\"swipe-block\"><div id=\"map-wrapper\"><div id=\"map\" class=\"dark\"></div></div><div id=\"swipe-controller\"><ul id=\"switch\" class=\"switch clearfix\"><li class=\"clearfix map\"><a href=\"#\" class=\"exit\">Exit Fullscreen</a></li><li class=\"grid clearfix map\"><a id=\"show-all\" href=\"#\" title=\"Show All Institutions\"><i class=\"icon-th icon-2x\"></i></a></li><li id=\"numbers\" class=\"map\"><span id=\"current-number\" class=\"num\"></span><span class=\"divider\">of</span><span id=\"last-number\" class=\"num\"></span></li></ul></div></div>");
+buf.push("<div id=\"swipe-block\"><div id=\"map-wrapper\"><div id=\"map\" class=\"dark\"></div></div><div id=\"swipe-controller\"><div id=\"switch\" class=\"switch clearfix\"><button href=\"#\" class=\"exit\"><i class='icon-remove margin-right'></i> Exit Fullscreen</button></div></div></div>");
 }
 return buf.join("");
 }
@@ -16445,21 +16346,41 @@ require.alias("component-events/index.js", "eugenicsarchivesca-horizontal-accord
 require.alias("component-event/index.js", "component-events/deps/event/index.js");
 
 require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
 require.alias("component-classes/index.js", "eugenicsarchivesca-horizontal-accordion/deps/classes/index.js");
 require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
 
-require.alias("eugenicsarchivesca-overlay/index.js", "institutions/deps/overlay/index.js");
-require.alias("eugenicsarchivesca-overlay/index.js", "overlay/index.js");
-require.alias("component-classes/index.js", "eugenicsarchivesca-overlay/deps/classes/index.js");
+require.alias("bmcmahen-overlay/index.js", "institutions/deps/overlay/index.js");
+require.alias("bmcmahen-overlay/index.js", "overlay/index.js");
+require.alias("component-classes/index.js", "bmcmahen-overlay/deps/classes/index.js");
 require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
 
-require.alias("component-emitter/index.js", "eugenicsarchivesca-overlay/deps/emitter/index.js");
+require.alias("component-emitter/index.js", "bmcmahen-overlay/deps/emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
+
+require.alias("anthonyshort-after-transition/index.js", "bmcmahen-overlay/deps/after-transition/index.js");
+require.alias("anthonyshort-after-transition/index.js", "bmcmahen-overlay/deps/after-transition/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-has-transitions/index.js");
+
+require.alias("anthonyshort-css-emitter/index.js", "anthonyshort-after-transition/deps/css-emitter/index.js");
+require.alias("component-emitter/index.js", "anthonyshort-css-emitter/deps/emitter/index.js");
+require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
+
+require.alias("component-event/index.js", "anthonyshort-css-emitter/deps/event/index.js");
+
+require.alias("anthonyshort-after-transition/index.js", "anthonyshort-after-transition/index.js");
+
+require.alias("ianstormtaylor-redraw/index.js", "bmcmahen-overlay/deps/redraw/index.js");
 
 require.alias("component-bind/index.js", "institutions/deps/bind/index.js");
 require.alias("component-bind/index.js", "bind/index.js");
@@ -16472,8 +16393,12 @@ require.alias("component-events/index.js", "events/index.js");
 require.alias("component-event/index.js", "component-events/deps/event/index.js");
 
 require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
@@ -16488,8 +16413,12 @@ require.alias("component-events/index.js", "component-swipe/deps/events/index.js
 require.alias("component-event/index.js", "component-events/deps/event/index.js");
 
 require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
@@ -16559,8 +16488,12 @@ require.alias("component-events/index.js", "bmcmahen-image-zoom/deps/events/inde
 require.alias("component-event/index.js", "component-events/deps/event/index.js");
 
 require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
@@ -16613,8 +16546,12 @@ require.alias("anthonyshort-after-transition/index.js", "anthonyshort-after-tran
 require.alias("ianstormtaylor-redraw/index.js", "bmcmahen-overlay/deps/redraw/index.js");
 
 require.alias("component-delegate/index.js", "bmcmahen-image-zoom/deps/delegate/index.js");
-require.alias("component-matches-selector/index.js", "component-delegate/deps/matches-selector/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
 require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
 
 require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 

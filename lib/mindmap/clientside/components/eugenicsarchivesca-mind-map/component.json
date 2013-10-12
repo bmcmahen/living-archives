@@ -25,7 +25,8 @@
     "yields/scrolltop": "*",
     "anthonyshort/emitter-manager": "*",
     "component/pinch": "*",
-    "stagas/mouseleave": "*"
+    "stagas/mouseleave": "*",
+    "yields/is-touch": "*"
   },
   "development": {},
   "license": "MIT",
@@ -39,5 +40,6 @@
     "lib/links.js",
     "lib/canvas.js",
     "lib/loading.js"
-  ]
+  ],
+  "remotes": []
 }

@@ -2,19 +2,25 @@
   "name": "heroes-and-villains",
   "description": "heroes and villains prod",
   "dependencies": {
-  	"component/fullscreen" : "*",
-  	"bmcmahen/cast" : "*",
-  	"bmcmahen/modal" : "*",
-    "component/jquery": "*"
+    "component/fullscreen": "*",
+    "bmcmahen/cast": "*",
+    "bmcmahen/modal": "*",
+    "component/jquery": "*",
+    "component/underscore": "*",
+    "component/tip": "*",
+    "bmcmahen/backbone": "*"
   },
   "development": {},
   "main": "index.js",
   "scripts": [
     "index.js"
   ],
-  "styles": [ "styles/index.css" ],
+  "styles": [
+    "styles/index.css"
+  ],
   "templates": [
     "templates/modal-dialogue.jade",
     "templates/card-view.jade"
-  ]
+  ],
+  "remotes": []
 }

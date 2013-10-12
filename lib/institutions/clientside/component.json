@@ -3,7 +3,7 @@
   "description": "institutions prod",
   "dependencies": {
     "eugenicsarchivesca/horizontal-accordion": "*",
-    "eugenicsarchivesca/overlay": "*",
+    "bmcmahen/overlay": "*",
     "component/bind": "*",
     "component/jquery": "*",
     "component/events": "*",
