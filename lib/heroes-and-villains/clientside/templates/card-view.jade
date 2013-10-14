@@ -1,22 +1,26 @@
 .front(tabindex='0')
-  img(src=locals.image.url+ '/convert?w=170&h=250&fit=crop&align=faces')
+  img(src=locals.image.url+ '/convert?w=220&h=360')
   .caption
     p.name
       strong= locals.title
     p.blurb= locals.shortDescription
+  i.icon-repeat.flip-icon
 .back
   .quotes
     span #{locals.first_name} #{locals.last_name} once said:
     if locals.heroQuote
       p<em>"#{heroQuote}"</em>
         if locals.heroQuoteSource
-          a.tooltip-trigger(href='#', title=heroQuoteSource) Source
+          br
+          span.tooltip-trigger(title=heroQuoteSource) Source
     if locals.villainQuote
       p<em>"#{villainQuote}"</em>
         if locals.villainQuoteSource
-          a.tooltip-trigger(href='#', title=villainQuoteSource) Source
+          br
+          span.tooltip-trigger(title=villainQuoteSource) Source
     if locals.ambiQuote
       p<em>"#{ambiQuote}"</em>
         if locals.ambiQuoteSource
-          a.tooltip-trigger(href='#', title=ambiQuoteSource) Source
+          br
+          span.tooltip-trigger(title=ambiQuoteSource) Source
   a.personInfo More about #{locals.last_name}

@@ -151,7 +151,7 @@ position:relative
 .cast-item {
   float:left;
   width:200px;
-  height:220px;
+  height:210px;
   cursor:pointer;
   -webkit-perspective:600px;
   -moz-perspective:600px;
@@ -184,6 +184,13 @@ position:relative
   z-index:500
 }
 
+.cast-item:active img,
+.cast-item.flip .front img {
+  -webkit-filter: contrast(200%);
+  -moz-filter: contrast(200%);
+  filter: contrast(200%);
+}
+
 .cast-item .front,.cast-item .back {
   background:#fff;
   background: rgba(255,255,255,1);
@@ -208,7 +215,8 @@ position:relative
   -moz-transition:all .4s ease-in-out;
   -o-transition:all .4s ease-in-out;
   -ms-transition:all .4s ease-in-out;
-  transition:all .4s ease-in-out
+  transition:all .4s ease-in-out;
+  outline: none;
 }
 
 .cast-item .front {
@@ -240,13 +248,14 @@ position:relative
   transform:rotateY(180deg);
 }
 
+
+
 .cast-item.flip .back {
   -webkit-transform:rotateY(0);
   -moz-transform:rotateY(0);
   -o-transform:rotateY(0);
   -ms-transform:rotateY(0);
   transform:rotateY(0);
-  box-shadow: 10px 10px 50px rgba(0,0,0,0.1);
 }
 
 .cast-item.flip .back,
@@ -265,8 +274,9 @@ position:relative
 }
 
 .quotes {
-  max-height: 290px;
+  height: 100%;
   padding: 15px;
+  padding-bottom: 42px;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-text-overflow: ellipsis;
@@ -294,6 +304,9 @@ position:relative
   bottom: 0;
   background: white;
   background: rgba(255, 255, 255, 0.85);
+  background: -moz-linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 1));
+  background: -webkit-linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 1));
+  background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 1));
 }
 
 .caption p {
@@ -368,7 +381,8 @@ input.filter {
 
 .personInfo {
   display: block;
-  background: rgb(71, 182, 129);
+  background: rgb(47, 121, 85);
+  background: rgba(47, 121, 85, 0.91);
   position: absolute;
   text-align: center;
   color: white;
@@ -385,7 +399,9 @@ input.filter {
 
 .personInfo:hover {
   text-decoration: none;
-  color: #333;
+  color: white;
+  background: rgb(60, 180, 122);
+  background: rgba(60, 180, 122, 0.91);
 }
 
 .quotes span {
@@ -393,8 +409,9 @@ input.filter {
   font-weight: bold;
   padding-bottom: 10px;
   display: block;
-  line-height: 13px;
+  line-height: 15px;
   text-transform: uppercase;
+  font-family: helvetica, arial, sans-serif;
 }
 
 .tip {
@@ -404,5 +421,17 @@ input.filter {
 
 .tooltip-trigger {
   font-weight: bold;
-  padding-left: 5px;
+  display: inline-block !important;
+  text-transform: none !important;
+  color: #049cdb;
+  cursor: default;
+}
+
+.flip-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 15px;
+  color: white;
+  opacity: 0.6;
 }

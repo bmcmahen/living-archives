@@ -14440,7 +14440,7 @@ module.exports = function(){
       });
 
       cast = new Cast({
-        boxHeight: 280,
+        boxHeight: 260,
         boxWidth: 175,
         paddingWidth: 40,
         paddingHeight: 30,
@@ -14765,13 +14765,13 @@ require.register("heroes-and-villains/templates/card-view.js", function(exports,
 module.exports = function anonymous(locals) {
 var buf = [];
 with (locals || {}) {
-buf.push("<div tabindex=\"0\" class=\"front\"><img" + (jade.attrs({ 'src':(locals.image.url+ '/convert?w=170&h=250&fit=crop&align=faces') }, {"src":true})) + "/><div class=\"caption\"><p class=\"name\"><strong>" + (jade.escape(null == (jade.interp = locals.title) ? "" : jade.interp)) + "</strong></p><p class=\"blurb\">" + (jade.escape(null == (jade.interp = locals.shortDescription) ? "" : jade.interp)) + "</p></div></div><div class=\"back\"><div class=\"quotes\"><span>" + (jade.escape((jade.interp = locals.first_name) == null ? '' : jade.interp)) + " " + (jade.escape((jade.interp = locals.last_name) == null ? '' : jade.interp)) + " once said:</span>");
+buf.push("<div tabindex=\"0\" class=\"front\"><img" + (jade.attrs({ 'src':(locals.image.url+ '/convert?w=220&h=360') }, {"src":true})) + "/><div class=\"caption\"><p class=\"name\"><strong>" + (jade.escape(null == (jade.interp = locals.title) ? "" : jade.interp)) + "</strong></p><p class=\"blurb\">" + (jade.escape(null == (jade.interp = locals.shortDescription) ? "" : jade.interp)) + "</p></div><i class=\"icon-repeat flip-icon\"></i></div><div class=\"back\"><div class=\"quotes\"><span>" + (jade.escape((jade.interp = locals.first_name) == null ? '' : jade.interp)) + " " + (jade.escape((jade.interp = locals.last_name) == null ? '' : jade.interp)) + " once said:</span>");
 if ( locals.heroQuote)
 {
 buf.push("<p><em>\"" + (jade.escape((jade.interp = heroQuote) == null ? '' : jade.interp)) + "\"</em>");
 if ( locals.heroQuoteSource)
 {
-buf.push("<a" + (jade.attrs({ 'href':('#'), 'title':(heroQuoteSource), "class": ('tooltip-trigger') }, {"href":true,"title":true})) + ">Source</a>");
+buf.push("<br/><span" + (jade.attrs({ 'title':(heroQuoteSource), "class": ('tooltip-trigger') }, {"title":true})) + ">Source</span>");
 }
 buf.push("</p>");
 }
@@ -14780,7 +14780,7 @@ if ( locals.villainQuote)
 buf.push("<p><em>\"" + (jade.escape((jade.interp = villainQuote) == null ? '' : jade.interp)) + "\"</em>");
 if ( locals.villainQuoteSource)
 {
-buf.push("<a" + (jade.attrs({ 'href':('#'), 'title':(villainQuoteSource), "class": ('tooltip-trigger') }, {"href":true,"title":true})) + ">Source</a>");
+buf.push("<br/><span" + (jade.attrs({ 'title':(villainQuoteSource), "class": ('tooltip-trigger') }, {"title":true})) + ">Source</span>");
 }
 buf.push("</p>");
 }
@@ -14789,7 +14789,7 @@ if ( locals.ambiQuote)
 buf.push("<p><em>\"" + (jade.escape((jade.interp = ambiQuote) == null ? '' : jade.interp)) + "\"</em>");
 if ( locals.ambiQuoteSource)
 {
-buf.push("<a" + (jade.attrs({ 'href':('#'), 'title':(ambiQuoteSource), "class": ('tooltip-trigger') }, {"href":true,"title":true})) + ">Source</a>");
+buf.push("<br/><span" + (jade.attrs({ 'title':(ambiQuoteSource), "class": ('tooltip-trigger') }, {"title":true})) + ">Source</span>");
 }
 buf.push("</p>");
 }
