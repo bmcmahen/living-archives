@@ -179,7 +179,16 @@ position:relative
   transform:rotateY(180deg);
 }
 
+.cast-item img {
+  opacity: 0;
+  -webkit-transition: opacity 300ms;
+  -moz-transition: opacity 300ms;
+  transition: opacity 300ms;
+}
 
+.cast-item img.onload {
+  opacity: 1;
+}
 
 .cast-item.flip .back {
   -webkit-transform:rotateY(0);
@@ -313,7 +322,6 @@ input.filter {
 .personInfo {
   display: block;
   background: rgb(47, 121, 85);
-  background: rgba(47, 121, 85, 0.91);
   position: absolute;
   text-align: center;
   color: white;
@@ -332,7 +340,6 @@ input.filter {
   text-decoration: none;
   color: white;
   background: rgb(60, 180, 122);
-  background: rgba(60, 180, 122, 0.91);
 }
 
 .quotes span {
@@ -365,4 +372,42 @@ input.filter {
   font-size: 15px;
   color: white;
   opacity: 0.6;
+}
+
+#modal-content {
+  padding: 20px;
+  height: 100%;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  overflow: auto;
+}
+
+#overlay {
+  z-index: 800;
+  background: white;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.modal-dialog-wrapper {
+  border: 2px solid;
+  border-top: none;
+  border-bottom: none;
+  color: #AFAFAF;
+  height: 100%;
+}
+
+#hv-modal {
+  outline: none;
+  height: 100%;
+}
+
+.modal-close {
+  position: absolute;
+  right: -70px;
+  top: 3px;
+}
+
+.modal-close i {
+  font-size: 70px;
+  text-decoration: none;
 }

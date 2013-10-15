@@ -8,7 +8,9 @@
     "component/jquery": "*",
     "component/underscore": "*",
     "component/tip": "*",
-    "bmcmahen/backbone": "*"
+    "bmcmahen/backbone": "*",
+    "component/onload": "*",
+    "eugenicsarchivesca/cross-link": "*"
   },
   "development": {},
   "main": "index.js",

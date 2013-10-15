@@ -1,19 +1,22 @@
-.modal.animated.hide
-  img(width='250px', src=locals.image.url+ '/convert?w=250&h=400', alt='A picture of' + locals.title)
-  strong=locals.title
-  em
-    if locals.heroQuote
-      p.quote
-        em= heroQuote
-    if locals.villainQuote
-      p.quote
-        em= villainQuote
-    if locals.ambiQuote
-      p.quote
-        em= ambiQuote
+.modal-body
+  h2=locals.title
+  if locals.heroQuote
+    p<em>"#{heroQuote}"</em>
+      if locals.heroQuoteSource
+        br
+        span.tooltip-trigger(title=heroQuoteSource) Source
+  if locals.villainQuote
+    p<em>"#{villainQuote}"</em>
+      if locals.villainQuoteSource
+        br
+        span.tooltip-trigger(title=villainQuoteSource) Source
+  if locals.ambiQuote
+    p<em>"#{ambiQuote}"</em>
+      if locals.ambiQuoteSource
+        br
+        span.tooltip-trigger(title=ambiQuoteSource) Source
   p(title='Press escape to return to heroes and villains', aria-labelledby=locals._id)=locals.fullDescription
   p
     if locals.resources
       for resource in resources
         p=resource.resource
-  a.close Close

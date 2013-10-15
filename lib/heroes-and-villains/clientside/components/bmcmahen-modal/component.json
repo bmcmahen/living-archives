@@ -2,13 +2,19 @@
   "name": "modal",
   "repo": "bmcmahen/modal",
   "description": "a simple modal written in vanilla javscript",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "keywords": [],
   "dependencies": {
     "component/emitter": "*",
-    "eugenicsarchivesca/overlay": "*",
+    "bmcmahen/overlay": "*",
     "component/classes": "*",
-    "bmcmahen/animate-css": "*"
+    "anthonyshort/after-transition": "*",
+    "component/events": "*",
+    "component/delegate": "*",
+    "component/domify": "*",
+    "javve/get-attribute": "*",
+    "bmcmahen/target": "*",
+    "yields/prevent": "*"
   },
   "development": {},
   "license": "MIT",

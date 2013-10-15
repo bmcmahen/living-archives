@@ -19,4 +19,8 @@ block content
     .content
       #flipcard-wrapper
 
-  #modalbackdrop
+  #hv-modal.modal-dialog(tabindex='-1', aria-hidden='true')
+    .modal-dialog-wrapper
+      a.modal-close(data-modal-close='true')
+        i.icon-remove-circle
+      #modal-content

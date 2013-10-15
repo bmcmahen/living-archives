@@ -1173,13 +1173,35 @@ CastItemView.prototype.showOrHide = function(){
 
 module.exports = Cast;
 });
-require.register("eugenicsarchivesca-overlay/index.js", function(exports, require, module){
+require.register("ianstormtaylor-redraw/index.js", function(exports, require, module){
+
+/**
+ * Expose `redraw`.
+ */
+
+module.exports = redraw;
+
+
+/**
+ * Force a redraw on an `el`.
+ *
+ * @param {Element} el
+ */
+
+function redraw (el) {
+  el.offsetHeight;
+}
+});
+require.register("bmcmahen-overlay/index.js", function(exports, require, module){
+
 /**
  * Module dependencies.
  */
 
-var Emitter = require('emitter')
-  , classes = require('classes');
+var Emitter = require('emitter');
+var classes = require('classes');
+var redraw = require('redraw');
+var afterTransition = require('after-transition');
 
 /**
  * Expose `Overlay`.
@@ -1194,11 +1216,11 @@ module.exports = Overlay;
  * @api public
  */
 
-function Overlay(options) {
-  if (!(this instanceof Overlay)) return new Overlay(options);
-  options || (options = {});
-  this.duration = options.duration || 300;
-  this.id = options.id || 'overlay';
+function Overlay(className) {
+  if (!(this instanceof Overlay)) return new Overlay();
+  this.el = document.createElement('div');
+  if (className) classes(this.el).add(className);
+  this.el.id = 'overlay';
 }
 
 /**
@@ -1217,49 +1239,39 @@ Emitter(Overlay.prototype);
  */
 
 Overlay.prototype.show = function(){
-  if (this.el) return;
-  this.el = document.createElement('div');
-  this.el.className = 'hide';
-  this.el.id = this.id;
   document.getElementsByTagName('body')[0].appendChild(this.el);
   this.emit('show');
+  redraw(this.el);
   var self = this;
-  setTimeout(function(){
-    classes(self.el).remove('hide');
-  }, 0);
+  afterTransition.once(this.el, function(){
+    self.emit('shown');
+  });
+  classes(this.el).add('show');
   return this;
 };
 
 /**
  * Hide the overlay.
  *
- * Emits "hide" event.
+ * Emits "hide" event, and "hidden" when finished.
  *
  * @return {Overlay}
  * @api public
  */
 
 Overlay.prototype.hide = function(){
-  this.emit('hide');
-  return this.remove();
-};
-
-/**
- * Remove the overlay from the DOM
- * Emits 'close' event.
- */
-
-Overlay.prototype.remove = function(){
   if (!this.el) return;
+  this.emit('hide');
   var self = this;
-  classes(this.el).add('hide');
-  setTimeout(function(){
-    self.emit('close');
+  afterTransition.once(this.el, function(){
+    self.emit('hidden');
     self.el.parentNode.removeChild(self.el);
-    delete self.el;
-  }, this.duration);
+  });
+  classes(this.el).remove('show');
   return this;
 };
+
+
 
 });
 require.register("component-classes/index.js", function(exports, require, module){
@@ -1430,6 +1442,56 @@ ClassList.prototype.contains = function(name){
 };
 
 });
+require.register("anthonyshort-has-transitions/index.js", function(exports, require, module){
+/**
+ * This will store the property that the current
+ * browser uses for transitionDuration
+ */
+var property;
+
+/**
+ * The properties we'll check on an element
+ * to determine if it actually has transitions
+ * We use duration as this is the only property
+ * needed to technically have transitions
+ * @type {Array}
+ */
+var types = [
+  "transitionDuration",
+  "MozTransitionDuration",
+  "webkitTransitionDuration"
+];
+
+/**
+ * Determine the correct property for this browser
+ * just once so we done need to check every time
+ */
+while(types.length) {
+  var type = types.shift();
+  if(type in document.body.style) {
+    property = type;
+  }
+}
+
+/**
+ * Determine if the browser supports transitions or
+ * if an element has transitions at all.
+ * @param  {Element}  el Optional. Returns browser support if not included
+ * @return {Boolean}
+ */
+function hasTransitions(el){
+  if(!property) {
+    return false; // No browser support for transitions
+  }
+  if(!el) {
+    return property != null; // We just want to know if browsers support it
+  }
+  var duration = getComputedStyle(el)[property];
+  return duration !== "" && parseFloat(duration) !== 0; // Does this element have transitions?
+}
+
+module.exports = hasTransitions;
+});
 require.register("component-event/index.js", function(exports, require, module){
 
 /**
@@ -1473,7 +1535,7 @@ exports.unbind = function(el, type, fn, capture){
 };
 
 });
-require.register("ecarter-css-emitter/index.js", function(exports, require, module){
+require.register("anthonyshort-css-emitter/index.js", function(exports, require, module){
 /**
  * Module Dependencies
  */
@@ -1519,6 +1581,7 @@ CssEmitter.prototype.bind = function(fn){
   for (var i=0; i < watch.length; i++) {
     events.bind(this.el, watch[i], fn);
   }
+  return this;
 };
 
 /**
@@ -1531,178 +1594,585 @@ CssEmitter.prototype.unbind = function(fn){
   for (var i=0; i < watch.length; i++) {
     events.unbind(this.el, watch[i], fn);
   }
+  return this;
+};
+
+/**
+ * Fire callback only once
+ * 
+ * @api public
+ */
+
+CssEmitter.prototype.once = function(fn){
+  var self = this;
+  function on(){
+    self.unbind(on);
+    fn.apply(self.el, arguments);
+  }
+  self.bind(on);
+  return this;
 };
 
 
+});
+require.register("anthonyshort-after-transition/index.js", function(exports, require, module){
+var hasTransitions = require('has-transitions');
+var emitter = require('css-emitter');
+
+function afterTransition(el, callback) {
+  if(hasTransitions(el)) {
+    return emitter(el).bind(callback);
+  }
+  return callback.apply(el);
+};
+
+afterTransition.once = function(el, callback) {
+  afterTransition(el, function fn(){
+    callback.apply(el);
+    emitter(el).unbind(fn);
+  });
+};
+
+module.exports = afterTransition;
+});
+require.register("component-events/index.js", function(exports, require, module){
+
+/**
+ * Module dependencies.
+ */
+
+var events = require('event');
+var delegate = require('delegate');
+
+/**
+ * Expose `Events`.
+ */
+
+module.exports = Events;
+
+/**
+ * Initialize an `Events` with the given
+ * `el` object which events will be bound to,
+ * and the `obj` which will receive method calls.
+ *
+ * @param {Object} el
+ * @param {Object} obj
+ * @api public
+ */
+
+function Events(el, obj) {
+  if (!(this instanceof Events)) return new Events(el, obj);
+  if (!el) throw new Error('element required');
+  if (!obj) throw new Error('object required');
+  this.el = el;
+  this.obj = obj;
+  this._events = {};
+}
+
+/**
+ * Subscription helper.
+ */
+
+Events.prototype.sub = function(event, method, cb){
+  this._events[event] = this._events[event] || {};
+  this._events[event][method] = cb;
+};
+
+/**
+ * Bind to `event` with optional `method` name.
+ * When `method` is undefined it becomes `event`
+ * with the "on" prefix.
+ *
+ * Examples:
+ *
+ *  Direct event handling:
+ *
+ *    events.bind('click') // implies "onclick"
+ *    events.bind('click', 'remove')
+ *    events.bind('click', 'sort', 'asc')
+ *
+ *  Delegated event handling:
+ *
+ *    events.bind('click li > a')
+ *    events.bind('click li > a', 'remove')
+ *    events.bind('click a.sort-ascending', 'sort', 'asc')
+ *    events.bind('click a.sort-descending', 'sort', 'desc')
+ *
+ * @param {String} event
+ * @param {String|function} [method]
+ * @return {Function} callback
+ * @api public
+ */
+
+Events.prototype.bind = function(event, method){
+  var e = parse(event);
+  var el = this.el;
+  var obj = this.obj;
+  var name = e.name;
+  var method = method || 'on' + name;
+  var args = [].slice.call(arguments, 2);
+
+  // callback
+  function cb(){
+    var a = [].slice.call(arguments).concat(args);
+    obj[method].apply(obj, a);
+  }
+
+  // bind
+  if (e.selector) {
+    cb = delegate.bind(el, e.selector, name, cb);
+  } else {
+    events.bind(el, name, cb);
+  }
+
+  // subscription for unbinding
+  this.sub(name, method, cb);
+
+  return cb;
+};
+
+/**
+ * Unbind a single binding, all bindings for `event`,
+ * or all bindings within the manager.
+ *
+ * Examples:
+ *
+ *  Unbind direct handlers:
+ *
+ *     events.unbind('click', 'remove')
+ *     events.unbind('click')
+ *     events.unbind()
+ *
+ * Unbind delegate handlers:
+ *
+ *     events.unbind('click', 'remove')
+ *     events.unbind('click')
+ *     events.unbind()
+ *
+ * @param {String|Function} [event]
+ * @param {String|Function} [method]
+ * @api public
+ */
+
+Events.prototype.unbind = function(event, method){
+  if (0 == arguments.length) return this.unbindAll();
+  if (1 == arguments.length) return this.unbindAllOf(event);
+
+  // no bindings for this event
+  var bindings = this._events[event];
+  if (!bindings) return;
+
+  // no bindings for this method
+  var cb = bindings[method];
+  if (!cb) return;
+
+  events.unbind(this.el, event, cb);
+};
+
+/**
+ * Unbind all events.
+ *
+ * @api private
+ */
+
+Events.prototype.unbindAll = function(){
+  for (var event in this._events) {
+    this.unbindAllOf(event);
+  }
+};
+
+/**
+ * Unbind all events for `event`.
+ *
+ * @param {String} event
+ * @api private
+ */
+
+Events.prototype.unbindAllOf = function(event){
+  var bindings = this._events[event];
+  if (!bindings) return;
+
+  for (var method in bindings) {
+    this.unbind(event, method);
+  }
+};
+
+/**
+ * Parse `event`.
+ *
+ * @param {String} event
+ * @return {Object}
+ * @api private
+ */
+
+function parse(event) {
+  var parts = event.split(/ +/);
+  return {
+    name: parts.shift(),
+    selector: parts.join(' ')
+  }
+}
 
 });
-require.register("component-once/index.js", function(exports, require, module){
+require.register("component-query/index.js", function(exports, require, module){
 
+function one(selector, el) {
+  return el.querySelector(selector);
+}
+
+exports = module.exports = function(selector, el){
+  el = el || document;
+  return one(selector, el);
+};
+
+exports.all = function(selector, el){
+  el = el || document;
+  return el.querySelectorAll(selector);
+};
+
+exports.engine = function(obj){
+  if (!obj.one) throw new Error('.one callback required');
+  if (!obj.all) throw new Error('.all callback required');
+  one = obj.one;
+  exports.all = obj.all;
+};
+
+});
+require.register("component-matches-selector/index.js", function(exports, require, module){
 /**
- * Identifier.
+ * Module dependencies.
  */
 
-var n = 0;
+var query = require('query');
 
 /**
- * Global.
+ * Element prototype.
  */
 
-var global = (function(){ return this })();
+var proto = Element.prototype;
 
 /**
- * Make `fn` callable only once.
+ * Vendor function.
+ */
+
+var vendor = proto.matches
+  || proto.webkitMatchesSelector
+  || proto.mozMatchesSelector
+  || proto.msMatchesSelector
+  || proto.oMatchesSelector;
+
+/**
+ * Expose `match()`.
+ */
+
+module.exports = match;
+
+/**
+ * Match `el` to `selector`.
  *
+ * @param {Element} el
+ * @param {String} selector
+ * @return {Boolean}
+ * @api public
+ */
+
+function match(el, selector) {
+  if (vendor) return vendor.call(el, selector);
+  var nodes = query.all(selector, el.parentNode);
+  for (var i = 0; i < nodes.length; ++i) {
+    if (nodes[i] == el) return true;
+  }
+  return false;
+}
+
+});
+require.register("discore-closest/index.js", function(exports, require, module){
+var matches = require('matches-selector')
+
+module.exports = function (element, selector, checkYoSelf, root) {
+  element = checkYoSelf ? element : element.parentNode
+  root = root || document
+
+  do {
+    if (matches(element, selector))
+      return element
+    // After `matches` on the edge case that
+    // the selector matches the root
+    // (when the root is not the document)
+    if (element === root)
+      return
+    // Make sure `element !== document`
+    // otherwise we get an illegal invocation
+  } while ((element = element.parentNode) && element !== document)
+}
+});
+require.register("component-delegate/index.js", function(exports, require, module){
+/**
+ * Module dependencies.
+ */
+
+var closest = require('closest')
+  , event = require('event');
+
+/**
+ * Delegate event `type` to `selector`
+ * and invoke `fn(e)`. A callback function
+ * is returned which may be passed to `.unbind()`.
+ *
+ * @param {Element} el
+ * @param {String} selector
+ * @param {String} type
  * @param {Function} fn
+ * @param {Boolean} capture
  * @return {Function}
  * @api public
  */
 
-module.exports = function(fn) {
-  var id = n++;
-  var called;
-
-  function once(){
-    // no receiver
-    if (this == global) {
-      if (called) return;
-      called = true;
-      return fn.apply(this, arguments);
-    }
-
-    // receiver
-    var key = '__called_' + id + '__';
-    if (this[key]) return;
-    this[key] = true;
-    return fn.apply(this, arguments);
-  }
-
-  return once;
+exports.bind = function(el, selector, type, fn, capture){
+  return event.bind(el, type, function(e){
+    var target = e.target || e.srcElement;
+    e.delegateTarget = closest(target, selector, true, el);
+    if (e.delegateTarget) fn.call(el, e);
+  }, capture);
 };
 
-});
-require.register("eugenicsarchivesca-has-css-animations/index.js", function(exports, require, module){
-// https://developer.mozilla.org/en-US/docs/CSS/Tutorials/Using_CSS_animations/Detecting_CSS_animation_support
-
-var animation = false,
-    animationstring = 'animation',
-    keyframeprefix = '',
-    domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
-    pfx  = '';
-
-var el = document.createElement('div');
-if( el.style.animationName ) { animation = true; }
-
-if( animation === false ) {
-  for( var i = 0; i < domPrefixes.length; i++ ) {
-    if( el.style[ domPrefixes[i] + 'AnimationName' ] !== undefined ) {
-      pfx = domPrefixes[ i ];
-      animationstring = pfx + 'Animation';
-      keyframeprefix = '-' + pfx.toLowerCase() + '-';
-      animation = true;
-      break;
-    }
-  }
-}
-
-module.exports = animation;
-
-});
-require.register("bmcmahen-animate-css/index.js", function(exports, require, module){
-var hasAnimations = require('has-css-animations')
-  , classes = require('classes')
-  , cssEvent = require('css-emitter')
-  , once = require('once');
-
-// API:
-// animate(el, 'fadeOutRight', function(el){
-//  $(el).remove();
-// });
-
-// If animations aren't supported, call back immediately,
-// which allows us to immediately remove specific elements.
-
-// One issue: If the browser supports animations, but an
-// animation is called that doens't exist, things get
-// screwed up because the callback is never invoked.
-// Workarounds? Or maybe people should just fix their css...
-
-module.exports = animate;
-
-function animate(el, className, fn){
-  if (!hasAnimations) {
-    if (fn) fn(el);
-    return;
-  }
-  var cls = classes(el);
-  cls.add(className);
-  cssEvent(el).bind(once(cleanup));
-  function cleanup(){
-    cls.remove(className);
-    if (fn) fn(el);
-  }
-}
-});
-require.register("bmcmahen-modal/index.js", function(exports, require, module){
 /**
- * Modal Dialogue
+ * Unbind event `type`'s callback `fn`.
  *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @api public
  */
 
-var Emitter = require('emitter')
-  , Overlay = require('overlay')
-  , classes = require('classes')
-  , animate = require('animate-css');
-
-var Modal = function (el, options) {
-  if (!(this instanceof Modal)) return new Modal(el, options);
-  if (!el) throw new TypeError('Modal() requires an element.');
-  this.el = el;
-  options = options || {};
-  this.animationIn = options.animationIn || 'fadeInDownBig';
-  this.animationOut = options.animationOut || 'fadeOutUpBig';
-  this.duration = options.duration || 800;
-  this.isShown = false;
-  this.overlay = new Overlay({duration: this.duration, id: options.overlayElementId || 'overlay'});
+exports.unbind = function(el, type, fn, capture){
+  event.unbind(el, type, fn, capture);
 };
 
-module.exports = Modal;
+});
+require.register("component-domify/index.js", function(exports, require, module){
+
+/**
+ * Expose `parse`.
+ */
+
+module.exports = parse;
+
+/**
+ * Wrap map from jquery.
+ */
+
+var map = {
+  option: [1, '<select multiple="multiple">', '</select>'],
+  optgroup: [1, '<select multiple="multiple">', '</select>'],
+  legend: [1, '<fieldset>', '</fieldset>'],
+  thead: [1, '<table>', '</table>'],
+  tbody: [1, '<table>', '</table>'],
+  tfoot: [1, '<table>', '</table>'],
+  colgroup: [1, '<table>', '</table>'],
+  caption: [1, '<table>', '</table>'],
+  tr: [2, '<table><tbody>', '</tbody></table>'],
+  td: [3, '<table><tbody><tr>', '</tr></tbody></table>'],
+  th: [3, '<table><tbody><tr>', '</tr></tbody></table>'],
+  col: [2, '<table><tbody></tbody><colgroup>', '</colgroup></table>'],
+  _default: [0, '', '']
+};
+
+/**
+ * Parse `html` and return the children.
+ *
+ * @param {String} html
+ * @return {Array}
+ * @api private
+ */
+
+function parse(html) {
+  if ('string' != typeof html) throw new TypeError('String expected');
+
+  html = html.replace(/^\s+|\s+$/g, ''); // Remove leading/trailing whitespace
+
+  // tag name
+  var m = /<([\w:]+)/.exec(html);
+  if (!m) throw new Error('No elements were generated.');
+  var tag = m[1];
+
+  // body support
+  if (tag == 'body') {
+    var el = document.createElement('html');
+    el.innerHTML = html;
+    return el.removeChild(el.lastChild);
+  }
+
+  // wrap map
+  var wrap = map[tag] || map._default;
+  var depth = wrap[0];
+  var prefix = wrap[1];
+  var suffix = wrap[2];
+  var el = document.createElement('div');
+  el.innerHTML = prefix + html + suffix;
+  while (depth--) el = el.lastChild;
+
+  var els = el.children;
+  if (1 == els.length) {
+    return el.removeChild(els[0]);
+  }
+
+  var fragment = document.createDocumentFragment();
+  while (els.length) {
+    fragment.appendChild(el.removeChild(els[0]));
+  }
+
+  return fragment;
+}
+
+});
+require.register("javve-get-attribute/index.js", function(exports, require, module){
+/**
+ * Return the value for `attr` at `element`.
+ *
+ * @param {Element} el
+ * @param {String} attr
+ * @api public
+ */
+
+module.exports = function(el, attr) {
+  var result = (el.getAttribute && el.getAttribute(attr)) || null;
+  if( !result ) {
+    var attrs = el.attributes;
+    var length = attrs.length;
+    for(var i = 0; i < length; i++) {
+      if (attr[i] !== undefined) {
+        if(attr[i].nodeName === attr) {
+          result = attr[i].nodeValue;
+        }
+      }
+    }
+  }
+  return result;
+}
+});
+require.register("bmcmahen-target/index.js", function(exports, require, module){
+module.exports = function(e){
+  e = e || window.event;
+  return e.target || e.srcElement;
+};
+});
+require.register("yields-prevent/index.js", function(exports, require, module){
+
+/**
+ * prevent default on the given `e`.
+ * 
+ * examples:
+ * 
+ *      anchor.onclick = prevent;
+ *      anchor.onclick = function(e){
+ *        if (something) return prevent(e);
+ *      };
+ * 
+ * @param {Event} e
+ */
+
+module.exports = function(e){
+  e = e || window.event
+  return e.preventDefault
+    ? e.preventDefault()
+    : e.returnValue = false;
+};
+
+});
+require.register("bmcmahen-modal/index.js", function(exports, require, module){
+var Emitter = require('emitter');
+var overlay = require('overlay');
+var classes = require('classes');
+var afterTransition = require('after-transition');
+var events = require('events');
+var delegate = require('delegate');
+var prevent = require('prevent');
+var target = require('target');
+var attr = require('get-attribute');
+var domify = require('domify');
+
+/**
+ * Bind any links with [data-modal-id]. _id should direct
+ * us to the id of the modal dialog.
+ */
+
+var modalTrigger = delegate.bind(document, '[data-modal-id]', 'click', function(e){
+  prevent(e);
+  var el = target(e);
+  var _id = attr(el, 'data-modal-id');
+  var newModal = new Modal(document.getElementById(_id));
+  if (attr(el, 'data-show-overlay')) newModal.overlay();
+  newModal.show();
+});
+
+/**
+ * API
+ * @param  {Element} el
+ * @return {Modal}
+ */
+
+module.exports = function(el){
+  delegate.unbind(document, 'click', modalTrigger, false);
+  return new Modal(el);
+};
+
+/**
+ * Modal Constructor
+ * @param {Element} el
+ */
+
+function Modal(el){
+  this.el = el;
+  this.isShown = false;
+  this.bind();
+}
 
 Emitter(Modal.prototype);
 
-// Functions
 Modal.prototype.toggle = function(){
-  return this.isShown ? this.hide() : this.show();
+  if (this.isShown) this.hide();
+  else this.show();
+  return this;
 };
 
-// Apply our animation to show the Modal.
+Modal.prototype.bind = function(){
+  this.events = events(this.el, this);
+  this.events.bind('click [data-modal-close]', 'hide');
+};
+
+Modal.prototype.overlay = function(className){
+  this._overlay = overlay(className || 'modal-dialogue');
+  return this;
+};
+
 Modal.prototype.show = function(){
-  if (this.isShown) return;
+  if (this.isShown) return this;
+  this.previouslyFocused = document.activeElement;
   this.isShown = true;
-  this.emit('show');
-  this.overlay.show();
-  var cls = classes(this.el)
-    , _this = this;
-
-  cls.add('in');
-  animate(this.el, this.animationIn, function(el){
-    cls.remove(this.animationIn);
-    _this.emit('modalIn');
+  this.emit('showing');
+  if (this._overlay) this._overlay.show();
+  classes(this.el).add('modal-show');
+  var self = this;
+  afterTransition(this.el, function(){
+    self.emit('shown');
   });
-
   this.el.focus();
   return this;
 };
 
-Modal.prototype.hide = function(){
-  if (!this.isShown) return;
-  this.emit('hide');
-  this.overlay.hide();
+Modal.prototype.hide = function(e){
+  if (e) prevent(e);
+  if (!this.isShown) return this;
+  this.emit('hiding');
+  if (this._overlay) this._overlay.hide();
+  classes(this.el).remove('modal-show');
+  this.previouslyFocused.focus();
   this.isShown = false;
-  var _this = this;
-  animate(this.el, this.animationOut, function(el){
-    classes(_this.el).remove('in');
-    _this.emit('modalOut');
+  var self = this;
+  afterTransition(this.el, function(){
+    self.emit('hidden');
   });
   return this;
 };
@@ -14389,11 +14859,314 @@ require.register("bmcmahen-backbone/backbone.js", function(exports, require, mod
 }).call(this);
 
 });
-require.register("heroes-and-villains/index.js", function(exports, require, module){
+require.register("component-onload/index.js", function(exports, require, module){
+/**
+ * Module dependencies.
+ */
+
+var classes = require('classes')
+  , event = require('event')
 
 /**
- * Cast
+ * Toggle .onload and .preload classes based on the state of `el`.
+ *
+ * @param {Element} el
+ * @param {Function} fn
+ * @api public
  */
+
+module.exports = function(el, fn){
+  var c = classes(el);
+
+  // cached images
+  if (el.complete) {
+    c.add('onload');
+    return;
+  }
+
+  c.add('preload');
+  event.bind(el, 'load', function(){
+    c.remove('preload');
+    c.add('onload');
+    fn && fn();
+  });
+};
+
+});
+require.register("component-to-function/index.js", function(exports, require, module){
+
+/**
+ * Expose `toFunction()`.
+ */
+
+module.exports = toFunction;
+
+/**
+ * Convert `obj` to a `Function`.
+ *
+ * @param {Mixed} obj
+ * @return {Function}
+ * @api private
+ */
+
+function toFunction(obj) {
+  switch ({}.toString.call(obj)) {
+    case '[object Object]':
+      return objectToFunction(obj);
+    case '[object Function]':
+      return obj;
+    case '[object String]':
+      return stringToFunction(obj);
+    case '[object RegExp]':
+      return regexpToFunction(obj);
+    default:
+      return defaultToFunction(obj);
+  }
+}
+
+/**
+ * Default to strict equality.
+ *
+ * @param {Mixed} val
+ * @return {Function}
+ * @api private
+ */
+
+function defaultToFunction(val) {
+  return function(obj){
+    return val === obj;
+  }
+}
+
+/**
+ * Convert `re` to a function.
+ *
+ * @param {RegExp} re
+ * @return {Function}
+ * @api private
+ */
+
+function regexpToFunction(re) {
+  return function(obj){
+    return re.test(obj);
+  }
+}
+
+/**
+ * Convert property `str` to a function.
+ *
+ * @param {String} str
+ * @return {Function}
+ * @api private
+ */
+
+function stringToFunction(str) {
+  // immediate such as "> 20"
+  if (/^ *\W+/.test(str)) return new Function('_', 'return _ ' + str);
+
+  // properties such as "name.first" or "age > 18"
+  return new Function('_', 'return _.' + str);
+}
+
+/**
+ * Convert `object` to a function.
+ *
+ * @param {Object} object
+ * @return {Function}
+ * @api private
+ */
+
+function objectToFunction(obj) {
+  var match = {}
+  for (var key in obj) {
+    match[key] = typeof obj[key] === 'string'
+      ? defaultToFunction(obj[key])
+      : toFunction(obj[key])
+  }
+  return function(val){
+    if (typeof val !== 'object') return false;
+    for (var key in match) {
+      if (!(key in val)) return false;
+      if (!match[key](val[key])) return false;
+    }
+    return true;
+  }
+}
+
+});
+require.register("component-each/index.js", function(exports, require, module){
+
+/**
+ * Module dependencies.
+ */
+
+var toFunction = require('to-function');
+var type;
+
+try {
+  type = require('type-component');
+} catch (e) {
+  type = require('type');
+}
+
+/**
+ * HOP reference.
+ */
+
+var has = Object.prototype.hasOwnProperty;
+
+/**
+ * Iterate the given `obj` and invoke `fn(val, i)`.
+ *
+ * @param {String|Array|Object} obj
+ * @param {Function} fn
+ * @api public
+ */
+
+module.exports = function(obj, fn){
+  fn = toFunction(fn);
+  switch (type(obj)) {
+    case 'array':
+      return array(obj, fn);
+    case 'object':
+      if ('number' == typeof obj.length) return array(obj, fn);
+      return object(obj, fn);
+    case 'string':
+      return string(obj, fn);
+  }
+};
+
+/**
+ * Iterate string chars.
+ *
+ * @param {String} obj
+ * @param {Function} fn
+ * @api private
+ */
+
+function string(obj, fn) {
+  for (var i = 0; i < obj.length; ++i) {
+    fn(obj.charAt(i), i);
+  }
+}
+
+/**
+ * Iterate object keys.
+ *
+ * @param {Object} obj
+ * @param {Function} fn
+ * @api private
+ */
+
+function object(obj, fn) {
+  for (var key in obj) {
+    if (has.call(obj, key)) {
+      fn(key, obj[key]);
+    }
+  }
+}
+
+/**
+ * Iterate array-ish.
+ *
+ * @param {Array|Object} obj
+ * @param {Function} fn
+ * @api private
+ */
+
+function array(obj, fn) {
+  for (var i = 0; i < obj.length; ++i) {
+    fn(obj[i], i);
+  }
+}
+
+});
+require.register("yields-capitalize/index.js", function(exports, require, module){
+
+/**
+ * Capitalize the provided `str`.
+ *
+ * example:
+ *
+ *        capitalize('foo');
+ *        // > Foo
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+exports = module.exports = function (str) {
+  return str.charAt(0).toUpperCase()
+    + str.slice(1);
+};
+
+/**
+ * Capitalize words.
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+exports.words = function(str){
+  return str.replace(/\w+/g, exports);
+};
+
+});
+require.register("matthewp-text/index.js", function(exports, require, module){
+
+var text = 'innerText' in document.createElement('div')
+  ? 'innerText'
+  : 'textContent'
+
+module.exports = function (el, val) {
+  if (val == null) return el[text];
+  el[text] = val;
+};
+
+});
+require.register("eugenicsarchivesca-cross-link/index.js", function(exports, require, module){
+var each = require('each');
+var capitalize = require('capitalize');
+var innerText = require('text');
+var domify = require('domify');
+var classes = require('classes');
+var listTemplate = require('./list');
+
+var urls = {
+  'mindmap' : function(id) {
+    return '/discover/mindmap/'+id;
+  },
+  'institutions' : function(id, obj) {
+    if (obj.residentialSchool) return '/discover/mindmap/residential/'+id;
+    else return '/discover/mindmap/map/'+id;
+  },
+  'timeline': function(id) {
+    return '/discover/timeline/'+id;
+  }
+};
+
+module.exports = function(obj, current){
+  var prods = obj.prods;
+  if (!prods) return false;
+  if (prods.length < 1) return false;
+  var $list = document.createElement('ul');
+  classes($list).add('prod-links');
+  each(prods, function(prod){
+    if (prod === current) return;
+    var $li = domify(listTemplate);
+    var $a = $li.querySelector('a');
+    var name = capitalize(prod);
+    innerText($a, name);
+    $a.href = urls[prod](obj._id, obj);
+    $list.appendChild($li);
+  });
+  return $list;
+};
+});
+require.register("eugenicsarchivesca-cross-link/list.js", function(exports, require, module){
+module.exports = '<li class=\'prod-link\'>\n  <a></a>\n</li>';
+});
+require.register("heroes-and-villains/index.js", function(exports, require, module){
 
 var Cast = require('cast');
 var Modal = require('modal');
@@ -14403,124 +15176,94 @@ var cardViewTemplate = require('./templates/card-view');
 var _ = require('underscore');
 var tip = require('tip');
 var Backbone = require('backbone');
+var onload = require('onload');
+var clink = require('cross-link');
 
 var cast;
 
-module.exports = function(){
-
-  function showModal(view){
-    var template = $('#modal-dialogue').html()
-      , html = modalTemplate(view.model.toJSON())
-      , $el = $(html);
-
-    $('body').append($el);
-    var model = new Modal($el[0], {
-      animationIn: 'fadeInDown',
-      animationOut: 'fadeOutUp'
-    }).show();
-
-    $el.find('.close').on('click', function(e){
-      e.preventDefault();
-      model.hide();
-      setTimeout(function(){
-        $el.remove();
-      }, 1000);
+function boot(){
+  var deferred = new $.Deferred();
+  $.get('/api/prods/heroes-and-villains', function(data){
+    data = _.map(data, function(item){
+      var parts = item.title.split(',');
+      item.first_name = parts[parts.length -1];
+      item.last_name = parts[0];
+      return item;
     });
-  }
+    buildCast(data);
+    deferred.resolve();
+  });
+  return deferred.promise();
+}
 
-  $(document).ready(function() {
+module.exports = boot;
 
-  $.when( $.get('/api/prods/heroes-and-villains') ).then( function(data){
-
-      data = _.map(data, function(item){
-        var parts = item.title.split(',');
-        item.first_name = parts[parts.length -1];
-        item.last_name = parts[0];
-        return item;
-      });
-
-      cast = new Cast({
-        boxHeight: 260,
-        boxWidth: 175,
-        paddingWidth: 40,
-        paddingHeight: 30,
-        template: cardViewTemplate,
-        wrapper: '#flipcard-wrapper'
-      })
-      .data(data, function(attr){
-        return attr._id;
-      })
-      .sortBy('title')
-      .on('wrapperHeight', function(h){
-        $('.content').height(h);
-      })
-      .dynamic()
-      .on('viewCreated', function(view){
-        var $view = $(view.el);
-        $view.on('click', function(){
-          $view.toggleClass('flip');
-        });
-      })
-      .on('viewRendered', function(view){
-        var $view = $(view.el);
-        $view.find('a.personInfo').on('click', function(e){
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          showModal(view);
-        });
-        var trigger = $view.find('.tooltip-trigger');
-        tip(trigger);
-      })
-      .on('viewDestroyed', function(view){
-        $(view.el).off('click');
-      })
-      .draw();
-
-
-    // Filter our cards based on user input
-    $('.filter').on('keyup', function(e){
-      var query = $(e.currentTarget).val();
-      var re = new RegExp(query, 'i');
-      var filtered = _.filter(data, function(attr){
-        return re.test(attr.title);
-      });
-      cast.data(filtered, function(attr){
-        return attr._id;
-      }).sortBy('title').justify();
-    });
-
-    /**
-     * Enter full screen mode
-     */
-
-    $('#fullscreenmode').on('click', function(e){
-      var $app = $('#app');
-      var setWidth = function(){
-        $('#flipcard-wrapper').width($('#app').width());
-        cast.justify({wrapper: '#flipcard-wrapper'});
-      };
-
-      if ($app.hasClass('fullscreen')) {
-        $(e.currentTarget).text('(Full Screen)');
-        $app.removeClass('fullscreen');
-        $('#modalbackdrop').removeClass('open');
-        setWidth();
-        $(window).off('resize');
-      } else {
-        $(e.currentTarget).text('(Exit Full Screen)');
-        $app.addClass('fullscreen');
-        $('#modalbackdrop').addClass('open');
-        setWidth();
-        $(window).on('resize', setWidth);
+function buildCast(data){
+ cast = new Cast({
+    boxHeight: 260,
+    boxWidth: 175,
+    paddingWidth: 40,
+    paddingHeight: 30,
+    template: cardViewTemplate,
+    wrapper: '#flipcard-wrapper'
+  })
+  .data(data, function(attr){
+    return attr._id;
+  })
+  .sortBy('title')
+  .on('wrapperHeight', function(h){
+    $('.content').height(h);
+  })
+  .dynamic()
+  .on('viewCreated', function(view){
+    var $view = $(view.el);
+    $view.on('click', function(){
+      if (!$view.hasClass('flip')){
+        router.navigate('discover/heroes/'+view.model.attributes._id);
       }
-  });
+      $view.toggleClass('flip');
+    });
+    $view.attr('id', view.model.attributes._id);
+  })
+  .on('viewRendered', function(view){
+    var $view = $(view.el);
+    $view.find('a.personInfo').on('click', function(e){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      showModal(view);
+    });
+    var trigger = $view.find('.tooltip-trigger');
+    tip(trigger);
+    var img = $view.find('img')[0];
+    onload(img);
+  })
+  .on('viewDestroyed', function(view){
+    $(view.el).off('click');
+  })
+  .draw();
+}
 
-  });
+var $modal = $('#hv-modal');
+var modal = Modal($modal[0]).overlay();
 
-  });
+function showModal(view){
+  var $modalContent = $modal.find('#modal-content');
+  var json = view.model.toJSON();
+  console.log(json);
+  $modalContent.html(modalTemplate(json));
+  var crosslinks = clink(json, 'heroes');
+  if (crosslinks) {
+    $modalContent
+      .append($('<h5>Cross-Links</h5>'))
+      .append(crosslinks);
+  }
+  modal.show();
+}
+
 
 var $main = $('#main');
 var $swipe = $('#navbar-swipe-container');
+
 function setBodySize(){
   $main.height($(window).height() - $swipe.height());
   if (cast) cast.dynamic({ wrapper : '#flipcard-wrapper' });
@@ -14528,7 +15271,27 @@ function setBodySize(){
 $(window).on('resize', _.debounce(setBodySize, 100));
 setBodySize();
 
-};
+/**
+ * Router
+ */
+
+var Router = Backbone.Router.extend({
+  routes: {
+    'discover/heroes/:id' : 'showCard'
+  },
+
+  showCard: function(id){
+    $.when(boot()).then(function(){
+      var $card = $('#'+id);
+      var $parent = $('#main');
+      $parent.scrollTop($parent.scrollTop() + $card.position().top);
+      $card.addClass('flip');
+    });
+  }
+});
+
+var router = new Router();
+Backbone.history.start({ pushState: true });
 });
 require.register("heroes-and-villains/jade-runtime.js", function(exports, require, module){
 
@@ -14715,20 +15478,35 @@ require.register("heroes-and-villains/templates/modal-dialogue.js", function(exp
 module.exports = function anonymous(locals) {
 var buf = [];
 with (locals || {}) {
-buf.push("<div class=\"modal animated hide\"><img" + (jade.attrs({ 'width':('250px'), 'src':(locals.image.url+ '/convert?w=250&h=400'), 'alt':('A picture of' + locals.title) }, {"width":true,"src":true,"alt":true})) + "/><strong>" + (jade.escape(null == (jade.interp = locals.title) ? "" : jade.interp)) + "</strong><em>");
+buf.push("<div class=\"modal-body\"><h2>" + (jade.escape(null == (jade.interp = locals.title) ? "" : jade.interp)) + "</h2>");
 if ( locals.heroQuote)
 {
-buf.push("<p class=\"quote\"><em>" + (jade.escape(null == (jade.interp = heroQuote) ? "" : jade.interp)) + "</em></p>");
+buf.push("<p><em>\"" + (jade.escape((jade.interp = heroQuote) == null ? '' : jade.interp)) + "\"</em>");
+if ( locals.heroQuoteSource)
+{
+buf.push("<br/><span" + (jade.attrs({ 'title':(heroQuoteSource), "class": ('tooltip-trigger') }, {"title":true})) + ">Source</span>");
+}
+buf.push("</p>");
 }
 if ( locals.villainQuote)
 {
-buf.push("<p class=\"quote\"><em>" + (jade.escape(null == (jade.interp = villainQuote) ? "" : jade.interp)) + "</em></p>");
+buf.push("<p><em>\"" + (jade.escape((jade.interp = villainQuote) == null ? '' : jade.interp)) + "\"</em>");
+if ( locals.villainQuoteSource)
+{
+buf.push("<br/><span" + (jade.attrs({ 'title':(villainQuoteSource), "class": ('tooltip-trigger') }, {"title":true})) + ">Source</span>");
+}
+buf.push("</p>");
 }
 if ( locals.ambiQuote)
 {
-buf.push("<p class=\"quote\"><em>" + (jade.escape(null == (jade.interp = ambiQuote) ? "" : jade.interp)) + "</em></p>");
+buf.push("<p><em>\"" + (jade.escape((jade.interp = ambiQuote) == null ? '' : jade.interp)) + "\"</em>");
+if ( locals.ambiQuoteSource)
+{
+buf.push("<br/><span" + (jade.attrs({ 'title':(ambiQuoteSource), "class": ('tooltip-trigger') }, {"title":true})) + ">Source</span>");
 }
-buf.push("</em><p" + (jade.attrs({ 'title':('Press escape to return to heroes and villains'), 'aria-labelledby':(locals._id) }, {"title":true,"aria-labelledby":true})) + ">" + (jade.escape(null == (jade.interp = locals.fullDescription) ? "" : jade.interp)) + "</p><p>");
+buf.push("</p>");
+}
+buf.push("<p" + (jade.attrs({ 'title':('Press escape to return to heroes and villains'), 'aria-labelledby':(locals._id) }, {"title":true,"aria-labelledby":true})) + ">" + (jade.escape(null == (jade.interp = locals.fullDescription) ? "" : jade.interp)) + "</p><p>");
 if ( locals.resources)
 {
 // iterate resources
@@ -14756,7 +15534,7 @@ buf.push("<p>" + (jade.escape(null == (jade.interp = resource.resource) ? "" : j
 }).call(this);
 
 }
-buf.push("</p><a class=\"close\">Close</a></div>");
+buf.push("</p></div>");
 }
 return buf.join("");
 }
@@ -14837,31 +15615,78 @@ require.alias("bmcmahen-modal/index.js", "modal/index.js");
 require.alias("component-emitter/index.js", "bmcmahen-modal/deps/emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
 
-require.alias("eugenicsarchivesca-overlay/index.js", "bmcmahen-modal/deps/overlay/index.js");
-require.alias("component-classes/index.js", "eugenicsarchivesca-overlay/deps/classes/index.js");
+require.alias("bmcmahen-overlay/index.js", "bmcmahen-modal/deps/overlay/index.js");
+require.alias("component-classes/index.js", "bmcmahen-overlay/deps/classes/index.js");
 require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
 
-require.alias("component-emitter/index.js", "eugenicsarchivesca-overlay/deps/emitter/index.js");
+require.alias("component-emitter/index.js", "bmcmahen-overlay/deps/emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
+
+require.alias("anthonyshort-after-transition/index.js", "bmcmahen-overlay/deps/after-transition/index.js");
+require.alias("anthonyshort-after-transition/index.js", "bmcmahen-overlay/deps/after-transition/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-has-transitions/index.js");
+
+require.alias("anthonyshort-css-emitter/index.js", "anthonyshort-after-transition/deps/css-emitter/index.js");
+require.alias("component-emitter/index.js", "anthonyshort-css-emitter/deps/emitter/index.js");
+require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
+
+require.alias("component-event/index.js", "anthonyshort-css-emitter/deps/event/index.js");
+
+require.alias("anthonyshort-after-transition/index.js", "anthonyshort-after-transition/index.js");
+
+require.alias("ianstormtaylor-redraw/index.js", "bmcmahen-overlay/deps/redraw/index.js");
 
 require.alias("component-classes/index.js", "bmcmahen-modal/deps/classes/index.js");
 require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
 
-require.alias("bmcmahen-animate-css/index.js", "bmcmahen-modal/deps/animate-css/index.js");
-require.alias("component-classes/index.js", "bmcmahen-animate-css/deps/classes/index.js");
-require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
+require.alias("anthonyshort-after-transition/index.js", "bmcmahen-modal/deps/after-transition/index.js");
+require.alias("anthonyshort-after-transition/index.js", "bmcmahen-modal/deps/after-transition/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-has-transitions/index.js");
 
-require.alias("ecarter-css-emitter/index.js", "bmcmahen-animate-css/deps/css-emitter/index.js");
-require.alias("component-emitter/index.js", "ecarter-css-emitter/deps/emitter/index.js");
+require.alias("anthonyshort-css-emitter/index.js", "anthonyshort-after-transition/deps/css-emitter/index.js");
+require.alias("component-emitter/index.js", "anthonyshort-css-emitter/deps/emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
 
-require.alias("component-event/index.js", "ecarter-css-emitter/deps/event/index.js");
+require.alias("component-event/index.js", "anthonyshort-css-emitter/deps/event/index.js");
 
-require.alias("component-once/index.js", "bmcmahen-animate-css/deps/once/index.js");
+require.alias("anthonyshort-after-transition/index.js", "anthonyshort-after-transition/index.js");
 
-require.alias("eugenicsarchivesca-has-css-animations/index.js", "bmcmahen-animate-css/deps/has-css-animations/index.js");
-require.alias("eugenicsarchivesca-has-css-animations/index.js", "bmcmahen-animate-css/deps/has-css-animations/index.js");
-require.alias("eugenicsarchivesca-has-css-animations/index.js", "eugenicsarchivesca-has-css-animations/index.js");
+require.alias("component-events/index.js", "bmcmahen-modal/deps/events/index.js");
+require.alias("component-event/index.js", "component-events/deps/event/index.js");
+
+require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
+
+require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
+
+require.alias("component-delegate/index.js", "bmcmahen-modal/deps/delegate/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
+
+require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
+
+require.alias("component-domify/index.js", "bmcmahen-modal/deps/domify/index.js");
+
+require.alias("javve-get-attribute/index.js", "bmcmahen-modal/deps/get-attribute/index.js");
+
+require.alias("bmcmahen-target/index.js", "bmcmahen-modal/deps/target/index.js");
+require.alias("bmcmahen-target/index.js", "bmcmahen-modal/deps/target/index.js");
+require.alias("bmcmahen-target/index.js", "bmcmahen-target/index.js");
+
+require.alias("yields-prevent/index.js", "bmcmahen-modal/deps/prevent/index.js");
 
 require.alias("component-jquery/index.js", "heroes-and-villains/deps/jquery/index.js");
 require.alias("component-jquery/index.js", "jquery/index.js");
@@ -14883,6 +15708,33 @@ require.alias("bmcmahen-backbone/index.js", "backbone/index.js");
 require.alias("component-underscore/index.js", "bmcmahen-backbone/deps/underscore/index.js");
 
 require.alias("component-jquery/index.js", "bmcmahen-backbone/deps/jquery/index.js");
+
+require.alias("component-onload/index.js", "heroes-and-villains/deps/onload/index.js");
+require.alias("component-onload/index.js", "onload/index.js");
+require.alias("component-classes/index.js", "component-onload/deps/classes/index.js");
+require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
+
+require.alias("component-event/index.js", "component-onload/deps/event/index.js");
+
+require.alias("eugenicsarchivesca-cross-link/index.js", "heroes-and-villains/deps/cross-link/index.js");
+require.alias("eugenicsarchivesca-cross-link/list.js", "heroes-and-villains/deps/cross-link/list.js");
+require.alias("eugenicsarchivesca-cross-link/index.js", "heroes-and-villains/deps/cross-link/index.js");
+require.alias("eugenicsarchivesca-cross-link/index.js", "cross-link/index.js");
+require.alias("component-each/index.js", "eugenicsarchivesca-cross-link/deps/each/index.js");
+require.alias("component-to-function/index.js", "component-each/deps/to-function/index.js");
+
+require.alias("component-type/index.js", "component-each/deps/type/index.js");
+
+require.alias("yields-capitalize/index.js", "eugenicsarchivesca-cross-link/deps/capitalize/index.js");
+
+require.alias("matthewp-text/index.js", "eugenicsarchivesca-cross-link/deps/text/index.js");
+
+require.alias("component-domify/index.js", "eugenicsarchivesca-cross-link/deps/domify/index.js");
+
+require.alias("component-classes/index.js", "eugenicsarchivesca-cross-link/deps/classes/index.js");
+require.alias("component-indexof/index.js", "component-classes/deps/indexof/index.js");
+
+require.alias("eugenicsarchivesca-cross-link/index.js", "eugenicsarchivesca-cross-link/index.js");
 
 require.alias("heroes-and-villains/index.js", "heroes-and-villains/index.js");
 

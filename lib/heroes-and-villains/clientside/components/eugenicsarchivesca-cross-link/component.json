@@ -1,0 +1,25 @@
+{
+  "name": "cross-link",
+  "repo": "eugenicsarchivesca/cross-link",
+  "description": "cross link between documents that are in multiple prods",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+    "component/each": "*",
+    "yields/capitalize": "*",
+    "matthewp/text": "*",
+    "component/domify": "*",
+    "component/classes": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js",
+    "list.js"
+  ],
+  "styles": [
+    "cross-link.css"
+  ],
+  "remotes": []
+}
