@@ -15285,15 +15285,6 @@ module.exports = function(){
   require('./leaflet-label');
   require('image-zoom');
 
-  var $app = $('#accordion-wrapper');
-  function setDimensions(){
-    var h = $(window).height() - $('#navbar-swipe-container').height();
-    $app.height(h);
-  }
-
-  setDimensions();
-  $(window).on('resize', _.debounce(setDimensions, 100));
-
   var Tip = require('tip');
 
   var Pamphlet = function(){

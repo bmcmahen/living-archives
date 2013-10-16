@@ -15265,7 +15265,6 @@ var $main = $('#main');
 var $swipe = $('#navbar-swipe-container');
 
 function setBodySize(){
-  $main.height($(window).height() - $swipe.height());
   if (cast) cast.dynamic({ wrapper : '#flipcard-wrapper' });
 }
 $(window).on('resize', _.debounce(setBodySize, 100));
@@ -15283,8 +15282,8 @@ var Router = Backbone.Router.extend({
   showCard: function(id){
     $.when(boot()).then(function(){
       var $card = $('#'+id);
-      var $parent = $('#main');
-      $parent.scrollTop($parent.scrollTop() + $card.position().top);
+      var $parent = $(window);
+      $parent.scrollTop($card.position().top);
       $card.addClass('flip');
     });
   }

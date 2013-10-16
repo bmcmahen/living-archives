@@ -2,16 +2,22 @@
 /**
  * Base Element Styles
  */
+html
+  height 100%
 
 body
   font: $baseFontSize $sansFont
   margin 0
   background $lightGray url('img/dotgrid-black.png')
   height 100%
-  overflow hidden
 
   &.fullscreen
     overflow hidden
+
+#main
+  padding-top 132px
+  height 100%
+  box-sizing border-box
 
 a
   color: $brightBlue
@@ -57,6 +63,8 @@ ul
   background white
   padding 15px
   padding-top 15px
+  height 100%
+  box-sizing border-box
 
   &.fullscreen
     position fixed
@@ -124,6 +132,8 @@ ul
 
 input.short
   width 100px
+
+
 
 /**
  * Discover Introduction

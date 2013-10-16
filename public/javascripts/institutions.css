@@ -101,11 +101,11 @@ ul.prod-links {
 /* line 5 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/institutions/clientside/styles/institutions.styl */
 #accordion-wrapper {
   width: 100%;
+  height: 100%;
   position: relative;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  height: 500px;
   background-color: #000;
 }
 

@@ -422,11 +422,10 @@ h5 {
 
 /* line 28 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 a.link {
-  line-height: 23px;
   font-family: helvetica, arial, sans-serif;
 }
 
-/* line 33 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 32 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #fullscreenmode {
   position: absolute;
   top: 0;
@@ -434,19 +433,19 @@ a.link {
   float: none;
 }
 
-/* line 40 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 39 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #fullscreenmode:hover {
   text-decoration: none;
   color: #555;
 }
 
-/* line 45 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 44 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #mindmap {
   width: 70%;
   display: inline-block;
 }
 
-/* line 50 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 49 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #data {
   width: 30%;
   bottom: 0;
@@ -464,12 +463,12 @@ a.link {
   -webkit-overflow-scrolling: touch;
 }
 
-/* line 67 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 66 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #app {
   padding: 0;
 }
 
-/* line 71 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 70 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #data h2 {
   line-height: 32px;
   margin-top: 15px;
@@ -480,7 +479,7 @@ a.link {
   color: #049cdb;
 }
 
-/* line 81 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 80 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #query {
   position: absolute;
   top: 8px;
@@ -488,13 +487,13 @@ a.link {
   left: 80px;
 }
 
-/* line 88 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 87 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #help:hover {
   text-decoration: none;
   color: #555;
 }
 
-/* line 93 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 92 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #help {
   position: absolute;
   top: 12px;
@@ -502,24 +501,24 @@ a.link {
   left: 50px;
 }
 
-/* line 100 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 99 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 p.small {
   font-size: 13px;
   line-height: 18px;
 }
 
-/* line 105 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 104 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #query .select {
   width: 200px;
 }
 
-/* line 109 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 108 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #query .select .select-dropdown {
   overflow: hidden;
   max-height: 390px;
 }
 
-/* line 114 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 113 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #query .select .select-box {
   box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -532,7 +531,7 @@ p.small {
   background: rgba(240,240,240,0.8);
 }
 
-/* line 127 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 126 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #query .select .select-label {
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -543,19 +542,19 @@ p.small {
   width: 100%;
 }
 
-/* line 137 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 136 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #query .select .select-dropdown {
   background: rgba(255,255,255,0.95);
   box-sizing: border-box;
 }
 
-/* line 142 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 141 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #query .select .select-options {
   max-height: 360px;
   overflow: hidden;
 }
 
-/* line 147 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 146 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #query .select .select-option {
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -564,29 +563,29 @@ p.small {
   padding: 4px 10px;
 }
 
-/* line 155 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 154 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 .select-option:hover {
   background: #eee;
 }
 
-/* line 159 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 158 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 .select-option.highlight {
   border-radius: 0;
 }
 
-/* line 163 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 162 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 .select-option.highlight:hover {
   background: #007d7f;
 }
 
-/* line 167 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 166 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 #query input {
   width: 100%;
   box-sizing: border-box;
   background: #eee;
 }
 
-/* line 173 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
+/* line 172 : /Users/bmcmahen/Development/KnowEugenics/know-eugenics/lib/mindmap/clientside/styles/mindmap.styl */
 img.zoom {
   max-height: 250px;
   margin-top: 15px;

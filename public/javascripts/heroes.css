@@ -127,6 +127,10 @@ ul.prod-links {
   box-sizing: border-box;
 }
 
+#main {
+  height: auto;
+}
+
 .modal {
   margin-top: -300px;
   margin-left: -350px;
@@ -427,7 +431,6 @@ input.filter {
 }
 
 #main {
-  padding: 10px;
   overflow-y: auto;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -480,6 +483,10 @@ input.filter {
   cursor: default;
 }
 
+.quotes span .tooltip-trigger {
+  padding-bottom: 0;
+}
+
 .flip-icon {
   position: absolute;
   top: 15px;
@@ -509,11 +516,13 @@ input.filter {
   border-bottom: none;
   color: #AFAFAF;
   height: 100%;
+  z-index: 1000;
 }
 
 #hv-modal {
   outline: none;
   height: 100%;
+  z-index: 1000;
 }
 
 .modal-close {
@@ -525,4 +534,8 @@ input.filter {
 .modal-close i {
   font-size: 70px;
   text-decoration: none;
+}
+
+.navbar-swipe-container {
+  z-index: 700;
 }

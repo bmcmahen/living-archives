@@ -20219,16 +20219,18 @@ EugenicsMap.prototype.determineLinks = function(){
   return this;
 }
 
+var $app = $('#app');
+var $mindmap = $('#mindmap');
+
 function setDimensions(){
-  var h = $(window).height() - $('#navbar-swipe-container').height();
-  var w = $('#mindmap').width();
-  $('#app').height(h);
+  var h = $app.height();
+  var w = $mindmap.width();
   myMap.height(h);
   myMap.width(w);
   myMap.animate();
 }
 
-$(window).on('resize', _.debounce(setDimensions, 50));
+$(window).on('resize', _.debounce(setDimensions, 100));
 
 function boot(options, fn){
   options = options || {};
